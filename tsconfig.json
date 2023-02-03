@@ -4,7 +4,7 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": true,
+    "strict": false,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "esModuleInterop": true,
@@ -16,9 +16,23 @@
     "incremental": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@/layout/*": ["components/layout/*"],
+      "@/claim/*": ["components/claim/*"],
+      "@/claim/hitandrun/*": ["components/claim/hitrunclaim/*"],
+      "@/organizations/*": ["components/organizations/*"],
+      "@/branchs/*": ["components/branchs/*"],
+      "@/users/*": ["components/users/*"],
+      "@/insured/*": ["components/insured/*"],
+      "@/vehicle/*": ["components/vehicle/*"],
+      "@/certificate/*": ["components/certificate/*"],
+      "@/policereport/insured/*": ["components/policereport/insured/*"],
+      "@/policereport/hitandrun/*": ["components/policereport/hitandrun/*"],
+      "@/policereport/uninsured/*": ["components/policereport/uninsured/*"],
+      "@/claim/uninsured/*": ["components/claim/uninsured/*"],
+      "@/store/*": ["store/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "pages/api/links.js"],
   "exclude": ["node_modules"]
 }

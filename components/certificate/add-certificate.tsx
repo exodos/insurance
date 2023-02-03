@@ -1,0 +1,410 @@
+import { useContext, useState } from "react";
+import { useRouter } from "next/router";
+import NotificationContext from "@/store/notification-context";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import { gql, useMutation } from "@apollo/client";
+import { Fragment } from "react";
+import { Dialog, Transition } from "@headlessui/react";
+import { XMarkIcon } from "@heroicons/react/24/solid";
+
+const CreateCertificate = gql`
+  mutation CreateCertificate(
+    $plateNumber: String!
+    $input: CertificateCreateInput!
+  ) {
+    createCertificate(plateNumber: $plateNumber, input: $input) {
+      insureds {
+        mobileNumber
+      }
+      vehicles {
+        plateNumber
+      }
+      policies {
+        policyNumber
+        policyStartDate
+        policyExpireDate
+        policyIssuedConditions
+        personsEntitledToUse
+      }
+      tariffs {
+        tariffCode
+      }
+    }
+  }
+`;
+
+const AddCertificateModal = ({ regionCode, codeList }) => {
+  const notificationCtx = useContext(NotificationContext);
+  const [open, setOpen] = useState<boolean>(true);
+  const [plateRegionOption, setPlateRegionOption] = useState(regionCode);
+  const [plateCodeOption, setPlateCodeOption] = useState(codeList);
+
+  const [createCertificate, { data, error, loading }] =
+    useMutation(CreateCertificate);
+  if (error) {
+    console.log(error);
+  }
+
+  const plateNumberRegExp = /^([A-Da-d])?\d{5}$/;
+
+  const initialValues = {
+    policyNumber: "",
+    policyStartDate: "",
+    policyIssuedConditions: "",
+    personsEntitledToUse: "",
+    plateCode: "",
+    plateRegion: "",
+    plateNumber: "",
+    tariffCode: "",
+  };
+  const validate = Yup.object().shape({
+    policyNumber: Yup.string().required("Policy Number Is Required"),
+    policyStartDate: Yup.date().required("Policy Start Date Is Required"),
+    policyIssuedConditions: Yup.string().required(
+      "Policy Issued Conditions Is Required"
+    ),
+    personsEntitledToUse: Yup.string().required(
+      "Persons Entitled To Use/Drive Is Required"
+    ),
+    plateCode: Yup.string().required("Plate Code Is Required"),
+    plateRegion: Yup.string().required("Plate Region Is Required"),
+    plateNumber: Yup.string()
+      .matches(plateNumberRegExp, "Plate Number Is Not Valid")
+      .required("Plate Number Is Required"),
+    tariffCode: Yup.string().required("Tariff Code Is Required"),
+  });
+  const [formValues, setFormValues] = useState(null);
+
+  const router = useRouter();
+
+  const onSubmit = async (values: any) => {
+    const fullPlateNumber = `${values.plateCode}${values.plateRegion}${values.plateNumber}`;
+    const input = {
+      policies: {
+        policyNumber: values.policyNumber,
+        policyStartDate: new Date(values.policyStartDate),
+        policyIssuedConditions: values.policyIssuedConditions,
+        personsEntitledToUse: values.personsEntitledToUse,
+      },
+      tariffs: {
+        tariffCode: values.tariffCode,
+      },
+    };
+
+    console.log(input);
+
+    await createCertificate({
+      variables: {
+        plateNumber: fullPlateNumber,
+        input,
+      },
+      onError: (error) => {
+        setOpen(false);
+        notificationCtx.showNotification({
+          title: "Error!",
+          message: error.message || "Something Went Wrong",
+          status: "error",
+        });
+      },
+      onCompleted: (data) => {
+        setOpen(false);
+        notificationCtx.showNotification({
+          title: "Success!",
+          message: "Successfully Created Certificate for the provided vehicle",
+          status: "success",
+        });
+      },
+      update: (cache, { data }) => {
+        const cacheId = cache.identify(data.message);
+        cache.modify({
+          fields: {
+            messages: (existinFieldData, { toReference }) => {
+              return [...existinFieldData, toReference(cacheId)];
+            },
+          },
+        });
+      },
+    }).then(() => router.push("/admin/certificate"));
+  };
+
+  return (
+    <Transition.Root show={open} as={Fragment}>
+      <Dialog as="div" className="relative z-10" onClose={setOpen}>
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+        <div className="fixed inset-0 overflow-hidden">
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10 sm:pl-16">
+              <Transition.Child
+                as={Fragment}
+                enter="transform transition ease-in-out duration-500 sm:duration-700"
+                enterFrom="translate-x-full"
+                enterTo="translate-x-0"
+                leave="transform transition ease-in-out duration-500 sm:duration-700"
+                leaveFrom="translate-x-0"
+                leaveTo="translate-x-full"
+              >
+                <Dialog.Panel className="pointer-events-auto w-screen max-w-2xl">
+                  <Formik
+                    initialValues={formValues || initialValues}
+                    validationSchema={validate}
+                    onSubmit={onSubmit}
+                    enableReinitialize={true}
+                  >
+                    <Form className="flex h-full flex-col overflow-y-scroll bg-white shadow-xl">
+                      <div className="flex-1">
+                        {/* Header */}
+                        <div className="bg-lightGreen px-4 py-6 sm:px-6">
+                          <div className="flex items-start justify-between space-x-3">
+                            <div className="space-y-1">
+                              <Dialog.Title className="text-lg font-semibold text-white mt-10">
+                                Create Certificate
+                              </Dialog.Title>
+                            </div>
+                            <div className="flex h-7 items-center">
+                              <button
+                                type="button"
+                                className="text-gray-50 hover:text-gray-800"
+                                onClick={() => setOpen(false)}
+                              >
+                                <span className="sr-only">Close panel</span>
+                                <XMarkIcon
+                                  className="h-6 w-6"
+                                  aria-hidden="true"
+                                />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="mt-1">
+                            <p className="text-sm text-white">
+                              Please enter detail for the certificate
+                            </p>
+                          </div>
+                        </div>
+                        <div className="space-y-4 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0 mt-8">
+                          <div className="space-x-1 grid grid-cols-2 gap-1">
+                            <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
+                              <div>
+                                <label
+                                  htmlFor="plateCode"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Plate Code
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  type="text"
+                                  as="select"
+                                  name="plateCode"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                >
+                                  <option disabled value="">
+                                    Select Plate Code
+                                  </option>
+                                  {plateCodeOption.map((option: any) => (
+                                    <option
+                                      key={option.code}
+                                      value={option.code}
+                                    >
+                                      {option.code}
+                                    </option>
+                                  ))}
+                                </Field>
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="plateCode" />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
+                              <div>
+                                <label
+                                  htmlFor="plateRegion"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Plate Region
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  type="text"
+                                  as="select"
+                                  name="plateRegion"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                >
+                                  <option disabled value="">
+                                    Select Plate Region
+                                  </option>
+                                  {plateRegionOption.map((option: any) => (
+                                    <option
+                                      key={option.regionApp}
+                                      value={option.regionApp}
+                                    >
+                                      {option.regionApp}
+                                    </option>
+                                  ))}
+                                </Field>
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="plateRegion" />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
+                            <div>
+                              <label
+                                htmlFor="plateNumber"
+                                className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                              >
+                                Plate Number
+                              </label>
+                            </div>
+                            <div className="sm:col-span-2">
+                              <Field
+                                type="text"
+                                name="plateNumber"
+                                id="plateNumber"
+                                placeholder="Enter Vehicle Plate Number"
+                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                              />
+                              <div className="text-eRed text-sm italic mt-2">
+                                <ErrorMessage name="plateNumber" />
+                              </div>
+                            </div>
+                          </div>
+                          <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
+                            <div>
+                              <label
+                                htmlFor="policyNumber"
+                                className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                              >
+                                Policy Number
+                              </label>
+                            </div>
+                            <div className="sm:col-span-2">
+                              <Field
+                                type="text"
+                                name="policyNumber"
+                                placeholder="Enter Policy Number"
+                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                              />
+                              <div className="text-eRed text-sm italic mt-2">
+                                <ErrorMessage name="policyNumber" />
+                              </div>
+                            </div>
+                          </div>
+                          <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
+                            <div>
+                              <label
+                                htmlFor="policyStartDate"
+                                className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                              >
+                                Policy Start Date
+                              </label>
+                            </div>
+                            <div className="sm:col-span-2">
+                              <Field
+                                type="date"
+                                name="policyStartDate"
+                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                              />
+                              <div className="text-eRed text-sm italic mt-2">
+                                <ErrorMessage name="policyStartDate" />
+                              </div>
+                            </div>
+                          </div>
+                          <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
+                            <div>
+                              <label
+                                htmlFor="policyIssuedConditions"
+                                className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                              >
+                                Policy Issued Conditions
+                              </label>
+                            </div>
+                            <div className="sm:col-span-2">
+                              <Field
+                                type="text"
+                                name="policyIssuedConditions"
+                                placeholder="Enter Policy Issued Conditions"
+                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                              />
+                              <div className="text-eRed text-sm italic mt-2">
+                                <ErrorMessage name="policyIssuedConditions" />
+                              </div>
+                            </div>
+                          </div>
+                          <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
+                            <div>
+                              <label
+                                htmlFor="personsEntitledToUse"
+                                className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                              >
+                                Persons Entitled To Use/Drive
+                              </label>
+                            </div>
+                            <div className="sm:col-span-2">
+                              <Field
+                                type="text"
+                                name="personsEntitledToUse"
+                                placeholder="Enter Persons Entitled To Use/Drive"
+                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                              />
+                              <div className="text-eRed text-sm italic mt-2">
+                                <ErrorMessage name="personsEntitledToUse" />
+                              </div>
+                            </div>
+                          </div>
+                          <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
+                            <div>
+                              <label
+                                htmlFor="tariffCode"
+                                className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                              >
+                                Tariff Code
+                              </label>
+                            </div>
+                            <div className="sm:col-span-2">
+                              <Field
+                                type="text"
+                                name="tariffCode"
+                                placeholder="Enter Tariff Code"
+                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                              />
+                              <div className="text-eRed text-sm italic mt-2">
+                                <ErrorMessage name="tariffCode" />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex-shrink-0 border-t border-gray-200 px-4 py-5 sm:px-6">
+                        <div className="flex justify-end space-x-3">
+                          <button
+                            type="button"
+                            className="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                            onClick={() => setOpen(false)}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="submit"
+                            className="inline-flex justify-center rounded-md border border-transparent bg-lightGreen py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-depGreen focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                          >
+                            Create
+                          </button>
+                        </div>
+                      </div>
+                    </Form>
+                  </Formik>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </div>
+      </Dialog>
+    </Transition.Root>
+  );
+};
+
+export default AddCertificateModal;

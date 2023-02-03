@@ -1,0 +1,479 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                     String                  @id @default(uuid())
+  firstName              String
+  lastName               String
+  region                 String?
+  city                   String?
+  email                  String                  @unique
+  mobileNumber           String                  @unique
+  password               String
+  adminRestPassword      Boolean                 @default(true)
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  memberships            Membership?
+  thirdPartyLogs         ThirdPartyLog[]
+  insuredPoliceReports   InsuredPoliceReport[]
+  unInsuredPoliceReports UnInsuredPoliceReport[]
+  hitAndRunPoliceReports HitAndRunPoliceReport[]
+}
+
+model Branch {
+  id                     String                  @id @default(uuid())
+  branchName             String                  @unique
+  region                 String
+  city                   String
+  mobileNumber           String                  @unique
+  memberships            Membership[]
+  vehicles               Vehicle[]
+  insuredPoliceReports   InsuredPoliceReport[]   @relation(name: "insuranceBranch")
+  insureds               Insured[]               @relation(name: "insuredToBranch")
+  hitAndRunPolicBranchs  HitAndRunPoliceReport[] @relation(name: "hitAndRunBranch")
+  hitAndRunPoliceReports HitAndRunPoliceReport[] @relation(name: "ReporterPolice")
+  claims                 Claim[]
+  certificates           Certificate[]
+  thirdPartyLogs         ThirdPartyLog[]
+  claimHitAndRuns        ClaimHitAndRun[]
+  claimUnInsureds        ClaimUnInsured[]
+  organizations          Organization            @relation(fields: [orgId], references: [id])
+  orgId                  String
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  policeBranchs          InsuredPoliceReport[]   @relation(name: "ReporterPolice")
+  unInsuredPoliceReports UnInsuredPoliceReport[] @relation(name: "unInsuredBranch")
+  policeReport           UnInsuredPoliceReport[] @relation(name: "unInsuredPoliceReporter")
+}
+
+model Organization {
+  id             String          @id @default(uuid())
+  orgName        String          @unique
+  region         String
+  city           String
+  mobileNumber   String          @unique
+  branchs        Branch[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  thirdPartyLogs ThirdPartyLog[]
+  description    OrgDesc
+
+  // UnInsuredPoliceReport UnInsuredPoliceReport[]
+}
+
+model Membership {
+  id             String          @id @default(uuid())
+  role           MembershipRole  @default(USER)
+  users          User            @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId         String          @unique
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  thirdPartyLogs ThirdPartyLog[]
+  branchs        Branch          @relation(fields: [branchId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  branchId       String
+
+  @@unique([userId, branchId])
+}
+
+model Certificate {
+  id                  String          @id @default(uuid())
+  certificateNumber   String          @unique
+  issuedDate          DateTime        @default(now())
+  insureds            Insured         @relation(fields: [insuredMobileNumber], references: [mobileNumber], onUpdate: Cascade)
+  insuredMobileNumber String
+  vehicles            Vehicle         @relation(fields: [vehiclePlateNumber], references: [plateNumber], onUpdate: Cascade, onDelete: Cascade)
+  vehiclePlateNumber  String          @unique
+  policies            Policy          @relation(fields: [policyId], references: [id])
+  policyId            String          @unique
+  branchs             Branch          @relation(fields: [branchId], references: [id])
+  branchId            String
+  tariffs             Tariff          @relation(fields: [tariffCode], references: [tariffCode], onUpdate: Cascade)
+  tariffCode          String
+  premiumTarif        Float
+  updatedAt           DateTime        @updatedAt
+  deleted             Boolean         @default(false)
+  deletedTime         DateTime?
+  claims              Claim[]
+  thirdPartyLogs      ThirdPartyLog[]
+}
+
+model Insured {
+  id             String          @id @default(uuid())
+  insuredName    String
+  region         String
+  city           String
+  subCity        String
+  wereda         String
+  kebelle        String
+  houseNumber    String
+  mobileNumber   String          @unique
+  vehicles       Vehicle[]
+  certificates   Certificate[]
+  claims         Claim[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  thirdPartyLogs ThirdPartyLog[]
+  branchs        Branch[]        @relation(name: "insuredToBranch")
+  deleted        Boolean         @default(false)
+  deletedTime    DateTime?
+}
+
+model Vehicle {
+  id                        String                @id @default(uuid())
+  plateNumber               String                @unique
+  engineNumber              String                @unique
+  chassisNumber             String                @unique
+  vehicleType               String
+  carryingCapacityInGoods   String // qunatals or litre
+  carryingCapacityInPersons String
+  vehicleStatus             VEHICLESTATUS         @default(NEW)
+  isInsured                 IsInsured             @default(NOTINSURED)
+  insureds                  Insured               @relation(fields: [insuredMobileNumber], references: [mobileNumber])
+  insuredMobileNumber       String
+  branchs                   Branch                @relation(fields: [branchId], references: [id])
+  branchId                  String
+  certificates              Certificate?
+  responsibleVehicle        InsuredPoliceReport[] @relation("PoliceReport_responsibleVehicle")
+  victimVehicle             InsuredPoliceReport[] @relation("PoliceReport_victimVehicle")
+  claims                    Claim[]
+  createdAt                 DateTime              @default(now())
+  updatedAt                 DateTime              @updatedAt
+  thirdPartyLogs            ThirdPartyLog[]
+  accidentRecords           AccidentRecord[]
+}
+
+model Policy {
+  id                     String       @id @default(uuid())
+  policyNumber           String       @unique
+  policyStartDate        DateTime     @db.Date
+  policyExpireDate       DateTime     @db.Date
+  policyIssuedConditions String?
+  personsEntitledToUse   String?
+  certificates           Certificate?
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime     @updatedAt
+}
+
+enum MembershipRole {
+  SUPERADMIN
+  INSURER
+  MEMBER
+  USER
+  TRAFFICPOLICEADMIN
+  TRAFFICPOLICEMEMBER
+}
+
+enum OrgDesc {
+  MINISTRY
+  INSURANCE
+  TRAFFICPOLICE
+}
+
+enum CertificateStatus {
+  CURRENT
+  ARCHIEVED
+}
+
+model Claim {
+  id                   String              @id @default(uuid())
+  claimNumber          String              @unique
+  damageEstimate       Float
+  claimedAt            DateTime            @default(now())
+  insuredPoliceReports InsuredPoliceReport @relation(fields: [incidentNumber], references: [incidentNumber])
+  incidentNumber       String              @unique
+  insureds             Insured             @relation(fields: [claimantMobileNumber], references: [mobileNumber])
+  claimantMobileNumber String
+  vehicles             Vehicle             @relation(fields: [claimantPlateNumber], references: [plateNumber])
+  claimantPlateNumber  String
+  certificates         Certificate         @relation(fields: [certificateNumber], references: [certificateNumber])
+  certificateNumber    String
+  branchs              Branch              @relation(fields: [branchId], references: [id])
+  branchId             String
+  updatedAt            DateTime            @updatedAt
+  deleted              Boolean             @default(false)
+  deletedTime          DateTime?
+  thirdPartyLogs       ThirdPartyLog[]
+}
+
+model ClaimUnInsured {
+  id                     String                @id @default(uuid())
+  claimNumber            String                @unique
+  damageEstimate         Float
+  claimedAt              DateTime              @default(now())
+  unInsuredPoliceReports UnInsuredPoliceReport @relation(fields: [incidentNumber], references: [incidentNumber])
+  incidentNumber         String                @unique
+  vehiclePlateNumber     String
+  branchs                Branch                @relation(fields: [branchId], references: [id])
+  branchId               String
+  updatedAt              DateTime              @updatedAt
+  thirdPartyLogs         ThirdPartyLog[]
+}
+
+model ClaimHitAndRun {
+  id                     String                @id @default(uuid())
+  claimNumber            String                @unique
+  damageEstimate         Float
+  claimerFullName        String
+  claimerRegion          String
+  claimerCity            String
+  claimerPhoneNumber     String
+  claimedAt              DateTime              @default(now())
+  branchs                Branch                @relation(fields: [branchId], references: [id])
+  branchId               String
+  hitAndRunPoliceReports HitAndRunPoliceReport @relation(fields: [incidentNumber], references: [incidentNumber])
+  incidentNumber         String                @unique
+  updatedAt              DateTime              @updatedAt
+}
+
+model InsuredPoliceReport {
+  id                                      String          @id @default(uuid())
+  incidentNumber                          String          @unique
+  victimDriverName                        String
+  victimLicenceNumber                     String
+  victimLevel                             String
+  victimRegion                            String
+  victimCity                              String
+  victimSubCity                           String
+  victimWereda                            String
+  victimKebelle                           String
+  victimHouseNo                           String
+  victimPhoneNumber                       String
+  vehicle_PoliceReport_victimVehicle      Vehicle         @relation("PoliceReport_victimVehicle", fields: [victimVehicle], references: [plateNumber], onDelete: NoAction, onUpdate: Cascade)
+  victimVehicle                           String
+  branchs                                 Branch          @relation(name: "insuranceBranch", fields: [branchId], references: [id])
+  branchId                                String
+  policeBranch                            Branch          @relation(name: "ReporterPolice", fields: [policeBranchId], references: [id])
+  policeBranchId                          String
+  incidentCause                           String
+  incidentDate                            DateTime        @db.Date
+  incidentPlace                           String
+  incidentTime                            String
+  victims                                 Victim[]
+  vehicle_PoliceReport_responsibleVehicle Vehicle         @relation("PoliceReport_responsibleVehicle", fields: [responsibleVehicle], references: [plateNumber], onDelete: NoAction, onUpdate: Cascade)
+  responsibleVehicle                      String
+  responsibleDriverName                   String
+  responsiblePhoneNumber                  String
+  reportDate                              DateTime        @default(now())
+  claims                                  Claim?
+  thirdPartyLogs                          ThirdPartyLog[]
+  trafficPolices                          User            @relation(fields: [trafficPoliceId], references: [id])
+  trafficPoliceId                         String
+  accidentRecords                         AccidentRecord? @relation(fields: [accidentRecordId], references: [id])
+  accidentRecordId                        String?
+}
+
+model UnInsuredPoliceReport {
+  id                            String          @id @default(uuid())
+  incidentNumber                String          @unique
+  victimDriverName              String
+  victimLicenceNumber           String
+  victimLevel                   String
+  victimRegion                  String
+  victimCity                    String
+  victimSubCity                 String
+  victimWereda                  String
+  victimKebelle                 String
+  victimHouseNo                 String
+  victimPhoneNumber             String
+  victimVehiclePlateNumber      String
+  branchs                       Branch          @relation(name: "unInsuredBranch", fields: [branchId], references: [id])
+  branchId                      String
+  policeBranch                  Branch          @relation(name: "unInsuredPoliceReporter", fields: [policeBranchId], references: [id])
+  policeBranchId                String
+  incidentCause                 String
+  incidentDate                  DateTime        @db.Date
+  incidentPlace                 String
+  incidentTime                  String
+  victims                       Victim[]
+  responsibleVehiclePlateNumber String
+  responsibleDriverName         String
+  responsiblePhoneNumber        String
+  reportDate                    DateTime        @default(now())
+  claimUnInsureds               ClaimUnInsured?
+  trafficPolices                User            @relation(fields: [trafficPoliceId], references: [id])
+  trafficPoliceId               String
+}
+
+model HitAndRunPoliceReport {
+  id              String          @id @default(uuid())
+  incidentNumber  String          @unique
+  victims         Victim[]
+  incidentCause   String
+  incidentDate    DateTime
+  incidentPlace   String
+  incidentTime    String?
+  reportDate      DateTime        @default(now())
+  claimHitAndRuns ClaimHitAndRun?
+  branchs         Branch          @relation(name: "hitAndRunBranch", fields: [branchId], references: [id])
+  branchId        String
+  policeBranch    Branch          @relation(name: "ReporterPolice", fields: [policeBranchId], references: [id])
+  policeBranchId  String
+  trafficPolices  User            @relation(fields: [trafficPoliceId], references: [id])
+  trafficPoliceId String
+}
+
+model Victim {
+  id                      String                  @id @default(uuid())
+  victimName              String
+  victimCondition         VictimedCondition
+  injuryType              InjuryType
+  victimAddress           String?
+  victimFamilyPhoneNumber String?
+  victimHospitalized      String?
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+  hitAndRunPoliceReports  HitAndRunPoliceReport[]
+  insuredPoliceReports    InsuredPoliceReport[]
+  unInsuredPoliceReport   UnInsuredPoliceReport?  @relation(fields: [unsuredPoliceReportId], references: [id])
+  unsuredPoliceReportId   String?
+}
+
+model Tariff {
+  id             Int             @id @default(autoincrement())
+  tariffCode     String          @unique
+  vehicleType    String
+  vehicleSubType String
+  vehicleDetail  String
+  usage          String
+  premiumTarif   Float
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  certificates   Certificate[]
+  thirdPartyLogs ThirdPartyLog[]
+}
+
+model RegionList {
+  id         Int      @id @default(autoincrement())
+  regionName String?
+  regionApp  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model CodeList {
+  id        Int      @id @default(autoincrement())
+  code      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TariffDetal {
+  id             String   @id @default(uuid())
+  vehicleType    String
+  vehicleSubType String
+  usage          String
+  vehicleDetail  String
+  premium        Float
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// model TariffVehicleType {
+//   id          Int      @id @default(autoincrement())
+//   vehicleType String   @unique
+//   createdAt   DateTime @default(now())
+//   updatedAt   DateTime @updatedAt
+// }
+
+// model TariffVehicleSubType {
+//   id             Int      @id @default(autoincrement())
+//   vehicleSubType String   @unique
+//   createdAt      DateTime @default(now())
+//   updatedAt      DateTime @updatedAt
+// }
+
+// model TariffVehicleDetail {
+//   id            Int      @id @default(autoincrement())
+//   vehicleDetail String   @unique
+//   createdAt     DateTime @default(now())
+//   updatedAt     DateTime @updatedAt
+// }
+
+// model TariffVehicleUsage {
+//   id        Int      @id @default(autoincrement())
+//   usage     String   @unique
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
+
+model ThirdPartyLog {
+  id                   String                @id @default(uuid())
+  userEmail            String
+  orgName              String
+  action               String
+  mode                 String
+  oldValue             Json?
+  newValue             Json?
+  certificates         Certificate[]
+  claims               Claim[]
+  insureds             Insured[]
+  insuredPoliceReports InsuredPoliceReport[]
+  memberships          Membership[]
+  organizations        Organization[]
+  users                User[]
+  vehicles             Vehicle[]
+  tariffs              Tariff[]
+  timeStamp            DateTime              @default(now())
+  ClaimUnInsured       ClaimUnInsured?       @relation(fields: [claimUnInsuredId], references: [id])
+  claimUnInsuredId     String?
+  branchs              Branch[]
+}
+
+model AccidentRecord {
+  id                   String                @id @default(uuid())
+  typeOfAccident       ACCIDENTTYPE
+  accidentSubType      String
+  vehicles             Vehicle               @relation(fields: [plateNumber], references: [chassisNumber], onUpdate: Cascade)
+  plateNumber          String
+  insuredPoliceReports InsuredPoliceReport[]
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+}
+
+enum ACCIDENTTYPE {
+  BODILYINJURY
+  PROPERTYINJURY
+}
+
+enum VEHICLESTATUS {
+  NEW
+  RENEWAL
+  ADDITIONAL
+}
+
+enum PaymentFor {
+  THIRDPARTY
+  CLAIM
+}
+
+enum IsInsured {
+  INSURED
+  NOTINSURED
+}
+
+enum STATUS {
+  SUSPENDED
+  BLOCKED
+}
+
+enum InjuryType {
+  SIMPLE
+  CRITICAL
+  DEATH
+}
+
+enum VictimedCondition {
+  PASSENGER
+  PEDESTRIAN
+  DRIVER
+  ASSISTANT
+}
