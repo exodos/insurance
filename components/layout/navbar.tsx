@@ -213,7 +213,7 @@ const NavBar = ({ navigation, children }) => {
                         )}
                       </div>
                     </nav>
-                    <div className="flex flex-shrink-0 p-4">
+                    <div className="flex flex-shrink-0 p-4 lg:border-t">
                       <Link href={"/"} legacyBehavior passHref>
                         <a className="group block flex-shrink-0">
                           <div className="flex items-center">

@@ -29,16 +29,27 @@ const FeedVehicleInsurer = gql`
         plateNumber
         engineNumber
         chassisNumber
+        vehicleModel
+        bodyType
+        horsePower
+        manufacturedYear
         vehicleType
+        vehicleSubType
+        vehicleDetails
+        vehicleUsage
+        passengerNumber
         carryingCapacityInGoods
-        carryingCapacityInPersons
+        purchasedYear
+        dutyFreeValue
+        dutyPaidValue
         vehicleStatus
         isInsured
         createdAt
         updatedAt
         insureds {
           id
-          insuredName
+          firstName
+          lastName
           mobileNumber
         }
         branchs {
@@ -69,8 +80,8 @@ const FeedVehicleInsurer = gql`
 `;
 
 const InsurerVehiclePage = ({
-  data,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   // const [showAddModal, setShowAddModal] = useState(false);
 

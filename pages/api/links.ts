@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./auth/[...nextauth]";
 import { NextApiRequest, NextApiResponse } from "next";
-import { FaHome } from "react-icons/fa";
+import { FaFileInvoiceDollar, FaHome } from "react-icons/fa";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const session = await getServerSession(req, res, authOptions);
@@ -63,6 +63,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           name: "Certificate",
           href: "/admin/certificate",
           icon: "FaCertificate",
+          current: false,
+        },
+        {
+          name: "Tariff",
+          href: "/admin/tariff",
+          icon: "FaCcAmazonPay",
           current: false,
         },
       ];

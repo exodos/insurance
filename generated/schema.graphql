@@ -60,7 +60,7 @@ type Certificate {
   insureds: Insured
   issuedDate: DateTime
   policies: Policy
-  tariffs: Tariff
+  premiumTarif: Float
   updatedAt: DateTime
   vehicles: Vehicle
 }
@@ -68,7 +68,7 @@ type Certificate {
 input CertificateCreateInput {
   branchs: branchConnectInput
   policies: policyCreateInput
-  tariffs: tariffConnectInput
+  premiumTarif: Float
 }
 
 input CertificateOrderByInput {
@@ -79,7 +79,6 @@ input CertificateOrderByInput {
 
 input CertificateUpdateInput {
   policies: policyUpdateInput
-  tariffs: tariffConnectInput
 }
 
 type Claim {
@@ -467,17 +466,17 @@ enum InjuryType {
 }
 
 type Insured {
-  branchs: [Branch!]!
+  branchs: Branch
   certificates: [Certificate!]!
   city: String
   createdAt: DateTime
-  deleted: Boolean
-  deletedTime: DateTime
+  firstName: String
   houseNumber: String
   id: String
-  insuredName: String
   kebelle: String
+  lastName: String
   mobileNumber: String
+  occupation: String
   region: String
   subCity: String
   updatedAt: DateTime
@@ -488,10 +487,12 @@ type Insured {
 input InsuredCreateInput {
   branchs: branchConnectInput
   city: String
+  firstName: String
   houseNumber: String
-  insuredName: String
   kebelle: String
+  lastName: String
   mobileNumber: String
+  occupation: String
   region: String
   subCity: String
   wereda: String
@@ -631,6 +632,7 @@ type Mutation {
   updateInsuredPoliceReport(id: String!, input: InsuredPoliceReportUpdateInput!): InsuredPoliceReport!
   updateOrganization(id: String!, input: organizationUpdateInput!): Organization!
   updatePolicy(id: String!, input: PolicyUpdateInput!): Policy!
+  updatePremiumTariff(id: Int!, premiumTariff: Float!): Tariff!
   updateTariff(id: Int!, input: TariffUpdateInput!): Tariff!
   updateUnInsuredClaim(damageEstimate: Float!, id: String!): ClaimUnInsured!
   updateUnInsuredPoliceReport(id: String!, input: UnInsuredPoliceReportUpdateInput!): UnInsuredPoliceReport!
@@ -737,7 +739,7 @@ type Query {
   feedPolicy(filter: String, orderBy: [PolicyOrderByInput!], skip: Int, take: Int): FeedPolicy!
   feedRegionList: FeedRegionList!
   feedRoleByOrgDesc(input: orgRoleDescInput!): FeedRoleByOrgDesc
-  feedTariff(filter: String, orderBy: [TariffOrderByInput!], skip: Int, take: Int): FeedTariff!
+  feedTariff(filter: String, skip: Int, take: Int): FeedTariff!
   feedTariffDetal(filter: String, orderBy: [TariffDetalOrderByInput!], skip: Int, take: Int): FeedTariffDetal!
   feedThirdPartyLogs(filter: String, orderBy: [LogOrderByInput!], skip: Int, take: Int): FeedThirdPartyLogs!
   feedUnInsuredPoliceReport(filter: String, orderBy: [UnInsuredPoliceReportOrderByInput!], skip: Int, take: Int): FeedUnInsuredPoliceReport!
@@ -764,7 +766,6 @@ type Query {
   regionCode: [RegionList!]!
   roleList: [Membership!]!
   tariffByID(id: Int!): Tariff!
-  tariffByTariffCode(tariffCode: String!): Tariff!
   tariffVehicleSubType(vehicleType: String!): [TariffDetal!]!
   tariffVehicleType: [TariffDetal!]!
   tariffVehicleUsage(vehicleSubType: String!, vehicleType: String!): [TariffDetal!]!
@@ -790,25 +791,22 @@ enum Sort {
 }
 
 type Tariff {
-  certificates: [Certificate!]!
   createdAt: DateTime
   id: Int
   premiumTarif: Float
-  tariffCode: String
   updatedAt: DateTime
-  usage: String
   vehicleDetail: String
   vehicleSubType: String
   vehicleType: String
+  vehicleUsage: String
 }
 
 input TariffCreateInput {
   premiumTarif: Float
-  tariffCode: String
-  usage: String
   vehicleDetail: String
   vehicleSubType: String
   vehicleType: String
+  vehicleUsage: String
 }
 
 type TariffDetal {
@@ -834,10 +832,10 @@ input TariffOrderByInput {
 
 input TariffUpdateInput {
   premiumTarif: Float
-  usage: String
   vehicleDetail: String
   vehicleSubType: String
   vehicleType: String
+  vehicleUsage: String
 }
 
 type ThirdPartyLog {
@@ -972,21 +970,31 @@ input UserOrderByInput {
 }
 
 type Vehicle {
+  bodyType: String
   branchs: Branch
   carryingCapacityInGoods: String
-  carryingCapacityInPersons: String
   certificates: Certificate
   chassisNumber: String
   claims: [Claim]
   createdAt: DateTime
+  dutyFreeValue: Float
+  dutyPaidValue: Float
   engineNumber: String
+  horsePower: String
   id: String
   insureds: Insured
   isInsured: IsInsured
+  manufacturedYear: Int
+  passengerNumber: String
   plateNumber: String
+  purchasedYear: Int
   updatedAt: DateTime
+  vehicleDetails: String
+  vehicleModel: String
   vehicleStatus: VehicleStatus
+  vehicleSubType: String
   vehicleType: String
+  vehicleUsage: String
 }
 
 input VehicleOrderByInput {
@@ -1106,10 +1114,12 @@ input insuredPoliceReportCreateInput {
 
 input insuredUpdateInput {
   city: String
+  firstName: String
   houseNumber: String
-  insuredName: String
   kebelle: String
+  lastName: String
   mobileNumber: String
+  occupation: String
   region: String
   subCity: String
   wereda: String
@@ -1238,15 +1248,25 @@ input vehicleConnectInput {
 }
 
 input vehicleCreateInput {
+  bodyType: String
   branchs: branchConnectInput
   carryingCapacityInGoods: String
-  carryingCapacityInPersons: String
   chassisNumber: String
+  dutyFreeValue: Float
+  dutyPaidValue: Float
   engineNumber: String
-  insureds: insuredMobileInput
+  horsePower: String
+  insureds: insuredConnectInput
+  manufacturedYear: Int
+  passengerNumber: String
   plateNumber: String
+  purchasedYear: Int
+  vehicleDetails: String
+  vehicleModel: String
   vehicleStatus: VehicleStatus
+  vehicleSubType: String
   vehicleType: String
+  vehicleUsage: String
 }
 
 input vehicleUpdateConnectionInput {
@@ -1254,15 +1274,21 @@ input vehicleUpdateConnectionInput {
 }
 
 input vehicleUpdateInput {
-  branchs: branchConnectInput
+  bodyType: String
   carryingCapacityInGoods: String
-  carryingCapacityInPersons: String
-  chassisNumber: String
-  engineNumber: String
-  insureds: insuredMobileInput
+  dutyFreeValue: Float
+  dutyPaidValue: Float
+  horsePower: String
+  manufacturedYear: Int
+  passengerNumber: String
   plateNumber: String
+  purchasedYear: Int
+  vehicleDetails: String
+  vehicleModel: String
   vehicleStatus: VehicleStatus
+  vehicleSubType: String
   vehicleType: String
+  vehicleUsage: String
 }
 
 input victimCreateInput {

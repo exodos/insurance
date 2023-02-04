@@ -25,16 +25,27 @@ const FeedVehicle = gql`
         plateNumber
         engineNumber
         chassisNumber
+        vehicleModel
+        bodyType
+        horsePower
+        manufacturedYear
         vehicleType
+        vehicleSubType
+        vehicleDetails
+        vehicleUsage
+        passengerNumber
         carryingCapacityInGoods
-        carryingCapacityInPersons
+        purchasedYear
+        dutyFreeValue
+        dutyPaidValue
         vehicleStatus
         isInsured
         createdAt
         updatedAt
         insureds {
           id
-          insuredName
+          firstName
+          lastName
           mobileNumber
         }
         branchs {
@@ -63,8 +74,8 @@ const FeedVehicle = gql`
 `;
 
 const AdminVehiclePage = ({
-      data,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  data,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
   const { asPath } = useRouter();
@@ -117,7 +128,7 @@ const AdminVehiclePage = ({
           vehicleData={data.feedVehicle}
           regionCode={data.regionCode}
           codeList={data.plateCode}
-          branch={data.listAllBranch}
+          branch={data.feedBranchByOrgDesc.branchs}
         />
       </div>
       {showAddModal ? (

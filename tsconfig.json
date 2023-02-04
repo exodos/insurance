@@ -30,6 +30,7 @@
       "@/policereport/hitandrun/*": ["components/policereport/hitandrun/*"],
       "@/policereport/uninsured/*": ["components/policereport/uninsured/*"],
       "@/claim/uninsured/*": ["components/claim/uninsured/*"],
+      "@/tariff/*": ["components/tariff/*"],
       "@/store/*": ["store/*"]
     }
   },

@@ -31,16 +31,27 @@ const FeedVehicleBranch = gql`
         plateNumber
         engineNumber
         chassisNumber
+        vehicleModel
+        bodyType
+        horsePower
+        manufacturedYear
         vehicleType
+        vehicleSubType
+        vehicleDetails
+        vehicleUsage
+        passengerNumber
         carryingCapacityInGoods
-        carryingCapacityInPersons
+        purchasedYear
+        dutyFreeValue
+        dutyPaidValue
         vehicleStatus
         isInsured
         createdAt
         updatedAt
         insureds {
           id
-          insuredName
+          firstName
+          lastName
           mobileNumber
         }
         branchs {

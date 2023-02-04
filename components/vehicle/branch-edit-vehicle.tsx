@@ -7,29 +7,29 @@ import { gql, useMutation } from "@apollo/client";
 import { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/solid";
-import { changePhone } from "lib/config";
 
 const UpdateVehicle = gql`
-  mutation Mutation($updateVehicleId: String!, $input: vehicleUpdateInput!) {
+  mutation UpdateVehicle(
+    $updateVehicleId: String!
+    $input: vehicleUpdateInput!
+  ) {
     updateVehicle(id: $updateVehicleId, input: $input) {
       id
       plateNumber
-      engineNumber
-      chassisNumber
+      vehicleModel
+      bodyType
+      horsePower
+      manufacturedYear
       vehicleType
+      vehicleSubType
+      vehicleDetails
+      vehicleUsage
+      passengerNumber
       carryingCapacityInGoods
-      carryingCapacityInPersons
+      purchasedYear
+      dutyFreeValue
+      dutyPaidValue
       vehicleStatus
-      isInsured
-      createdAt
-      updatedAt
-      branchs {
-        id
-      }
-      insureds {
-        id
-        mobileNumber
-      }
     }
   }
 `;
@@ -58,13 +58,21 @@ const EditBranchVehicleModal = ({
     plateCode: vehicle.plateNumber.slice(0, 1),
     plateRegion: vehicle.plateNumber.slice(1, 3),
     plateNumber: vehicle.plateNumber.slice(3),
-    engineNumber: vehicle.engineNumber,
-    chassisNumber: vehicle.chassisNumber,
+    vehicleModel: vehicle.vehicleModel,
+    bodyType: vehicle.bodyType,
+    horsePower: vehicle.horsePower,
+    manufacturedYear: vehicle.manufacturedYear,
     vehicleType: vehicle.vehicleType,
+    vehicleSubType: vehicle.vehicleSubType,
+    vehicleDetails: vehicle.vehicleDetails,
+    vehicleUsage: vehicle.vehicleUsage,
+    passengerNumber: vehicle.passengerNumber,
     carryingCapacityInGoods: vehicle.carryingCapacityInGoods,
-    carryingCapacityInPersons: vehicle.carryingCapacityInPersons,
+    purchasedYear: vehicle.purchasedYear,
+    dutyFreeValue: vehicle.dutyFreeValue,
+    dutyPaidValue: vehicle.dutyPaidValue,
     vehicleStatus: vehicle.vehicleStatus,
-    mobileNumber: vehicle.insureds.mobileNumber,
+    // mobileNumber: vehicle.insureds.mobileNumber,
   };
 
   const validate = Yup.object().shape({
@@ -73,19 +81,24 @@ const EditBranchVehicleModal = ({
     plateNumber: Yup.string()
       .matches(plateNumberRegExp, "Plate Number Is Not Valid")
       .required("Plate Number Is Required"),
-    engineNumber: Yup.string().required("Engine Number Is Required"),
-    chassisNumber: Yup.string().required("Chassis Number Is Required"),
+    vehicleModel: Yup.string().required("Vehicle Model Is Required"),
+    bodyType: Yup.string().required("Body Type Is Required"),
+    horsePower: Yup.string().required("Horse Power Is Required"),
+    manufacturedYear: Yup.number().required(
+      "Manufactured Year In Goods Is Required"
+    ),
     vehicleType: Yup.string().required("Vehicle Type Is Required"),
-    carryingCapacityInGoods: Yup.string().required(
-      "Carrying Capacity In Goods Is Required"
-    ),
-    carryingCapacityInPersons: Yup.string().required(
-      "Carrying Capacity In Persons Is Required"
-    ),
+    vehicleSubType: Yup.string().required("Vehicle Sub Type Is Required"),
+    vehicleDetails: Yup.string().required("Vehicle Detail Is Required"),
+    vehicleUsage: Yup.string().required("Usage Is Required"),
+    passengerNumber: Yup.string().required("Passenger Number Is Required"),
+    purchasedYear: Yup.number().required("Purchased Year Is Required"),
+    dutyFreeValue: Yup.number().required("Duty Free Value Is Required"),
+    dutyPaidValue: Yup.string().required("Duty Paid Value Is Required"),
     vehicleStatus: Yup.string().required("Vehicle Status Is Required"),
-    mobileNumber: Yup.string()
-      .matches(phoneRegExp, "Phone Number Is Not Valid")
-      .required("Insured Phone Number Is Required"),
+    // mobileNumber: Yup.string()
+    //   .matches(phoneRegExp, "Phone Number Is Not Valid")
+    //   .required("Insured Phone Number Is Required"),
   });
 
   const vehicleStatusOptions = [
@@ -97,18 +110,26 @@ const EditBranchVehicleModal = ({
   const onSubmit = async (values: any) => {
     const input = {
       plateNumber: `${values.plateCode}${values.plateRegion}${values.plateNumber}`,
-      engineNumber: values.engineNumber,
-      chassisNumber: values.chassisNumber,
+      vehicleModel: values.vehicleModel,
+      bodyType: values.bodyType,
+      horsePower: values.horsePower,
+      manufacturedYear: values.manufacturedYear,
       vehicleType: values.vehicleType,
+      vehicleSubType: values.vehicleSubType,
+      vehicleDetails: values.vehicleDetails,
+      vehicleUsage: values.vehicleUsage,
+      passengerNumber: values.passengerNumber,
       carryingCapacityInGoods: values.carryingCapacityInGoods,
-      carryingCapacityInPersons: values.carryingCapacityInPersons,
+      purchasedYear: values.purchasedYear,
+      dutyFreeValue: values.dutyFreeValue,
+      dutyPaidValue: values.dutyPaidValue,
       vehicleStatus: values.vehicleStatus,
-      insureds: {
-        mobileNumber: changePhone(values.mobileNumber),
-      },
-      branchs: {
-        id: branchId,
-      },
+      // insureds: {
+      //   mobileNumber: changePhone(values.mobileNumber),
+      // },
+      // branchs: {
+      //   id: branchId,
+      // },
     };
 
     // console.log(input);
@@ -163,7 +184,7 @@ const EditBranchVehicleModal = ({
                 leaveFrom="translate-x-0"
                 leaveTo="translate-x-full"
               >
-                <Dialog.Panel className="pointer-events-auto w-screen max-w-3xl">
+                <Dialog.Panel className="pointer-events-auto w-screen max-w-5xl">
                   <Formik
                     initialValues={formValues || initialValues}
                     validationSchema={validate}
@@ -197,7 +218,7 @@ const EditBranchVehicleModal = ({
                         </div>
 
                         <div className="space-y-4 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0 mt-8">
-                          <div className="space-x-1 grid grid-cols-2 gap-1">
+                          <div className="space-x-1 grid grid-cols-3 gap-1">
                             <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
                               <div>
                                 <label
@@ -257,8 +278,6 @@ const EditBranchVehicleModal = ({
                                 </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="space-x-1 grid grid-cols-2 gap-1">
                             <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-2 sm:space-y-0 sm:px-3 sm:py-5">
                               <div>
                                 <label
@@ -280,51 +299,95 @@ const EditBranchVehicleModal = ({
                                 </div>
                               </div>
                             </div>
-                            <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-2 sm:space-y-0 sm:px-3 sm:py-5">
+                          </div>
+                          <div className="space-x-1 grid grid-cols-3 gap-3">
+                            <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-3 sm:space-y-0 sm:px-6 sm:py-5">
                               <div>
                                 <label
-                                  htmlFor="engineNumber"
+                                  htmlFor="vehicleModel"
                                   className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
                                 >
-                                  Engine Number
+                                  Vehicle Model
                                 </label>
                               </div>
                               <div className="sm:col-span-2">
                                 <Field
                                   type="text"
-                                  name="engineNumber"
-                                  placeholder="Enter Vehicle Engine Number"
+                                  name="vehicleModel"
+                                  placeholder="Enter Vehicle Model"
                                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                 />
                                 <div className="text-eRed text-sm italic mt-2">
-                                  <ErrorMessage name="engineNumber" />
+                                  <ErrorMessage name="vehicleModel" />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-3 sm:space-y-0 sm:px-6 sm:py-5">
+                              <div>
+                                <label
+                                  htmlFor="bodyType"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Body Type
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  type="text"
+                                  name="bodyType"
+                                  placeholder="Enter Vehicle Body Type"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="bodyType" />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-3 sm:space-y-0 sm:px-3 sm:py-5">
+                              <div>
+                                <label
+                                  htmlFor="horsePower"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Horse Power
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  type="text"
+                                  name="horsePower"
+                                  placeholder="Enter Vehicle Horse Power"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="horsePower" />
                                 </div>
                               </div>
                             </div>
                           </div>
-                          <div className="space-x-1 grid grid-cols-2 gap-1">
-                            <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-2 sm:space-y-0 sm:px-3 sm:py-5">
+                          <div className="space-x-1 grid grid-cols-3 gap-1">
+                            <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-1 sm:space-y-0 sm:px-6 sm:py-5">
                               <div>
                                 <label
-                                  htmlFor="chassisNumber"
+                                  htmlFor="manufacturedYear"
                                   className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
                                 >
-                                  Chassis Number
+                                  Manufactured Year
                                 </label>
                               </div>
                               <div className="sm:col-span-2">
                                 <Field
-                                  type="text"
-                                  name="chassisNumber"
-                                  placeholder="Enter Vehicle Chassis Number"
+                                  type="number"
+                                  name="manufacturedYear"
+                                  placeholder="Enter Vehicle Manufactured Year"
                                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                 />
                                 <div className="text-eRed text-sm italic mt-2">
-                                  <ErrorMessage name="chassisNumber" />
+                                  <ErrorMessage name="manufacturedYear" />
                                 </div>
                               </div>
                             </div>
-                            <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-2 sm:space-y-0 sm:px-3 sm:py-5">
+                            <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-1 sm:space-y-0 sm:px-6 sm:py-5">
                               <div>
                                 <label
                                   htmlFor="vehicleType"
@@ -345,51 +408,182 @@ const EditBranchVehicleModal = ({
                                 </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
-                            <div>
-                              <label
-                                htmlFor="carryingCapacityInGoods"
-                                className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
-                              >
-                                Carrying Capacity (In Goods)
-                              </label>
-                            </div>
-                            <div className="sm:col-span-2">
-                              <Field
-                                type="text"
-                                name="carryingCapacityInGoods"
-                                placeholder="Enter Vehicle Carrying Capacity In Goods"
-                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                              />
-                              <div className="text-eRed text-sm italic mt-2">
-                                <ErrorMessage name="carryingCapacityInGoods" />
+                            <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-1 sm:space-y-0 sm:px-3 sm:py-5">
+                              <div>
+                                <label
+                                  htmlFor="vehicleSubType"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Vehicle Sub Type
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  type="text"
+                                  name="vehicleSubType"
+                                  placeholder="Enter Vehicle Sub Type"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="vehicleSubType" />
+                                </div>
                               </div>
                             </div>
                           </div>
-                          <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
-                            <div>
-                              <label
-                                htmlFor="carryingCapacityInPersons"
-                                className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
-                              >
-                                Carrying Capacity (In Persons)
-                              </label>
+                          <div className="space-x-1 grid grid-cols-3 gap-1">
+                            <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-1 sm:space-y-0 sm:px-6 sm:py-5">
+                              <div>
+                                <label
+                                  htmlFor="vehicleDetails"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Vehicle Detail
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  type="text"
+                                  name="vehicleDetails"
+                                  placeholder="Enter Vehicle Detail"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="vehicleDetails" />
+                                </div>
+                              </div>
                             </div>
-                            <div className="sm:col-span-2">
-                              <Field
-                                type="text"
-                                name="carryingCapacityInPersons"
-                                placeholder="Enter Vehicle Carrying Capacity In Persons"
-                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                              />
-                              <div className="text-eRed text-sm italic mt-2">
-                                <ErrorMessage name="carryingCapacityInPersons" />
+                            <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-1 sm:space-y-0 sm:px-6 sm:py-5">
+                              <div>
+                                <label
+                                  htmlFor="vehicleUsage"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Usage
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  type="text"
+                                  name="vehicleUsage"
+                                  placeholder="Enter Vehicle Usage"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="vehicleUsage" />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-1 sm:space-y-0 sm:px-3 sm:py-5">
+                              <div>
+                                <label
+                                  htmlFor="passengerNumber"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Passenger Number
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  type="text"
+                                  name="passengerNumber"
+                                  placeholder="Enter Number Of Passenger"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="passengerNumber" />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="space-x-1 grid grid-cols-3 gap-1">
+                            <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-1 sm:space-y-0 sm:px-6 sm:py-5">
+                              <div>
+                                <label
+                                  htmlFor="carryingCapacityInGoods"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Goods Carrying Capacity
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  type="text"
+                                  name="carryingCapacityInGoods"
+                                  placeholder="Enter Goods Carrying Capacity"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="carryingCapacityInGoods" />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-1 sm:space-y-0 sm:px-6 sm:py-5">
+                              <div>
+                                <label
+                                  htmlFor="purchasedYear"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Purchased Year
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  type="number"
+                                  name="purchasedYear"
+                                  placeholder="Enter Purchased Year"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="purchasedYear" />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-1 sm:space-y-0 sm:px-3 sm:py-5">
+                              <div>
+                                <label
+                                  htmlFor="dutyFreeValue"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Duty Free Value
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  type="number"
+                                  step="any"
+                                  name="dutyFreeValue"
+                                  placeholder="Enter Duty Free Value"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="dutyFreeValue" />
+                                </div>
                               </div>
                             </div>
                           </div>
                           <div className="space-x-1 grid grid-cols-2 gap-1">
-                            <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-2 sm:space-y-0 sm:px-3 sm:py-5">
+                            <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-1 sm:space-y-0 sm:px-6 sm:py-5">
+                              <div>
+                                <label
+                                  htmlFor="dutyPaidValue"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Duty Paid Value
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  type="number"
+                                  name="dutyPaidValue"
+                                  placeholder="Enter Duty Paid Value"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="dutyPaidValue" />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-1 sm:space-y-0 sm:px-6 sm:py-5">
                               <div>
                                 <label
                                   htmlFor="vehicleStatus"
@@ -414,24 +608,26 @@ const EditBranchVehicleModal = ({
                                   ))}
                                 </Field>
                                 <div className="text-eRed text-sm italic mt-2">
-                                  <ErrorMessage name="chassisNumber" />
+                                  <ErrorMessage name="vehicleStatus" />
                                 </div>
                               </div>
                             </div>
-                            <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-2 sm:space-y-0 sm:px-3 sm:py-5">
+                          </div>
+                          {/* <div className="space-x-1 grid grid-cols-2 gap-1">
+                            <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-1 sm:space-y-0 sm:px-6 sm:py-5">
                               <div>
                                 <label
                                   htmlFor="mobileNumber"
                                   className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
                                 >
-                                  Insured Mobile Number
+                                  Insurer Mobile Number
                                 </label>
                               </div>
                               <div className="sm:col-span-2">
                                 <Field
                                   type="text"
                                   name="mobileNumber"
-                                  placeholder="Enter Insurer MobileNumber"
+                                  placeholder="Enter Insurer Mobile Number"
                                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                 />
                                 <div className="text-eRed text-sm italic mt-2">
@@ -439,31 +635,30 @@ const EditBranchVehicleModal = ({
                                 </div>
                               </div>
                             </div>
-                          </div>
-                          {/* <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
-                            <div>
-                              <label
-                                htmlFor="branchName"
-                                className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
-                              >
-                                Branch Name
-                              </label>
-                            </div>
-                            <div className="sm:col-span-2">
-                              <Field
-                                type="text"
-                                as="select"
-                                name="branchName"
-                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                              >
-                                {branchOptions.map((option: any) => (
-                                  <option key={option.id} value={option.id}>
-                                    {option.branchName}
-                                  </option>
-                                ))}
-                              </Field>
-                              <div className="text-eRed text-sm italic mt-2">
-                                <ErrorMessage name="branchName" />
+                            <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-1 sm:space-y-0 sm:px-6 sm:py-5">
+                              <div>
+                                <label
+                                  htmlFor="branchName"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Branch
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  as="select"
+                                  name="branchName"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                >
+                                  {branchOptions.map((option: any) => (
+                                    <option key={option.id} value={option.uid}>
+                                      {option.branchName}
+                                    </option>
+                                  ))}
+                                </Field>
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="branchName" />
+                                </div>
                               </div>
                             </div>
                           </div> */}

@@ -10,7 +10,7 @@ import {
   objectType,
   stringArg,
 } from "nexus";
-import { insuredMobileInput } from "./Insured";
+import { insuredConnectInput, insuredMobileInput } from "./Insured";
 import { Sort } from "./User";
 import { branchConnectInput } from "./Branch";
 
@@ -21,9 +21,20 @@ export const Vehicle = objectType({
     t.string("plateNumber");
     t.string("engineNumber");
     t.string("chassisNumber");
+    t.string("vehicleModel");
+    t.string("bodyType");
+    t.string("horsePower");
+    t.int("manufacturedYear");
     t.string("vehicleType");
+    t.string("vehicleSubType");
+    t.string("vehicleDetails");
+    t.string("vehicleUsage");
+    t.string("passengerNumber");
+    t.nullable.string("carryingCapacityInGoods");
+    t.int("purchasedYear");
+    t.float("dutyFreeValue");
+    t.float("dutyPaidValue");
     t.string("carryingCapacityInGoods");
-    t.string("carryingCapacityInPersons");
     t.field("vehicleStatus", { type: VehicleStatus });
     t.field("isInsured", { type: IsInsured });
     t.date("createdAt");
@@ -282,7 +293,7 @@ export const createVehicleMutation = extendType({
         }
         const checkInsured = await ctx.prisma.insured.findFirst({
           where: {
-            mobileNumber: args.input.insureds.mobileNumber,
+            id: args.input.insureds.id,
           },
         });
         if (!checkInsured) {
@@ -295,13 +306,23 @@ export const createVehicleMutation = extendType({
             plateNumber: args.input.plateNumber,
             engineNumber: args.input.engineNumber,
             chassisNumber: args.input.chassisNumber,
+            vehicleModel: args.input.vehicleModel,
+            bodyType: args.input.bodyType,
+            horsePower: args.input.horsePower,
+            manufacturedYear: args.input.manufacturedYear,
             vehicleType: args.input.vehicleType,
+            vehicleSubType: args.input.vehicleSubType,
+            vehicleDetails: args.input.vehicleDetails,
+            vehicleUsage: args.input.vehicleUsage,
+            passengerNumber: args.input.passengerNumber,
             carryingCapacityInGoods: args.input.carryingCapacityInGoods,
-            carryingCapacityInPersons: args.input.carryingCapacityInPersons,
+            purchasedYear: args.input.purchasedYear,
+            dutyFreeValue: args.input.dutyFreeValue,
+            dutyPaidValue: args.input.dutyPaidValue,
             vehicleStatus: args.input.vehicleStatus,
             insureds: {
               connect: {
-                mobileNumber: args.input.insureds.mobileNumber,
+                id: args.input.insureds.id,
               },
             },
             branchs: {
@@ -345,17 +366,33 @@ export const updateVehicleMutation = extendType({
         return await ctx.prisma.vehicle.update({
           where: { id: args.id },
           data: {
-            ...args.input,
-            insureds: {
-              connect: {
-                mobileNumber: args.input.insureds.mobileNumber,
-              },
-            },
-            branchs: {
-              connect: {
-                id: args.input.branchs.id,
-              },
-            },
+            // ...args.input,
+            plateNumber: args.input.plateNumber,
+            vehicleModel: args.input.vehicleModel,
+            bodyType: args.input.bodyType,
+            horsePower: args.input.horsePower,
+            manufacturedYear: args.input.manufacturedYear,
+            vehicleType: args.input.vehicleType,
+            vehicleSubType: args.input.vehicleSubType,
+            vehicleDetails: args.input.vehicleDetails,
+            vehicleUsage: args.input.vehicleUsage,
+            passengerNumber: args.input.passengerNumber,
+            carryingCapacityInGoods: args.input.carryingCapacityInGoods,
+            purchasedYear: args.input.purchasedYear,
+            dutyFreeValue: args.input.dutyFreeValue,
+            dutyPaidValue: args.input.dutyPaidValue,
+            vehicleStatus: args.input.vehicleStatus,
+
+            // insureds: {
+            //   connect: {
+            //     id: args.input.insureds.id,
+            //   },
+            // },
+            // branchs: {
+            //   connect: {
+            //     id: args.input.branchs.id,
+            //   },
+            // },
           },
         });
       },
@@ -432,11 +469,21 @@ export const vehicleCreateInput = inputObjectType({
     t.string("plateNumber");
     t.string("engineNumber");
     t.string("chassisNumber");
+    t.string("vehicleModel");
+    t.string("bodyType");
+    t.string("horsePower");
+    t.int("manufacturedYear");
     t.string("vehicleType");
-    t.string("carryingCapacityInGoods");
-    t.string("carryingCapacityInPersons");
+    t.string("vehicleSubType");
+    t.string("vehicleDetails");
+    t.string("vehicleUsage");
+    t.string("passengerNumber");
+    t.nullable.string("carryingCapacityInGoods");
+    t.int("purchasedYear");
+    t.float("dutyFreeValue");
+    t.float("dutyPaidValue");
     t.field("vehicleStatus", { type: VehicleStatus });
-    t.field("insureds", { type: insuredMobileInput });
+    t.field("insureds", { type: insuredConnectInput });
     t.field("branchs", { type: branchConnectInput });
 
     // t.field("thirdPartyLog", { type: thirdPartyLogCreateInput });
@@ -447,14 +494,22 @@ export const vehicleUpdateInput = inputObjectType({
   name: "vehicleUpdateInput",
   definition(t) {
     t.string("plateNumber");
-    t.string("engineNumber");
-    t.string("chassisNumber");
+    t.string("vehicleModel");
+    t.string("bodyType");
+    t.string("horsePower");
+    t.int("manufacturedYear");
     t.string("vehicleType");
-    t.string("carryingCapacityInGoods");
-    t.string("carryingCapacityInPersons");
+    t.string("vehicleSubType");
+    t.string("vehicleDetails");
+    t.string("vehicleUsage");
+    t.string("passengerNumber");
+    t.nullable.string("carryingCapacityInGoods");
+    t.int("purchasedYear");
+    t.float("dutyFreeValue");
+    t.float("dutyPaidValue");
     t.field("vehicleStatus", { type: VehicleStatus });
-    t.field("insureds", { type: insuredMobileInput });
-    t.field("branchs", { type: branchConnectInput });
+    // t.field("insureds", { type: insuredMobileInput });
+    // t.field("branchs", { type: branchConnectInput });
 
     // t.field("thirdPartyLog", { type: thirdPartyLogEditInput });
   },

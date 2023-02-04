@@ -7,7 +7,6 @@ import { useSession } from "next-auth/react";
 import { useState } from "react";
 import ReactTooltip from "react-tooltip";
 import { gql, useLazyQuery } from "@apollo/client";
-import AdminVehicleEdit from "./edit-vehicle";
 import VehicleDetails from "./detail-vehicle";
 import DeleteVehicleModal from "./delete-vehicle";
 import EditVehicleModal from "./edit-vehicle";
@@ -19,17 +18,19 @@ const VehicleByPlateNumber = gql`
       plateNumber
       engineNumber
       chassisNumber
+      vehicleModel
+      bodyType
+      horsePower
       vehicleType
-      carryingCapacityInGoods
-      carryingCapacityInPersons
+      vehicleSubType
+      vehicleDetails
+      vehicleUsage
       vehicleStatus
       isInsured
-      createdAt
-      updatedAt
-
       insureds {
         id
-        insuredName
+        firstName
+        lastName
         region
         city
         mobileNumber
@@ -153,19 +154,79 @@ const ListVehicle = ({ vehicleData, regionCode, codeList, branch }) => {
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Vehicle Type
+                        Model
                       </th>
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Carrying Capacity (In Goods)
+                        Body Type
                       </th>
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Carrying Capacity (In Persons)
+                        Horse Power
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      >
+                        Manufactured Year
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      >
+                        Type Of Vehicle
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      >
+                        Sub Type Of Vehicle
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      >
+                        Details Of Vehicle
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      >
+                        Usage
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      >
+                        Number Of Passengers
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      >
+                        Carrying Capacity (InGoods)
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      >
+                        Year Of Purchased
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      >
+                        Duty Free Value
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      >
+                        Duty Paid Value
                       </th>
                       <th
                         scope="col"
@@ -183,7 +244,13 @@ const ListVehicle = ({ vehicleData, regionCode, codeList, branch }) => {
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Insured Name
+                        Insured First Name
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      >
+                        Insured Last Name
                       </th>
                       <th
                         scope="col"
@@ -191,7 +258,6 @@ const ListVehicle = ({ vehicleData, regionCode, codeList, branch }) => {
                       >
                         Insured Mobile Number
                       </th>
-
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
@@ -253,13 +319,43 @@ const ListVehicle = ({ vehicleData, regionCode, codeList, branch }) => {
                             {item.chassisNumber}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            {item.vehicleModel}
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            {item.bodyType}
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            {item.horsePower}
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            {item.manufacturedYear}
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {item.vehicleType}
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            {item.vehicleSubType}
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            {item.vehicleDetails}
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            {item.vehicleUsage}
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            {item.passengerNumber}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {item.carryingCapacityInGoods}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {item.carryingCapacityInPersons}
+                            {item.purchasedYear}
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            {item.dutyFreeValue}
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            {item.dutyPaidValue}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {item.vehicleStatus}
@@ -268,7 +364,10 @@ const ListVehicle = ({ vehicleData, regionCode, codeList, branch }) => {
                             {item.isInsured}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {item.insureds.insuredName}
+                            {item.insureds.firstName}
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            {item.insureds.lastName}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {item.insureds.mobileNumber}

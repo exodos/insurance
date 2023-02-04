@@ -56,7 +56,7 @@ export interface NexusGenInputs {
   CertificateCreateInput: { // input type
     branchs?: NexusGenInputs['branchConnectInput'] | null; // branchConnectInput
     policies?: NexusGenInputs['policyCreateInput'] | null; // policyCreateInput
-    tariffs?: NexusGenInputs['tariffConnectInput'] | null; // tariffConnectInput
+    premiumTarif?: number | null; // Float
   }
   CertificateOrderByInput: { // input type
     issuedDate?: NexusGenEnums['Sort'] | null; // Sort
@@ -65,7 +65,6 @@ export interface NexusGenInputs {
   }
   CertificateUpdateInput: { // input type
     policies?: NexusGenInputs['policyUpdateInput'] | null; // policyUpdateInput
-    tariffs?: NexusGenInputs['tariffConnectInput'] | null; // tariffConnectInput
   }
   ClaimCreateInput: { // input type
     branchs?: NexusGenInputs['branchConnectInput'] | null; // branchConnectInput
@@ -117,10 +116,12 @@ export interface NexusGenInputs {
   InsuredCreateInput: { // input type
     branchs?: NexusGenInputs['branchConnectInput'] | null; // branchConnectInput
     city?: string | null; // String
+    firstName?: string | null; // String
     houseNumber?: string | null; // String
-    insuredName?: string | null; // String
     kebelle?: string | null; // String
+    lastName?: string | null; // String
     mobileNumber?: string | null; // String
+    occupation?: string | null; // String
     region?: string | null; // String
     subCity?: string | null; // String
     wereda?: string | null; // String
@@ -179,11 +180,10 @@ export interface NexusGenInputs {
   }
   TariffCreateInput: { // input type
     premiumTarif?: number | null; // Float
-    tariffCode?: string | null; // String
-    usage?: string | null; // String
     vehicleDetail?: string | null; // String
     vehicleSubType?: string | null; // String
     vehicleType?: string | null; // String
+    vehicleUsage?: string | null; // String
   }
   TariffDetalOrderByInput: { // input type
     createdAt?: NexusGenEnums['Sort'] | null; // Sort
@@ -195,10 +195,10 @@ export interface NexusGenInputs {
   }
   TariffUpdateInput: { // input type
     premiumTarif?: number | null; // Float
-    usage?: string | null; // String
     vehicleDetail?: string | null; // String
     vehicleSubType?: string | null; // String
     vehicleType?: string | null; // String
+    vehicleUsage?: string | null; // String
   }
   UnInsuredPoliceReportConnectInput: { // input type
     incidentNumber?: string | null; // String
@@ -331,10 +331,12 @@ export interface NexusGenInputs {
   }
   insuredUpdateInput: { // input type
     city?: string | null; // String
+    firstName?: string | null; // String
     houseNumber?: string | null; // String
-    insuredName?: string | null; // String
     kebelle?: string | null; // String
+    lastName?: string | null; // String
     mobileNumber?: string | null; // String
+    occupation?: string | null; // String
     region?: string | null; // String
     subCity?: string | null; // String
     wereda?: string | null; // String
@@ -440,29 +442,45 @@ export interface NexusGenInputs {
     plateNumber?: string | null; // String
   }
   vehicleCreateInput: { // input type
+    bodyType?: string | null; // String
     branchs?: NexusGenInputs['branchConnectInput'] | null; // branchConnectInput
     carryingCapacityInGoods?: string | null; // String
-    carryingCapacityInPersons?: string | null; // String
     chassisNumber?: string | null; // String
+    dutyFreeValue?: number | null; // Float
+    dutyPaidValue?: number | null; // Float
     engineNumber?: string | null; // String
-    insureds?: NexusGenInputs['insuredMobileInput'] | null; // insuredMobileInput
+    horsePower?: string | null; // String
+    insureds?: NexusGenInputs['insuredConnectInput'] | null; // insuredConnectInput
+    manufacturedYear?: number | null; // Int
+    passengerNumber?: string | null; // String
     plateNumber?: string | null; // String
+    purchasedYear?: number | null; // Int
+    vehicleDetails?: string | null; // String
+    vehicleModel?: string | null; // String
     vehicleStatus?: NexusGenEnums['VehicleStatus'] | null; // VehicleStatus
+    vehicleSubType?: string | null; // String
     vehicleType?: string | null; // String
+    vehicleUsage?: string | null; // String
   }
   vehicleUpdateConnectionInput: { // input type
     plateNumber?: string | null; // String
   }
   vehicleUpdateInput: { // input type
-    branchs?: NexusGenInputs['branchConnectInput'] | null; // branchConnectInput
+    bodyType?: string | null; // String
     carryingCapacityInGoods?: string | null; // String
-    carryingCapacityInPersons?: string | null; // String
-    chassisNumber?: string | null; // String
-    engineNumber?: string | null; // String
-    insureds?: NexusGenInputs['insuredMobileInput'] | null; // insuredMobileInput
+    dutyFreeValue?: number | null; // Float
+    dutyPaidValue?: number | null; // Float
+    horsePower?: string | null; // String
+    manufacturedYear?: number | null; // Int
+    passengerNumber?: string | null; // String
     plateNumber?: string | null; // String
+    purchasedYear?: number | null; // Int
+    vehicleDetails?: string | null; // String
+    vehicleModel?: string | null; // String
     vehicleStatus?: NexusGenEnums['VehicleStatus'] | null; // VehicleStatus
+    vehicleSubType?: string | null; // String
     vehicleType?: string | null; // String
+    vehicleUsage?: string | null; // String
   }
   victimCreateInput: { // input type
     injuryType?: NexusGenEnums['InjuryType'] | null; // InjuryType
@@ -519,6 +537,7 @@ export interface NexusGenObjects {
     deletedTime?: NexusGenScalars['DateTime'] | null; // DateTime
     id?: string | null; // String
     issuedDate?: NexusGenScalars['DateTime'] | null; // DateTime
+    premiumTarif?: number | null; // Float
     updatedAt?: NexusGenScalars['DateTime'] | null; // DateTime
   }
   Claim: { // root type
@@ -779,13 +798,13 @@ export interface NexusGenObjects {
   Insured: { // root type
     city?: string | null; // String
     createdAt?: NexusGenScalars['DateTime'] | null; // DateTime
-    deleted?: boolean | null; // Boolean
-    deletedTime?: NexusGenScalars['DateTime'] | null; // DateTime
+    firstName?: string | null; // String
     houseNumber?: string | null; // String
     id?: string | null; // String
-    insuredName?: string | null; // String
     kebelle?: string | null; // String
+    lastName?: string | null; // String
     mobileNumber?: string | null; // String
+    occupation?: string | null; // String
     region?: string | null; // String
     subCity?: string | null; // String
     updatedAt?: NexusGenScalars['DateTime'] | null; // DateTime
@@ -850,12 +869,11 @@ export interface NexusGenObjects {
     createdAt?: NexusGenScalars['DateTime'] | null; // DateTime
     id?: number | null; // Int
     premiumTarif?: number | null; // Float
-    tariffCode?: string | null; // String
     updatedAt?: NexusGenScalars['DateTime'] | null; // DateTime
-    usage?: string | null; // String
     vehicleDetail?: string | null; // String
     vehicleSubType?: string | null; // String
     vehicleType?: string | null; // String
+    vehicleUsage?: string | null; // String
   }
   TariffDetal: { // root type
     createdAt?: NexusGenScalars['DateTime'] | null; // DateTime
@@ -914,17 +932,27 @@ export interface NexusGenObjects {
     updatedAt?: NexusGenScalars['DateTime'] | null; // DateTime
   }
   Vehicle: { // root type
+    bodyType?: string | null; // String
     carryingCapacityInGoods?: string | null; // String
-    carryingCapacityInPersons?: string | null; // String
     chassisNumber?: string | null; // String
     createdAt?: NexusGenScalars['DateTime'] | null; // DateTime
+    dutyFreeValue?: number | null; // Float
+    dutyPaidValue?: number | null; // Float
     engineNumber?: string | null; // String
+    horsePower?: string | null; // String
     id?: string | null; // String
     isInsured?: NexusGenEnums['IsInsured'] | null; // IsInsured
+    manufacturedYear?: number | null; // Int
+    passengerNumber?: string | null; // String
     plateNumber?: string | null; // String
+    purchasedYear?: number | null; // Int
     updatedAt?: NexusGenScalars['DateTime'] | null; // DateTime
+    vehicleDetails?: string | null; // String
+    vehicleModel?: string | null; // String
     vehicleStatus?: NexusGenEnums['VehicleStatus'] | null; // VehicleStatus
+    vehicleSubType?: string | null; // String
     vehicleType?: string | null; // String
+    vehicleUsage?: string | null; // String
   }
   Victim: { // root type
     createdAt?: NexusGenScalars['DateTime'] | null; // DateTime
@@ -991,7 +1019,7 @@ export interface NexusGenFieldTypes {
     insureds: NexusGenRootTypes['Insured'] | null; // Insured
     issuedDate: NexusGenScalars['DateTime'] | null; // DateTime
     policies: NexusGenRootTypes['Policy'] | null; // Policy
-    tariffs: NexusGenRootTypes['Tariff'] | null; // Tariff
+    premiumTarif: number | null; // Float
     updatedAt: NexusGenScalars['DateTime'] | null; // DateTime
     vehicles: NexusGenRootTypes['Vehicle'] | null; // Vehicle
   }
@@ -1265,17 +1293,17 @@ export interface NexusGenFieldTypes {
     victims: Array<NexusGenRootTypes['Victim'] | null> | null; // [Victim]
   }
   Insured: { // field return type
-    branchs: NexusGenRootTypes['Branch'][]; // [Branch!]!
+    branchs: NexusGenRootTypes['Branch'] | null; // Branch
     certificates: NexusGenRootTypes['Certificate'][]; // [Certificate!]!
     city: string | null; // String
     createdAt: NexusGenScalars['DateTime'] | null; // DateTime
-    deleted: boolean | null; // Boolean
-    deletedTime: NexusGenScalars['DateTime'] | null; // DateTime
+    firstName: string | null; // String
     houseNumber: string | null; // String
     id: string | null; // String
-    insuredName: string | null; // String
     kebelle: string | null; // String
+    lastName: string | null; // String
     mobileNumber: string | null; // String
+    occupation: string | null; // String
     region: string | null; // String
     subCity: string | null; // String
     updatedAt: NexusGenScalars['DateTime'] | null; // DateTime
@@ -1359,6 +1387,7 @@ export interface NexusGenFieldTypes {
     updateInsuredPoliceReport: NexusGenRootTypes['InsuredPoliceReport']; // InsuredPoliceReport!
     updateOrganization: NexusGenRootTypes['Organization']; // Organization!
     updatePolicy: NexusGenRootTypes['Policy']; // Policy!
+    updatePremiumTariff: NexusGenRootTypes['Tariff']; // Tariff!
     updateTariff: NexusGenRootTypes['Tariff']; // Tariff!
     updateUnInsuredClaim: NexusGenRootTypes['ClaimUnInsured']; // ClaimUnInsured!
     updateUnInsuredPoliceReport: NexusGenRootTypes['UnInsuredPoliceReport']; // UnInsuredPoliceReport!
@@ -1458,7 +1487,6 @@ export interface NexusGenFieldTypes {
     regionCode: NexusGenRootTypes['RegionList'][]; // [RegionList!]!
     roleList: NexusGenRootTypes['Membership'][]; // [Membership!]!
     tariffByID: NexusGenRootTypes['Tariff']; // Tariff!
-    tariffByTariffCode: NexusGenRootTypes['Tariff']; // Tariff!
     tariffVehicleSubType: NexusGenRootTypes['TariffDetal'][]; // [TariffDetal!]!
     tariffVehicleType: NexusGenRootTypes['TariffDetal'][]; // [TariffDetal!]!
     tariffVehicleUsage: NexusGenRootTypes['TariffDetal'][]; // [TariffDetal!]!
@@ -1477,16 +1505,14 @@ export interface NexusGenFieldTypes {
     regionName: string | null; // String
   }
   Tariff: { // field return type
-    certificates: NexusGenRootTypes['Certificate'][]; // [Certificate!]!
     createdAt: NexusGenScalars['DateTime'] | null; // DateTime
     id: number | null; // Int
     premiumTarif: number | null; // Float
-    tariffCode: string | null; // String
     updatedAt: NexusGenScalars['DateTime'] | null; // DateTime
-    usage: string | null; // String
     vehicleDetail: string | null; // String
     vehicleSubType: string | null; // String
     vehicleType: string | null; // String
+    vehicleUsage: string | null; // String
   }
   TariffDetal: { // field return type
     createdAt: NexusGenScalars['DateTime'] | null; // DateTime
@@ -1564,21 +1590,31 @@ export interface NexusGenFieldTypes {
     updatedAt: NexusGenScalars['DateTime'] | null; // DateTime
   }
   Vehicle: { // field return type
+    bodyType: string | null; // String
     branchs: NexusGenRootTypes['Branch'] | null; // Branch
     carryingCapacityInGoods: string | null; // String
-    carryingCapacityInPersons: string | null; // String
     certificates: NexusGenRootTypes['Certificate'] | null; // Certificate
     chassisNumber: string | null; // String
     claims: Array<NexusGenRootTypes['Claim'] | null> | null; // [Claim]
     createdAt: NexusGenScalars['DateTime'] | null; // DateTime
+    dutyFreeValue: number | null; // Float
+    dutyPaidValue: number | null; // Float
     engineNumber: string | null; // String
+    horsePower: string | null; // String
     id: string | null; // String
     insureds: NexusGenRootTypes['Insured'] | null; // Insured
     isInsured: NexusGenEnums['IsInsured'] | null; // IsInsured
+    manufacturedYear: number | null; // Int
+    passengerNumber: string | null; // String
     plateNumber: string | null; // String
+    purchasedYear: number | null; // Int
     updatedAt: NexusGenScalars['DateTime'] | null; // DateTime
+    vehicleDetails: string | null; // String
+    vehicleModel: string | null; // String
     vehicleStatus: NexusGenEnums['VehicleStatus'] | null; // VehicleStatus
+    vehicleSubType: string | null; // String
     vehicleType: string | null; // String
+    vehicleUsage: string | null; // String
   }
   Victim: { // field return type
     createdAt: NexusGenScalars['DateTime'] | null; // DateTime
@@ -1637,7 +1673,7 @@ export interface NexusGenFieldTypeNames {
     insureds: 'Insured'
     issuedDate: 'DateTime'
     policies: 'Policy'
-    tariffs: 'Tariff'
+    premiumTarif: 'Float'
     updatedAt: 'DateTime'
     vehicles: 'Vehicle'
   }
@@ -1915,13 +1951,13 @@ export interface NexusGenFieldTypeNames {
     certificates: 'Certificate'
     city: 'String'
     createdAt: 'DateTime'
-    deleted: 'Boolean'
-    deletedTime: 'DateTime'
+    firstName: 'String'
     houseNumber: 'String'
     id: 'String'
-    insuredName: 'String'
     kebelle: 'String'
+    lastName: 'String'
     mobileNumber: 'String'
+    occupation: 'String'
     region: 'String'
     subCity: 'String'
     updatedAt: 'DateTime'
@@ -2005,6 +2041,7 @@ export interface NexusGenFieldTypeNames {
     updateInsuredPoliceReport: 'InsuredPoliceReport'
     updateOrganization: 'Organization'
     updatePolicy: 'Policy'
+    updatePremiumTariff: 'Tariff'
     updateTariff: 'Tariff'
     updateUnInsuredClaim: 'ClaimUnInsured'
     updateUnInsuredPoliceReport: 'UnInsuredPoliceReport'
@@ -2104,7 +2141,6 @@ export interface NexusGenFieldTypeNames {
     regionCode: 'RegionList'
     roleList: 'Membership'
     tariffByID: 'Tariff'
-    tariffByTariffCode: 'Tariff'
     tariffVehicleSubType: 'TariffDetal'
     tariffVehicleType: 'TariffDetal'
     tariffVehicleUsage: 'TariffDetal'
@@ -2123,16 +2159,14 @@ export interface NexusGenFieldTypeNames {
     regionName: 'String'
   }
   Tariff: { // field return type name
-    certificates: 'Certificate'
     createdAt: 'DateTime'
     id: 'Int'
     premiumTarif: 'Float'
-    tariffCode: 'String'
     updatedAt: 'DateTime'
-    usage: 'String'
     vehicleDetail: 'String'
     vehicleSubType: 'String'
     vehicleType: 'String'
+    vehicleUsage: 'String'
   }
   TariffDetal: { // field return type name
     createdAt: 'DateTime'
@@ -2210,21 +2244,31 @@ export interface NexusGenFieldTypeNames {
     updatedAt: 'DateTime'
   }
   Vehicle: { // field return type name
+    bodyType: 'String'
     branchs: 'Branch'
     carryingCapacityInGoods: 'String'
-    carryingCapacityInPersons: 'String'
     certificates: 'Certificate'
     chassisNumber: 'String'
     claims: 'Claim'
     createdAt: 'DateTime'
+    dutyFreeValue: 'Float'
+    dutyPaidValue: 'Float'
     engineNumber: 'String'
+    horsePower: 'String'
     id: 'String'
     insureds: 'Insured'
     isInsured: 'IsInsured'
+    manufacturedYear: 'Int'
+    passengerNumber: 'String'
     plateNumber: 'String'
+    purchasedYear: 'Int'
     updatedAt: 'DateTime'
+    vehicleDetails: 'String'
+    vehicleModel: 'String'
     vehicleStatus: 'VehicleStatus'
+    vehicleSubType: 'String'
     vehicleType: 'String'
+    vehicleUsage: 'String'
   }
   Victim: { // field return type name
     createdAt: 'DateTime'
@@ -2378,6 +2422,10 @@ export interface NexusGenArgTypes {
     updatePolicy: { // args
       id: string; // String!
       input: NexusGenInputs['PolicyUpdateInput']; // PolicyUpdateInput!
+    }
+    updatePremiumTariff: { // args
+      id: number; // Int!
+      premiumTariff: number; // Float!
     }
     updateTariff: { // args
       id: number; // Int!
@@ -2623,7 +2671,6 @@ export interface NexusGenArgTypes {
     }
     feedTariff: { // args
       filter?: string | null; // String
-      orderBy?: NexusGenInputs['TariffOrderByInput'][] | null; // [TariffOrderByInput!]
       skip?: number | null; // Int
       take?: number | null; // Int
     }
@@ -2724,9 +2771,6 @@ export interface NexusGenArgTypes {
     }
     tariffByID: { // args
       id: number; // Int!
-    }
-    tariffByTariffCode: { // args
-      tariffCode: string; // String!
     }
     tariffVehicleSubType: { // args
       vehicleType: string; // String!

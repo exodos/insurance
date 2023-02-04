@@ -28,7 +28,9 @@ const FeedInsuredInsurer = gql`
     ) {
       insured {
         id
-        insuredName
+        firstName
+        lastName
+        occupation
         region
         city
         subCity
@@ -38,21 +40,6 @@ const FeedInsuredInsurer = gql`
         mobileNumber
         createdAt
         updatedAt
-        deleted
-        deletedTime
-        vehicles {
-          id
-          plateNumber
-          engineNumber
-          chassisNumber
-          vehicleType
-          carryingCapacityInGoods
-          carryingCapacityInPersons
-          vehicleStatus
-          isInsured
-          createdAt
-          updatedAt
-        }
       }
       totalInsured
       maxPage

@@ -1,4 +1,8 @@
-import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import {
+  GetServerSideProps,
+  InferGetServerSidePropsType,
+  NextPage,
+} from "next";
 import { getServerSession } from "next-auth";
 import { useSession } from "next-auth/react";
 import { initializeApollo } from "../../../lib/apollo";
@@ -6,51 +10,39 @@ import { gql } from "@apollo/client";
 import { authOptions } from "../../api/auth/[...nextauth]";
 import { BsPlusCircleFill, BsFillArrowUpCircleFill } from "react-icons/bs";
 import { useState } from "react";
-import AddInsuredModal from "@/insured/create-insured";
-import SiteHeader from "@/components/layout/header";
-import ListInsured from "@/components/insured/list-insured";
+import ListUser from "@/users/list-user";
+import AddUserModal from "@/users/add-user";
+import { useRouter } from "next/router";
+import SiteHeader from "@/layout/header";
+import ListTariff from "@/components/tariff/list-tariff";
+import AddTariffModal from "@/components/tariff/add-tariff";
 
-const FeedInsured = gql`
-  query FeedInsured(
-    $filter: String
-    $skip: Int
-    $take: Int
-    $orderBy: [InsuredOrderByInput!]
-    $input: orgDescInput!
-  ) {
-    feedInsured(filter: $filter, skip: $skip, take: $take, orderBy: $orderBy) {
-      insured {
+const FeedTariff = gql`
+  query FeedTariff($filter: String, $skip: Int, $take: Int) {
+    feedTariff(filter: $filter, skip: $skip, take: $take) {
+      tariff {
         id
-        firstName
-        lastName
-        occupation
-        region
-        city
-        subCity
-        wereda
-        kebelle
-        houseNumber
-        mobileNumber
+        vehicleType
+        vehicleSubType
+        vehicleDetail
+        vehicleUsage
+        premiumTarif
         createdAt
         updatedAt
       }
-      totalInsured
+      totalTariff
       maxPage
-    }
-    feedBranchByOrgDesc(input: $input) {
-      branchs {
-        id
-        branchName
-      }
     }
   }
 `;
 
-const AdminInsuredPage = ({
+const TariffPage = ({
       data,
     }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
+
+  const { pathname } = useRouter();
 
   const handleAdd = () => {
     setShowAddModal((prev) => !prev);
@@ -58,16 +50,16 @@ const AdminInsuredPage = ({
   return (
     <>
       <SiteHeader
-        title={"Third Party Insurance Insured Page"}
-        content={"Third Party Insurance Insured Page"}
+        title={"Third Party Insurance Tariff Page"}
+        content={"Third Party Insurance Tariff Page"}
       />
-      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-2">
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="sm:flex sm:items-center">
             <div className="sm:flex-auto">
-              <h1 className="text-xl font-semibold text-gray-50">Insured</h1>
+              <h1 className="text-xl font-semibold text-gray-50">Tariff</h1>
               <p className="text-base font-medium text-gray-50 pt-1">
-                List Of All Insureds
+                List Of All Tariffs
               </p>
             </div>
             {session?.user && (
@@ -96,11 +88,9 @@ const AdminInsuredPage = ({
             )}
           </div>
         </div>
-        <ListInsured insuredData={data.feedInsured} />
+        <ListTariff tariffData={data.feedTariff} />
       </div>
-      {showAddModal ? (
-        <AddInsuredModal branchData={data.feedBranchByOrgDesc.branchs} />
-      ) : null}
+      {showAddModal ? <AddTariffModal /> : null}
     </>
   );
 };
@@ -138,19 +128,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const apolloClient = initializeApollo();
 
   const { data } = await apolloClient.query({
-    query: FeedInsured,
+    query: FeedTariff,
     variables: {
-      input: {
-        description: "INSURANCE",
-      },
       filter: filter,
       skip: skip,
       take: take,
-      orderBy: [
-        {
-          updatedAt: "desc",
-        },
-      ],
     },
   });
 
@@ -162,4 +144,4 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   };
 };
 
-export default AdminInsuredPage;
+export default TariffPage;

@@ -17,7 +17,9 @@ export const Insured = objectType({
   name: "Insured",
   definition(t) {
     t.string("id");
-    t.string("insuredName");
+    t.string("firstName");
+    t.string("lastName");
+    t.nullable.string("occupation");
     t.string("region");
     t.string("city");
     t.string("subCity");
@@ -27,8 +29,6 @@ export const Insured = objectType({
     t.string("mobileNumber");
     t.date("createdAt");
     t.date("updatedAt");
-    t.boolean("deleted");
-    t.nullable.date("deletedTime");
     t.nonNull.list.nonNull.field("vehicles", {
       type: "Vehicle",
       async resolve(_parent, _args, ctx) {
@@ -49,7 +49,8 @@ export const Insured = objectType({
           .certificates();
       },
     });
-    t.nonNull.list.nonNull.field("branchs", {
+
+    t.field("branchs", {
       type: "Branch",
       async resolve(_parent, _args, ctx) {
         return await ctx.prisma.insured
@@ -76,10 +77,13 @@ export const InsuredPagination = extendType({
       async resolve(_parent, args, ctx) {
         const where = args.filter
           ? {
-              deleted: false,
-              OR: [{ insuredName: args.filter }, { mobileNumber: args.filter }],
+              OR: [
+                { firstName: args.filter },
+                { lastName: args.filter },
+                { mobileNumber: args.filter },
+              ],
             }
-          : { deleted: false };
+          : {};
 
         const insured = await ctx.prisma.insured.findMany({
           where,
@@ -120,20 +124,18 @@ export const InsuredBranchPagination = extendType({
       async resolve(_parent, args, ctx) {
         const where = args.filter
           ? {
-              deleted: false,
               branchs: {
-                some: {
-                  id: args.branchId,
-                },
+                id: args.branchId,
               },
-              OR: [{ insuredName: args.filter }, { mobileNumber: args.filter }],
+              OR: [
+                { firstName: args.filter },
+                { lastName: args.filter },
+                { mobileNumber: args.filter },
+              ],
             }
           : {
-              deleted: false,
               branchs: {
-                some: {
-                  id: args.branchId,
-                },
+                id: args.branchId,
               },
             };
 
@@ -176,20 +178,18 @@ export const InsuredInsurerPagination = extendType({
       async resolve(_parent, args, ctx) {
         const where = args.filter
           ? {
-              deleted: false,
               branchs: {
-                some: {
-                  orgId: args.orgId,
-                },
+                orgId: args.orgId,
               },
-              OR: [{ insuredName: args.filter }, { mobileNumber: args.filter }],
+              OR: [
+                { firstName: args.filter },
+                { lastName: args.filter },
+                { mobileNumber: args.filter },
+              ],
             }
           : {
-              deleted: false,
               branchs: {
-                some: {
-                  orgId: args.orgId,
-                },
+                orgId: args.orgId,
               },
             };
 
@@ -227,7 +227,6 @@ export const insuredByIDQuery = extendType({
         return ctx.prisma.insured.findFirst({
           where: {
             id: args.id,
-            deleted: false,
           },
         });
       },
@@ -245,7 +244,6 @@ export const insuredByMobileNumberQuery = extendType({
         return ctx.prisma.insured.findFirst({
           where: {
             mobileNumber: args.mobileNumber,
-            deleted: false,
           },
         });
       },
@@ -259,7 +257,7 @@ export const createInsuredMutation = extendType({
     t.nonNull.field("createInsured", {
       type: Insured,
       args: {
-        input: nonNull(InsuredCreateInput),
+        input: nonNull(insuredCreateInput),
       },
       resolve: async (_parent, args, ctx) => {
         const user = await ctx.prisma.user.findUnique({
@@ -273,46 +271,25 @@ export const createInsuredMutation = extendType({
         if (!user || user.memberships.role !== "SUPERADMIN") {
           throw new Error(`You do not have permission to perform action`);
         }
-        const checkInsured = await ctx.prisma.insured.findFirst({
-          where: {
+        return await ctx.prisma.insured.create({
+          data: {
+            firstName: args.input.firstName,
+            lastName: args.input.lastName,
+            occupation: args.input.occupation,
+            region: args.input.region,
+            city: args.input.city,
+            subCity: args.input.subCity,
+            wereda: args.input.wereda,
+            kebelle: args.input.kebelle,
+            houseNumber: args.input.houseNumber,
             mobileNumber: changePhone(args.input.mobileNumber),
+            branchs: {
+              connect: {
+                id: args.input.branchs.id,
+              },
+            },
           },
         });
-        let insuredData = null;
-        if (checkInsured) {
-          insuredData = await ctx.prisma.insured.update({
-            where: {
-              id: checkInsured.id,
-            },
-            data: {
-              branchs: {
-                connect: {
-                  id: args.input.branchs.id,
-                },
-              },
-            },
-          });
-        } else {
-          insuredData = await ctx.prisma.insured.create({
-            data: {
-              insuredName: args.input.insuredName,
-              region: args.input.region,
-              city: args.input.city,
-              subCity: args.input.subCity,
-              wereda: args.input.wereda,
-              kebelle: args.input.kebelle,
-              houseNumber: args.input.houseNumber,
-              mobileNumber: changePhone(args.input.mobileNumber),
-              branchs: {
-                connect: {
-                  id: args.input.branchs.id,
-                },
-              },
-            },
-          });
-        }
-
-        return insuredData;
       },
     });
   },
@@ -376,13 +353,18 @@ export const deleteInsuredMutation = extendType({
         if (!user || user.memberships.role !== "SUPERADMIN") {
           throw new Error(`You do not have permission to perform action`);
         }
-        return await ctx.prisma.insured.update({
+        // return await ctx.prisma.insured.update({
+        //   where: {
+        //     id: args.id,
+        //   },
+        //   data: {
+        //     deleted: true,
+        //     deletedTime: new Date(),
+        //   },
+        // });
+        return await ctx.prisma.insured.delete({
           where: {
             id: args.id,
-          },
-          data: {
-            deleted: true,
-            deletedTime: new Date(),
           },
         });
       },
@@ -417,10 +399,12 @@ export const FeedInsuredInsurer = objectType({
   },
 });
 
-export const InsuredCreateInput = inputObjectType({
+export const insuredCreateInput = inputObjectType({
   name: "InsuredCreateInput",
   definition(t) {
-    t.string("insuredName");
+    t.string("firstName");
+    t.string("lastName");
+    t.nullable.string("occupation");
     t.string("region");
     t.string("city");
     t.string("subCity");
@@ -437,7 +421,9 @@ export const InsuredCreateInput = inputObjectType({
 export const insuredUpdateInput = inputObjectType({
   name: "insuredUpdateInput",
   definition(t) {
-    t.string("insuredName");
+    t.string("firstName");
+    t.string("lastName");
+    t.nullable.string("occupation");
     t.string("region");
     t.string("city");
     t.string("subCity");

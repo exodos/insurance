@@ -3,6 +3,7 @@ import {
   arg,
   enumType,
   extendType,
+  floatArg,
   inputObjectType,
   intArg,
   list,
@@ -17,24 +18,24 @@ export const Tariff = objectType({
   name: "Tariff",
   definition(t) {
     t.int("id");
-    t.string("tariffCode");
     t.string("vehicleType");
     t.string("vehicleSubType");
     t.string("vehicleDetail");
-    t.string("usage");
+    t.string("vehicleUsage");
     t.float("premiumTarif");
     t.date("createdAt");
     t.date("updatedAt");
-    t.nonNull.list.nonNull.field("certificates", {
-      type: "Certificate",
-      async resolve(_parent, _args, ctx) {
-        return await ctx.prisma.tariff
-          .findUnique({
-            where: { id: _parent.id },
-          })
-          .certificates();
-      },
-    });
+
+    // t.nonNull.list.nonNull.field("certificates", {
+    //   type: "Certificate",
+    //   async resolve(_parent, _args, ctx) {
+    //     return await ctx.prisma.tariff
+    //       .findUnique({
+    //         where: { id: _parent.id },
+    //       })
+    //       .certificates();
+    //   },
+    // });
   },
 });
 
@@ -47,18 +48,17 @@ export const TariffPagination = extendType({
         filter: stringArg(),
         skip: intArg(),
         take: intArg(),
-        orderBy: arg({ type: list(nonNull(TariffOrderByInput)) }),
+        // orderBy: arg({ type: list(nonNull(TariffOrderByInput)) }),
       },
       async resolve(parent, args, ctx) {
         const where = args.filter
           ? {
               OR: [
-                { tariffCode: args.filter },
                 { vehicleType: args.filter },
                 { vehicleSubType: args.filter },
                 { vehicleDetail: args.filter },
-                { usage: args.filter },
-                { premiumTarif: Number(args.filter) },
+                { vehiclUsage: args.filter },
+                // { premiumTarif: Number(args.filter) },
               ],
             }
           : {};
@@ -67,9 +67,12 @@ export const TariffPagination = extendType({
           where,
           skip: args?.skip as number | undefined,
           take: args?.take as number | undefined,
-          orderBy: args?.orderBy as
-            | Prisma.Enumerable<Prisma.TariffOrderByWithRelationInput>
-            | undefined,
+          // orderBy: args?.orderBy as
+          //   | Prisma.Enumerable<Prisma.TariffOrderByWithRelationInput>
+          //   | undefined,
+          orderBy: {
+            id: "asc",
+          },
         });
 
         const totalTariff = await ctx.prisma.tariff.count({
@@ -104,51 +107,34 @@ export const tariffByIDQuery = extendType({
   },
 });
 
-export const tariffByTariffCodeQuery = extendType({
-  type: "Query",
-  definition(t) {
-    t.nonNull.field("tariffByTariffCode", {
-      type: Tariff,
-      args: { tariffCode: nonNull(stringArg()) },
-      resolve(_parent, args, ctx) {
-        return ctx.prisma.tariff.findUnique({
-          where: {
-            tariffCode: args.tariffCode,
-          },
-        });
-      },
-    });
-  },
-});
-
 export const createTariffMutation = extendType({
   type: "Mutation",
   definition(t) {
     t.nonNull.field("createTariff", {
       type: Tariff,
       args: {
-        input: nonNull(TariffCreateInput),
+        input: nonNull(tariffCreateInput),
       },
       resolve: async (_parent, args, ctx) => {
-        // const user = await ctx.prisma.user.findUnique({
-        //   where: {
-        //     email: ctx.session.user.email,
-        //   },
-        // });
-        // if (
-        //   !user ||
-        //   (user.roleName !== "SUPERADMIN" && user.roleName !== "ADMIN")
-        // ) {
-        //   throw new Error(`You do not have permission to perform action`);
-        // }
+        const user = await ctx.prisma.user.findUnique({
+          where: {
+            email: ctx.session.user.email,
+          },
+          include: {
+            memberships: true,
+          },
+        });
+        if (!user || user.memberships.role !== "SUPERADMIN") {
+          throw new Error(`You do not have permission to perform action`);
+        }
         return await ctx.prisma.tariff.create({
           data: {
-            ...args.input,
-            tariffCode: args.input.tariffCode,
+            // ...args.input,
+            // tariffCode: args.input.tariffCode,
             vehicleType: args.input.vehicleType,
             vehicleSubType: args.input.vehicleSubType,
             vehicleDetail: args.input.vehicleDetail,
-            usage: args.input.usage,
+            vehicleUsage: args.input.vehicleUsage,
             premiumTarif: args.input.premiumTarif,
           },
         });
@@ -167,17 +153,17 @@ export const updateTariffMutation = extendType({
         input: nonNull(tariffUpdateInput),
       },
       resolve: async (_parent, args, ctx) => {
-        // const user = await ctx.prisma.user.findUnique({
-        //   where: {
-        //     email: ctx.session.user.email,
-        //   },
-        // });
-        // if (
-        //   !user ||
-        //   (user.roleName !== "SUPERADMIN" && user.roleName !== "ADMIN")
-        // ) {
-        //   throw new Error(`You do not have permission to perform action`);
-        // }
+        const user = await ctx.prisma.user.findUnique({
+          where: {
+            email: ctx.session.user.email,
+          },
+          include: {
+            memberships: true,
+          },
+        });
+        if (!user || user.memberships.role !== "SUPERADMIN") {
+          throw new Error(`You do not have permission to perform action`);
+        }
         return await ctx.prisma.tariff.update({
           where: { id: args.id },
           data: {
@@ -189,6 +175,38 @@ export const updateTariffMutation = extendType({
   },
 });
 
+export const updatePremiumTariffMutation = extendType({
+  type: "Mutation",
+  definition(t) {
+    t.nonNull.field("updatePremiumTariff", {
+      type: Tariff,
+      args: {
+        id: nonNull(intArg()),
+        premiumTariff: nonNull(floatArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        const user = await ctx.prisma.user.findUnique({
+          where: {
+            email: ctx.session.user.email,
+          },
+          include: {
+            memberships: true,
+          },
+        });
+        if (!user || user.memberships.role !== "SUPERADMIN") {
+          throw new Error(`You do not have permission to perform action`);
+        }
+        return await ctx.prisma.tariff.update({
+          where: { id: args.id },
+          data: {
+            // ...args.input,
+            premiumTarif: args.premiumTariff,
+          },
+        });
+      },
+    });
+  },
+});
 export const deleteTariffMutation = extendType({
   type: "Mutation",
   definition(t) {
@@ -198,14 +216,17 @@ export const deleteTariffMutation = extendType({
         id: nonNull(intArg()),
       },
       resolve: async (_parent, args, ctx) => {
-        // const user = await ctx.prisma.user.findUnique({
-        //   where: {
-        //     email: ctx.session.user.email,
-        //   },
-        // });
-        // if (!user || user.roleName !== "SUPERADMIN") {
-        //   throw new Error(`You do not have permission to perform action`);
-        // }
+        const user = await ctx.prisma.user.findUnique({
+          where: {
+            email: ctx.session.user.email,
+          },
+          include: {
+            memberships: true,
+          },
+        });
+        if (!user || user.memberships.role !== "SUPERADMIN") {
+          throw new Error(`You do not have permission to perform action`);
+        }
         return await ctx.prisma.tariff.delete({
           where: {
             id: args.id,
@@ -225,14 +246,13 @@ export const FeedTariff = objectType({
   },
 });
 
-export const TariffCreateInput = inputObjectType({
+export const tariffCreateInput = inputObjectType({
   name: "TariffCreateInput",
   definition(t) {
-    t.string("tariffCode");
     t.string("vehicleType");
     t.string("vehicleSubType");
     t.string("vehicleDetail");
-    t.string("usage");
+    t.string("vehicleUsage");
     t.float("premiumTarif");
     // t.field("thirdPartyLog", { type: thirdPartyLogCreateInput });
   },
@@ -241,11 +261,10 @@ export const TariffCreateInput = inputObjectType({
 export const tariffUpdateInput = inputObjectType({
   name: "TariffUpdateInput",
   definition(t) {
-    // t.string("tariffCode");
     t.string("vehicleType");
     t.string("vehicleSubType");
     t.string("vehicleDetail");
-    t.string("usage");
+    t.string("vehicleUsage");
     t.float("premiumTarif");
     // t.field("thirdPartyLog", { type: thirdPartyLogEditInput });
   },

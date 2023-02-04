@@ -21,6 +21,7 @@ export const Certificate = objectType({
   definition(t) {
     t.string("id");
     t.string("certificateNumber");
+    t.float("premiumTarif");
     t.date("issuedDate");
     t.date("updatedAt");
     t.boolean("deleted");
@@ -63,16 +64,6 @@ export const Certificate = objectType({
             where: { id: _parent.id },
           })
           .branchs();
-      },
-    });
-    t.field("tariffs", {
-      type: "Tariff",
-      async resolve(_parent, _args, ctx) {
-        return await ctx.prisma.certificate
-          .findUnique({
-            where: { id: _parent.id },
-          })
-          .tariffs();
       },
     });
     t.list.field("claims", {
@@ -296,6 +287,7 @@ export const createCertificateMutation = extendType({
             data: {
               ...args.input,
               certificateNumber: `CN-${format(new Date(), "yyMMiHms")}`,
+              premiumTarif: args.input.premiumTarif,
               insureds: {
                 connect: {
                   mobileNumber: vehicleDetail.insureds.mobileNumber,
@@ -323,11 +315,6 @@ export const createCertificateMutation = extendType({
               branchs: {
                 connect: {
                   id: vehicleDetail.branchs.id,
-                },
-              },
-              tariffs: {
-                connect: {
-                  tariffCode: args.input.tariffs.tariffCode,
                 },
               },
             },
@@ -381,7 +368,7 @@ export const createCertificateBranchMutation = extendType({
           include: {
             insureds: {
               select: {
-                mobileNumber: true,
+                id: true,
               },
             },
             branchs: {
@@ -410,9 +397,10 @@ export const createCertificateBranchMutation = extendType({
             data: {
               ...args.input,
               certificateNumber: `CN-${format(new Date(), "yyMMiHms")}`,
+              premiumTarif: args.input.premiumTarif,
               insureds: {
                 connect: {
-                  mobileNumber: vehicleDetail.insureds.mobileNumber,
+                  id: vehicleDetail.insureds.id,
                 },
               },
               vehicles: {
@@ -437,11 +425,6 @@ export const createCertificateBranchMutation = extendType({
               branchs: {
                 connect: {
                   id: vehicleDetail.branchs.id,
-                },
-              },
-              tariffs: {
-                connect: {
-                  tariffCode: args.input.tariffs.tariffCode,
                 },
               },
             },
@@ -573,11 +556,6 @@ export const updateCertificateMutation = extendType({
                     args.input.policies.policyIssuedConditions,
                   personsEntitledToUse:
                     args.input.policies.personsEntitledToUse,
-                },
-              },
-              tariffs: {
-                connect: {
-                  tariffCode: args.input.tariffs.tariffCode,
                 },
               },
             },
@@ -753,9 +731,10 @@ export const CertificateOrderByInput = inputObjectType({
 export const CertificateCreateInput = inputObjectType({
   name: "CertificateCreateInput",
   definition(t) {
+    t.float("premiumTarif");
     t.field("policies", { type: policyCreateInput });
     t.field("branchs", { type: branchConnectInput });
-    t.field("tariffs", { type: tariffConnectInput });
+    // t.field("tariffs", { type: tariffConnectInput });
     // t.field("thirdPartyLog", { type: thirdPartyLogCreateInput });
   },
 });
@@ -764,7 +743,7 @@ export const CertificateUpdateInput = inputObjectType({
   name: "CertificateUpdateInput",
   definition(t) {
     t.field("policies", { type: policyUpdateInput });
-    t.field("tariffs", { type: tariffConnectInput });
+    // t.field("tariffs", { type: tariffConnectInput });
     // t.field("thirdPartyLog", { type: thirdPartyLogEditInput });
   },
 });

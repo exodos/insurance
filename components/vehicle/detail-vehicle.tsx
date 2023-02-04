@@ -82,7 +82,31 @@ const VehicleDetails = ({ vehicle }) => {
                               </div>
                               <div className="grid-cols-1 sm:grid-cols-1 sm:mt-0">
                                 <dt className="text-sm font-medium text-gray-500">
-                                  Vehicle Type
+                                  Model
+                                </dt>
+                                <dd className="text-sm text-gray-900">
+                                  {vehicle?.vehicleModel}
+                                </dd>
+                              </div>
+                              <div className="grid-cols-1 sm:grid-cols-1 sm:mt-0">
+                                <dt className="text-sm font-medium text-gray-500">
+                                  Body Type
+                                </dt>
+                                <dd className="text-sm text-gray-900">
+                                  {vehicle?.bodyType}
+                                </dd>
+                              </div>
+                              <div className="grid-cols-1 sm:grid-cols-1 sm:mt-0">
+                                <dt className="text-sm font-medium text-gray-500">
+                                  Horse Power
+                                </dt>
+                                <dd className="text-sm text-gray-900">
+                                  {vehicle?.horsePower}
+                                </dd>
+                              </div>
+                              <div className="grid-cols-1 sm:grid-cols-1 sm:mt-0">
+                                <dt className="text-sm font-medium text-gray-500">
+                                  Type Of Vehicle
                                 </dt>
                                 <dd className="text-sm text-gray-900">
                                   {vehicle?.vehicleType}
@@ -90,18 +114,26 @@ const VehicleDetails = ({ vehicle }) => {
                               </div>
                               <div className="grid-cols-1 sm:grid-cols-1 sm:mt-0">
                                 <dt className="text-sm font-medium text-gray-500">
-                                  Goods Carrying Capacity
+                                  Sub Type Of Vehicle
                                 </dt>
                                 <dd className="text-sm text-gray-900">
-                                  {vehicle?.carryingCapacityInGoods}
+                                  {vehicle?.vehicleSubType}
                                 </dd>
                               </div>
                               <div className="grid-cols-1 sm:grid-cols-1 sm:mt-0">
                                 <dt className="text-sm font-medium text-gray-500">
-                                  Persons Carrying Capacity
+                                  Detail Of vehicle
                                 </dt>
                                 <dd className="text-sm text-gray-900">
-                                  {vehicle?.carryingCapacityInPersons}
+                                  {vehicle?.vehicleDetails}
+                                </dd>
+                              </div>
+                              <div className="grid-cols-1 sm:grid-cols-1 sm:mt-0">
+                                <dt className="text-sm font-medium text-gray-500">
+                                  Usage
+                                </dt>
+                                <dd className="text-sm text-gray-900">
+                                  {vehicle?.vehicleUsage}
                                 </dd>
                               </div>
                               <div className="grid-cols-1 sm:grid-cols-1 sm:mt-0">
@@ -114,7 +146,7 @@ const VehicleDetails = ({ vehicle }) => {
                               </div>
                               <div className="grid-cols-1 sm:grid-cols-1 sm:mt-0">
                                 <dt className="text-sm font-medium text-gray-500">
-                                  Is Insured
+                                  Insurance Status
                                 </dt>
                                 <dd className="text-sm text-gray-900">
                                   {vehicle?.isInsured}
@@ -128,10 +160,18 @@ const VehicleDetails = ({ vehicle }) => {
                             <div className="bg-white px-4 py-5 grid-cols-4 grid gap-4">
                               <div className="grid-cols-1 sm:grid-cols-1 sm:mt-0">
                                 <dt className="text-sm font-medium text-gray-500">
-                                  Insured Name
+                                  Insured First Name
                                 </dt>
                                 <dd className="text-sm text-gray-900">
-                                  {vehicle?.insureds?.insuredName}
+                                  {vehicle?.insureds?.firstName}
+                                </dd>
+                              </div>
+                              <div className="grid-cols-1 sm:grid-cols-1 sm:mt-0">
+                                <dt className="text-sm font-medium text-gray-500">
+                                  Insured Last Name
+                                </dt>
+                                <dd className="text-sm text-gray-900">
+                                  {vehicle?.insureds?.lastName}
                                 </dd>
                               </div>
                               <div className="grid-cols-1 sm:grid-cols-1 sm:mt-0">
@@ -148,14 +188,6 @@ const VehicleDetails = ({ vehicle }) => {
                                 </dt>
                                 <dd className="text-sm text-gray-900">
                                   {vehicle?.insureds.city}
-                                </dd>
-                              </div>
-                              <div className="grid-cols-1 sm:grid-cols-1 sm:mt-0">
-                                <dt className="text-sm font-medium text-gray-500">
-                                  Mobile Number
-                                </dt>
-                                <dd className="text-sm text-gray-900">
-                                  {vehicle?.insureds?.mobileNumber}
                                 </dd>
                               </div>
                             </div>

@@ -27,7 +27,9 @@ const FeedInsuredBranch = gql`
     ) {
       insured {
         id
-        insuredName
+        firstName
+        lastName
+        occupation
         region
         city
         subCity
@@ -37,19 +39,6 @@ const FeedInsuredBranch = gql`
         mobileNumber
         createdAt
         updatedAt
-        vehicles {
-          id
-          plateNumber
-          engineNumber
-          chassisNumber
-          vehicleType
-          carryingCapacityInGoods
-          carryingCapacityInPersons
-          vehicleStatus
-          isInsured
-          createdAt
-          updatedAt
-        }
       }
       totalInsured
       maxPage
@@ -62,9 +51,9 @@ const FeedInsuredBranch = gql`
 `;
 
 const BranchInsuredPage = ({
-  data,
-  branchId,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+      branchId,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
 

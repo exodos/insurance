@@ -40,7 +40,8 @@ const AddInsuredModal = ({ branchData }) => {
   const phoneRegExp = /^(^\+251|^251|^0)?9\d{8}$/;
 
   const initialValues = {
-    insuredName: "",
+    firstName: "",
+    lastName: "",
     region: "",
     city: "",
     subCity: "",
@@ -51,7 +52,8 @@ const AddInsuredModal = ({ branchData }) => {
     branchName: "",
   };
   const validate = Yup.object().shape({
-    insuredName: Yup.string().required("Insured Name Is Required"),
+    firstName: Yup.string().required("First Name Is Required"),
+    lastName: Yup.string().required("First Name Is Required"),
     region: Yup.string().required("Region Is Required"),
     city: Yup.string().required("City Is Required"),
     subCity: Yup.string().required("SubCity Name Is Required"),
@@ -170,25 +172,49 @@ const AddInsuredModal = ({ branchData }) => {
                             <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
                               <div>
                                 <label
-                                  htmlFor="insuredName"
+                                  htmlFor="firstName"
                                   className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
                                 >
-                                  Insured Name
+                                  First Name
                                 </label>
                               </div>
                               <div className="sm:col-span-2">
                                 <Field
                                   type="text"
-                                  name="insuredName"
-                                  id="insuredName"
-                                  placeholder="Enter Insured Name"
+                                  name="firstName"
+                                  id="firstName"
+                                  placeholder="Enter First Name"
                                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                 />
                                 <div className="text-eRed text-sm italic mt-2">
-                                  <ErrorMessage name="insuredName" />
+                                  <ErrorMessage name="firstName" />
                                 </div>
                               </div>
                             </div>
+                            <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
+                              <div>
+                                <label
+                                  htmlFor="lastName"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Last Name
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  type="text"
+                                  name="lastName"
+                                  id="lastName"
+                                  placeholder="Enter Last Name"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="lastName" />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="space-x-1 grid grid-cols-2 gap-1">
                             <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
                               <div>
                                 <label
@@ -211,8 +237,6 @@ const AddInsuredModal = ({ branchData }) => {
                                 </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="space-x-1 grid grid-cols-2 gap-1">
                             <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
                               <div>
                                 <label
@@ -234,6 +258,8 @@ const AddInsuredModal = ({ branchData }) => {
                                 </div>
                               </div>
                             </div>
+                          </div>
+                          <div className="space-x-1 grid grid-cols-2 gap-1">
                             <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
                               <div>
                                 <label
@@ -255,8 +281,6 @@ const AddInsuredModal = ({ branchData }) => {
                                 </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="space-x-1 grid grid-cols-2 gap-1">
                             <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
                               <div>
                                 <label
@@ -278,6 +302,8 @@ const AddInsuredModal = ({ branchData }) => {
                                 </div>
                               </div>
                             </div>
+                          </div>
+                          <div className="space-x-1 grid grid-cols-2 gap-1">
                             <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
                               <div>
                                 <label
@@ -299,8 +325,6 @@ const AddInsuredModal = ({ branchData }) => {
                                 </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="space-x-1 grid grid-cols-2 gap-1">
                             <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
                               <div>
                                 <label
@@ -322,6 +346,9 @@ const AddInsuredModal = ({ branchData }) => {
                                 </div>
                               </div>
                             </div>
+                          </div>
+
+                          <div className="space-x-1 grid grid-cols-2 gap-1">
                             <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
                               <div>
                                 <label
@@ -343,56 +370,33 @@ const AddInsuredModal = ({ branchData }) => {
                                 </div>
                               </div>
                             </div>
-                          </div>
-                          {/* <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
-                            <div>
-                              <label
-                                htmlFor="mobileNumber"
-                                className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
-                              >
-                                Mobile Number
-                              </label>
-                            </div>
-                            <div className="sm:col-span-2">
-                              <Field
-                                type="text"
-                                name="mobileNumber"
-                                id="mobileNumber"
-                                placeholder="Enter Mobile Number"
-                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                              />
-                              <div className="text-eRed text-sm italic mt-2">
-                                <ErrorMessage name="mobileNumber" />
+                            <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
+                              <div>
+                                <label
+                                  htmlFor="branchName"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Branch Name
+                                </label>
                               </div>
-                            </div>
-                          </div> */}
-
-                          <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
-                            <div>
-                              <label
-                                htmlFor="branchName"
-                                className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
-                              >
-                                Branch Name
-                              </label>
-                            </div>
-                            <div className="sm:col-span-2">
-                              <Field
-                                as="select"
-                                name="branchName"
-                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                              >
-                                <option disabled value="">
-                                  Select Branch Name
-                                </option>
-                                {branchOption.map((option: any) => (
-                                  <option key={option.id} value={option.id}>
-                                    {option.branchName}
+                              <div className="sm:col-span-2">
+                                <Field
+                                  as="select"
+                                  name="branchName"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                >
+                                  <option disabled value="">
+                                    Select Branch Name
                                   </option>
-                                ))}
-                              </Field>
-                              <div className="text-eRed text-sm italic mt-2">
-                                <ErrorMessage name="branchName" />
+                                  {branchOption.map((option: any) => (
+                                    <option key={option.id} value={option.id}>
+                                      {option.branchName}
+                                    </option>
+                                  ))}
+                                </Field>
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="branchName" />
+                                </div>
                               </div>
                             </div>
                           </div>
