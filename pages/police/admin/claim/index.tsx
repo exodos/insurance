@@ -41,6 +41,7 @@ const FeedClaim = gql`
         branchs {
           id
           branchName
+          region
         }
       }
       totalClaim
@@ -50,8 +51,8 @@ const FeedClaim = gql`
 `;
 
 const PoliceClaimPage = ({
-  data,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
 
   const { asPath } = useRouter();

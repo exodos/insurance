@@ -29,15 +29,14 @@ const FeedClaimPoliceBranch = gql`
         damageEstimate
         claimedAt
         updatedAt
-        deleted
-        deletedTime
         insuredPoliceReports {
           id
           incidentNumber
         }
         insureds {
           id
-          insuredName
+          firstName
+          lastName
           mobileNumber
         }
         vehicles {
@@ -61,8 +60,8 @@ const FeedClaimPoliceBranch = gql`
 `;
 
 const PoliceUserClaimPage = ({
-      data,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  data,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
 
   const { asPath } = useRouter();

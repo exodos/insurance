@@ -6,6 +6,7 @@ import { authOptions } from "pages/api/auth/[...nextauth]";
 import { gql } from "apollo-server-micro";
 import { initializeApollo } from "lib/apollo";
 import CreateInsuredPoliceReportPage from "@/policereport/insured/insured-create-report";
+import { useRouter } from "next/router";
 
 const PlateCode = gql`
   query PlateCode {
@@ -21,10 +22,13 @@ const PlateCode = gql`
 `;
 
 const AddPoliceReport = ({
-  data,
-  userId,
-  branchId,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+      userId,
+      branchId,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  const router = useRouter();
+  const path = router.query.returnPage;
+
   return (
     <>
       <Head>
@@ -39,7 +43,7 @@ const AddPoliceReport = ({
         regionCode={data.regionCode}
         userId={userId}
         branchId={branchId}
-        href={"/police-admin/policereport"}
+        href={path}
       />
     </>
   );

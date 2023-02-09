@@ -9,6 +9,7 @@ import { useState } from "react";
 import ListInsured from "@/insured/list-insured";
 import BranchAddInsuredModal from "@/insured/branch-create-insured";
 import SiteHeader from "@/components/layout/header";
+import { useRouter } from "next/router";
 
 const FeedInsuredBranch = gql`
   query FeedInsuredBranch(
@@ -57,6 +58,8 @@ const BranchInsuredPage = ({
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
 
+  const { pathname } = useRouter();
+
   const handleAdd = () => {
     setShowAddModal((prev) => !prev);
   };
@@ -104,7 +107,9 @@ const BranchInsuredPage = ({
         </div>
         <ListInsured insuredData={data.feedInsuredBranch} />
       </div>
-      {showAddModal ? <BranchAddInsuredModal branchId={branchId} /> : null}
+      {showAddModal ? (
+        <BranchAddInsuredModal branchId={branchId} href={pathname} />
+      ) : null}
     </>
   );
 };

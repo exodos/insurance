@@ -8,6 +8,8 @@ import { BsPlusCircleFill, BsFillArrowUpCircleFill } from "react-icons/bs";
 import { useState } from "react";
 import ListCertificate from "@/certificate/list-certificate";
 import SiteHeader from "@/components/layout/header";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
 const FeedCertificateInsurer = gql`
   query FeedCertificateInsurer(
@@ -29,8 +31,6 @@ const FeedCertificateInsurer = gql`
         certificateNumber
         issuedDate
         updatedAt
-        deleted
-        deletedTime
         policies {
           id
           policyNumber
@@ -42,11 +42,6 @@ const FeedCertificateInsurer = gql`
         vehicles {
           id
           plateNumber
-        }
-        tariffs {
-          id
-          tariffCode
-          premiumTarif
         }
       }
       totalCertificate
@@ -64,14 +59,15 @@ const FeedCertificateInsurer = gql`
 `;
 
 const InsurerCertificatePage = ({
-  data,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   // const [showAddModal, setShowAddModal] = useState(false);
 
   // const handleAdd = () => {
   //   setShowAddModal((prev) => !prev);
   // };
+  const { pathname } = useRouter();
   return (
     <>
       <SiteHeader
@@ -91,18 +87,25 @@ const InsurerCertificatePage = ({
             </div>
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
-                {/* {session.user.memberships.role === "INSURER" && (
-                  <button
-                    type="button"
-                    className="inline-flex items-center"
-                    onClick={() => handleAdd()}
+                {session.user.memberships.role === "INSURER" && (
+                  <Link
+                    href={{
+                      pathname: "/branch/certificate/branch-add-certificate",
+                      query: {
+                        returnPage: pathname,
+                      },
+                    }}
+                    passHref
+                    legacyBehavior
                   >
-                    <BsPlusCircleFill
-                      className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
-                      aria-hidden="true"
-                    />
-                  </button>
-                )} */}
+                    <button type="button" className="inline-flex items-center">
+                      <BsPlusCircleFill
+                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </Link>
+                )}
                 {session.user.memberships.role === "INSURER" && (
                   <button type="button" className="inline-flex items-center">
                     <BsFillArrowUpCircleFill
@@ -117,13 +120,6 @@ const InsurerCertificatePage = ({
         </div>
         <ListCertificate certificateData={data.feedCertificateInsurer} />
       </div>
-      {/* {showAddModal ? (
-        <BranchAddCertificateModal
-          regionCode={data.regionCode}
-          codeList={data.plateCode}
-          href={"/insurer/certificate"}
-        />
-      ) : null} */}
     </>
   );
 };

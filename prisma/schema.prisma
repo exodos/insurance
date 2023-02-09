@@ -98,8 +98,8 @@ model Certificate {
   branchId           String
   premiumTarif       Float
   updatedAt          DateTime        @updatedAt
-  deleted            Boolean         @default(false)
-  deletedTime        DateTime?
+  // deleted            Boolean         @default(false)
+  // deletedTime        DateTime?
   claims             Claim[]
   thirdPartyLogs     ThirdPartyLog[]
 }
@@ -124,6 +124,8 @@ model Insured {
   branchs        Branch          @relation(fields: [branchId], references: [id])
   branchId       String
   thirdPartyLogs ThirdPartyLog[]
+
+  @@unique([mobileNumber, branchId])
 }
 
 model Vehicle {
@@ -139,13 +141,16 @@ model Vehicle {
   vehicleSubType          String
   vehicleDetails          String
   vehicleUsage            String
-  passengerNumber         String
+  vehicleCategory         VehicleCategory
+  premiumTarif            Float
+  passengerNumber         Int
   carryingCapacityInGoods String?
   purchasedYear           Int
   dutyFreeValue           Float
   dutyPaidValue           Float
   vehicleStatus           VEHICLESTATUS         @default(NEW)
   isInsured               IsInsured             @default(NOTINSURED)
+  status                  STATUS?               @default(SUSPENDED)
   insureds                Insured               @relation(fields: [insuredId], references: [id])
   insuredId               String
   branchs                 Branch                @relation(fields: [branchId], references: [id])
@@ -175,6 +180,7 @@ model Policy {
 enum MembershipRole {
   SUPERADMIN
   INSURER
+  BRANCHADMIN
   MEMBER
   USER
   TRAFFICPOLICEADMIN
@@ -208,8 +214,8 @@ model Claim {
   branchs              Branch              @relation(fields: [branchId], references: [id])
   branchId             String
   updatedAt            DateTime            @updatedAt
-  deleted              Boolean             @default(false)
-  deletedTime          DateTime?
+  // deleted              Boolean             @default(false)
+  // deletedTime          DateTime?
   thirdPartyLogs       ThirdPartyLog[]
 }
 
@@ -347,16 +353,17 @@ model Victim {
 }
 
 model Tariff {
-  id             Int             @id @default(autoincrement())
-  vehicleType    String
-  vehicleSubType String
-  vehicleDetail  String
-  vehicleUsage   String
-  premiumTarif   Float
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  id              Int             @id @default(autoincrement())
+  vehicleType     String
+  vehicleSubType  String
+  vehicleDetail   String
+  vehicleUsage    String
+  vehicleCategory VehicleCategory @default(PRIVATEUSE)
+  premiumTarif    Float
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
   // certificates   Certificate[]
-  thirdPartyLogs ThirdPartyLog[]
+  thirdPartyLogs  ThirdPartyLog[]
 }
 
 model RegionList {
@@ -441,8 +448,9 @@ enum IsInsured {
 }
 
 enum STATUS {
+  APPROVED
   SUSPENDED
-  BLOCKED
+  TRANSFERABLE
 }
 
 enum InjuryType {
@@ -456,4 +464,9 @@ enum VictimedCondition {
   PEDESTRIAN
   DRIVER
   ASSISTANT
+}
+
+enum VehicleCategory {
+  PRIVATEUSE
+  BUSINESSUSE
 }

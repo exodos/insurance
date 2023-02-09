@@ -62,6 +62,8 @@ const ListInsured = ({ insuredData }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteList, setDeleteList] = useState([]);
 
+  console.log(insuredData);
+
   const { asPath } = useRouter();
 
   const router = useRouter();

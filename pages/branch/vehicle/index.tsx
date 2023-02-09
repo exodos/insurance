@@ -4,12 +4,11 @@ import { initializeApollo } from "../../../lib/apollo";
 import { gql } from "@apollo/client";
 import { authOptions } from "../../api/auth/[...nextauth]";
 import { BsPlusCircleFill, BsFillArrowUpCircleFill } from "react-icons/bs";
-import { useState } from "react";
-import BranchAddVehicleModal from "@/vehicle/branch-add-vehicle";
 import ListBranchVehicle from "@/vehicle/branch-list-vehicle";
 import { useRouter } from "next/router";
 import SiteHeader from "@/components/layout/header";
 import { getServerSession } from "next-auth";
+import Link from "next/link";
 
 const FeedVehicleBranch = gql`
   query FeedVehicleBranch(
@@ -39,12 +38,15 @@ const FeedVehicleBranch = gql`
         vehicleSubType
         vehicleDetails
         vehicleUsage
+        vehicleCategory
+        premiumTarif
         passengerNumber
         carryingCapacityInGoods
         purchasedYear
         dutyFreeValue
         dutyPaidValue
         vehicleStatus
+        status
         isInsured
         createdAt
         updatedAt
@@ -71,6 +73,23 @@ const FeedVehicleBranch = gql`
       id
       regionApp
     }
+    feedUniqueTariff {
+      tariffVehicleType {
+        vehicleType
+      }
+      tariffVehicleSubType {
+        vehicleSubType
+      }
+      tariffVehicleDetail {
+        vehicleDetail
+      }
+      tariffVehicleUsage {
+        vehicleUsage
+      }
+      tariffVehicleCategory {
+        vehicleCategory
+      }
+    }
     listAllBranch {
       id
       branchName
@@ -83,13 +102,13 @@ const BranchVehiclePage = ({
       branchId,
     }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
-  const [showAddModal, setShowAddModal] = useState(false);
+  // const [showAddModal, setShowAddModal] = useState(false);
 
   const { pathname } = useRouter();
 
-  const handleAdd = () => {
-    setShowAddModal((prev) => !prev);
-  };
+  // const handleAdd = () => {
+  //   setShowAddModal((prev) => !prev);
+  // };
   return (
     <>
       <SiteHeader
@@ -109,16 +128,23 @@ const BranchVehiclePage = ({
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
                 {(session.user.memberships.role === "INSURER" ||
                   session.user.memberships.role === "MEMBER") && (
-                  <button
-                    type="button"
-                    className="inline-flex items-center"
-                    onClick={() => handleAdd()}
+                  <Link
+                    href={{
+                      pathname: "/branch/vehicle/branch-add-vehicle",
+                      query: {
+                        returnPage: pathname,
+                      },
+                    }}
+                    passHref
+                    legacyBehavior
                   >
-                    <BsPlusCircleFill
-                      className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
-                      aria-hidden="true"
-                    />
-                  </button>
+                    <button type="button" className="inline-flex items-center">
+                      <BsPlusCircleFill
+                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </Link>
                 )}
                 {(session.user.memberships.role === "INSURER" ||
                   session.user.memberships.role === "MEMBER") && (
@@ -138,16 +164,17 @@ const BranchVehiclePage = ({
           regionCode={data.regionCode}
           codeList={data.plateCode}
           branchId={branchId}
+          tariffData={data.feedUniqueTariff}
         />
       </div>
-      {showAddModal ? (
+      {/* {showAddModal ? (
         <BranchAddVehicleModal
           regionCode={data.regionCode}
           codeList={data.plateCode}
           branchId={branchId}
           href={pathname}
         />
-      ) : null}
+      ) : null} */}
     </>
   );
 };

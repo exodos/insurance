@@ -47,20 +47,20 @@ const FeedUser = gql`
       totalUser
       maxPage
     }
-    listAllBranch {
-      id
-      branchName
-    }
     roleList {
       id
       role
+    }
+    listAllBranch {
+      id
+      branchName
     }
   }
 `;
 
 const AdminUserPage = ({
-  data,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
 

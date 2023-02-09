@@ -52,11 +52,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         },
         {
           name: "Insured",
+          href: "/admin/insured",
           icon: "FaUserCheck",
           current: false,
+        },
+        {
+          name: "Vehicle",
+          icon: "FaCar",
+          current: false,
           children: [
-            { name: "Owner", href: "/admin/insured" },
-            { name: "Vehicle", href: "/admin/vehicle" },
+            { name: "Approved", href: "/admin/vehicle" },
+            { name: "Suspended", href: "/admin/vehicle" },
           ],
         },
         {

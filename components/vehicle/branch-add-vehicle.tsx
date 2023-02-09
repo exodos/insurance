@@ -7,7 +7,6 @@ import { gql, useMutation } from "@apollo/client";
 import { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/solid";
-import { changePhone } from "lib/config";
 
 const CreateVehicle = gql`
   mutation CreateVehicle($input: vehicleCreateInput!) {
@@ -16,12 +15,28 @@ const CreateVehicle = gql`
       plateNumber
       engineNumber
       chassisNumber
+      vehicleModel
+      bodyType
+      horsePower
+      manufacturedYear
       vehicleType
+      vehicleSubType
+      vehicleDetails
+      vehicleUsage
+      vehicleCategory
+      premiumTarif
+      passengerNumber
       carryingCapacityInGoods
-      carryingCapacityInPersons
+      purchasedYear
+      dutyFreeValue
+      dutyPaidValue
       vehicleStatus
+      status
+      isInsured
+      createdAt
+      updatedAt
       insureds {
-        mobileNumber
+        id
       }
       branchs {
         id
@@ -30,24 +45,46 @@ const CreateVehicle = gql`
   }
 `;
 
-const BranchAddVehicleModal = ({ regionCode, codeList, branchId, href }) => {
+const BranchAddVehicleModal = ({
+  regionCode,
+  codeList,
+  branchId,
+  href,
+  uniqueTariff,
+  insuredId,
+}) => {
   const notificationCtx = useContext(NotificationContext);
   const [open, setOpen] = useState<boolean>(true);
   const [plateRegionOption, setPlateRegionOption] = useState(regionCode);
   const [plateCodeOption, setPlateCodeOption] = useState(codeList);
+  const [vehicleTypeOptions, setVehicleTypeOptions] = useState(
+    uniqueTariff.tariffVehicleType
+  );
+  const [vehicleSubTypeOptions, setVehicleSubTypeOptions] = useState(
+    uniqueTariff.tariffVehicleSubType
+  );
+  const [vehicleDetailOptions, setVehicleDetailOptions] = useState(
+    uniqueTariff.tariffVehicleDetail
+  );
+  const [vehicleUsageOptions, setVehicleUsageOptions] = useState(
+    uniqueTariff.tariffVehicleUsage
+  );
+  const [vehicleCategoryOptions, setVehicleCategoryOptions] = useState(
+    uniqueTariff.tariffVehicleCategory
+  );
 
-  const vehicleStatusOption = [
-    { value: "NEW", label: "NEW" },
-    { value: "RENEWAL", label: "RENEWAL" },
-    { value: "ADDITIONAL", label: "ADDITIONAL" },
-  ];
+  console.log(href);
 
   const [createVehicle, { data, error, loading }] = useMutation(CreateVehicle);
   if (error) {
     console.log(error);
   }
+  const vehicleStatusOptions = [
+    { value: "NEW", label: "NEW" },
+    { value: "RENEWAL", label: "RENEWAL" },
+    { value: "ADDITIONAL", label: "ADDITIONAL" },
+  ];
 
-  const phoneRegExp = /^(^\+251|^251|^0)?9\d{8}$/;
   const plateNumberRegExp = /^([A-Da-d])?\d{5}$/;
 
   const initialValues = {
@@ -56,11 +93,23 @@ const BranchAddVehicleModal = ({ regionCode, codeList, branchId, href }) => {
     plateNumber: "",
     engineNumber: "",
     chassisNumber: "",
+    vehicleModel: "",
+    bodyType: "",
+    horsePower: "",
+    manufacturedYear: "",
     vehicleType: "",
+    vehicleSubType: "",
+    vehicleDetails: "",
+    vehicleUsage: "",
+    vehicleCategory: "",
+    passengerNumber: "",
     carryingCapacityInGoods: "",
-    carryingCapacityInPersons: "",
+    purchasedYear: "",
+    dutyFreeValue: "",
+    dutyPaidValue: "",
     vehicleStatus: "",
-    mobileNumber: "",
+    // mobileNumber: "",
+    // branchName: "",
   };
   const validate = Yup.object().shape({
     plateCode: Yup.string().required("Plate Code Is Required"),
@@ -70,17 +119,25 @@ const BranchAddVehicleModal = ({ regionCode, codeList, branchId, href }) => {
       .required("Plate Number Is Required"),
     engineNumber: Yup.string().required("Engine Number Is Required"),
     chassisNumber: Yup.string().required("Chassis Number Is Required"),
+    vehicleModel: Yup.string().required("Vehicle Model Is Required"),
+    bodyType: Yup.string().required("Body Type Is Required"),
+    horsePower: Yup.string().required("Horse Power Is Required"),
+    manufacturedYear: Yup.number().required("Manufactured Year Is Required"),
     vehicleType: Yup.string().required("Vehicle Type Is Required"),
-    carryingCapacityInGoods: Yup.string().required(
-      "Carrying Capacity (In Goods) Is Required"
-    ),
-    carryingCapacityInPersons: Yup.string().required(
-      "Carrying Capacity (In Persons) Is Required"
-    ),
+    vehicleSubType: Yup.string().required("Vehicle Sub Type Is Required"),
+    vehicleDetails: Yup.string().required("Vehicle Detail Is Required"),
+    vehicleUsage: Yup.string().required("Vehicle Usage Is Required"),
+    vehicleCategory: Yup.string().required("Vehicle Category Is Required"),
+    passengerNumber: Yup.number().required("Passenger Number Is Required"),
+    purchasedYear: Yup.number().required("Purchased Year Is Required"),
+    dutyFreeValue: Yup.number().required("Duty Free Value Is Required"),
+    dutyPaidValue: Yup.number().required("Duty Paid Value Is Required"),
     vehicleStatus: Yup.string().required("Vehicle Status Is Required"),
-    mobileNumber: Yup.string()
-      .matches(phoneRegExp, "Phone Number Is Not Valid")
-      .required("Phone Number Is Required"),
+
+    // mobileNumber: Yup.string()
+    //   .matches(phoneRegExp, "Phone Number Is Not Valid")
+    //   .required("Phone Number Is Required"),
+    // branchName: Yup.string().required("Branch Name Is Required"),
   });
   const [formValues, setFormValues] = useState(null);
 
@@ -91,12 +148,23 @@ const BranchAddVehicleModal = ({ regionCode, codeList, branchId, href }) => {
       plateNumber: `${values.plateCode}${values.plateRegion}${values.plateNumber}`,
       engineNumber: values.engineNumber,
       chassisNumber: values.chassisNumber,
+      vehicleModel: values.vehicleModel,
+      bodyType: values.bodyType,
+      horsePower: values.horsePower,
+      manufacturedYear: values.manufacturedYear,
       vehicleType: values.vehicleType,
+      vehicleSubType: values.vehicleSubType,
+      vehicleDetails: values.vehicleDetails,
+      vehicleUsage: values.vehicleUsage,
+      vehicleCategory: values.vehicleCategory,
+      passengerNumber: values.passengerNumber,
       carryingCapacityInGoods: values.carryingCapacityInGoods,
-      carryingCapacityInPersons: values.carryingCapacityInPersons,
+      purchasedYear: values.purchasedYear,
+      dutyFreeValue: values.dutyFreeValue,
+      dutyPaidValue: values.dutyPaidValue,
       vehicleStatus: values.vehicleStatus,
       insureds: {
-        mobileNumber: changePhone(values.mobileNumber),
+        id: insuredId,
       },
       branchs: {
         id: branchId,
@@ -152,7 +220,7 @@ const BranchAddVehicleModal = ({ regionCode, codeList, branchId, href }) => {
                 leaveFrom="translate-x-0"
                 leaveTo="translate-x-full"
               >
-                <Dialog.Panel className="pointer-events-auto w-screen max-w-3xl">
+                <Dialog.Panel className="pointer-events-auto w-screen max-w-5xl">
                   <Formik
                     initialValues={formValues || initialValues}
                     validationSchema={validate}
@@ -183,9 +251,14 @@ const BranchAddVehicleModal = ({ regionCode, codeList, branchId, href }) => {
                               </button>
                             </div>
                           </div>
+                          <div className="mt-1">
+                            <p className="text-sm text-white">
+                              Please enter detail for the vehicle
+                            </p>
+                          </div>
                         </div>
                         <div className="space-y-4 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0 mt-8">
-                          <div className="space-x-1 grid grid-cols-2 gap-1">
+                          <div className="space-x-1 grid grid-cols-3 gap-3">
                             <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
                               <div>
                                 <label
@@ -251,8 +324,6 @@ const BranchAddVehicleModal = ({ regionCode, codeList, branchId, href }) => {
                                 </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="space-x-1 grid grid-cols-2 gap-1">
                             <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-2 sm:space-y-0 sm:px-3 sm:py-5">
                               <div>
                                 <label
@@ -274,6 +345,8 @@ const BranchAddVehicleModal = ({ regionCode, codeList, branchId, href }) => {
                                 </div>
                               </div>
                             </div>
+                          </div>
+                          <div className="space-x-1 grid grid-cols-3 gap-1">
                             <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-2 sm:space-y-0 sm:px-3 sm:py-5">
                               <div>
                                 <label
@@ -295,8 +368,6 @@ const BranchAddVehicleModal = ({ regionCode, codeList, branchId, href }) => {
                                 </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="space-x-1 grid grid-cols-2 gap-1">
                             <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-2 sm:space-y-0 sm:px-3 sm:py-5">
                               <div>
                                 <label
@@ -321,6 +392,94 @@ const BranchAddVehicleModal = ({ regionCode, codeList, branchId, href }) => {
                             <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-2 sm:space-y-0 sm:px-3 sm:py-5">
                               <div>
                                 <label
+                                  htmlFor="vehicleModel"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Vehicle Model
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  type="text"
+                                  name="vehicleModel"
+                                  placeholder="Enter Vehicle Model"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="vehicleModel" />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="space-x-1 grid grid-cols-3 gap-1">
+                            <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-2 sm:space-y-0 sm:px-3 sm:py-5">
+                              <div>
+                                <label
+                                  htmlFor="bodyType"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Body Type
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  type="text"
+                                  name="bodyType"
+                                  placeholder="Enter Vehicle Body Type"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="bodyType" />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-2 sm:space-y-0 sm:px-3 sm:py-5">
+                              <div>
+                                <label
+                                  htmlFor="horsePower"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Horse Power
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  type="text"
+                                  name="horsePower"
+                                  placeholder="Enter Vehicle Horse Power"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="horsePower" />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-2 sm:space-y-0 sm:px-3 sm:py-5">
+                              <div>
+                                <label
+                                  htmlFor="manufacturedYear"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Manufactured Year
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  type="number"
+                                  name="manufacturedYear"
+                                  placeholder="Enter Vehicle Manufactured Year"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="manufacturedYear" />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="space-x-1 grid grid-cols-3 gap-1">
+                            <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-2 sm:space-y-0 sm:px-3 sm:py-5">
+                              <div>
+                                <label
                                   htmlFor="vehicleType"
                                   className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
                                 >
@@ -329,109 +488,298 @@ const BranchAddVehicleModal = ({ regionCode, codeList, branchId, href }) => {
                               </div>
                               <div className="sm:col-span-2">
                                 <Field
-                                  type="text"
+                                  as="select"
                                   name="vehicleType"
-                                  placeholder="Enter Vehicle Type"
                                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                />
+                                >
+                                  <option disabled value="">
+                                    Select Vehicle Type
+                                  </option>
+                                  {vehicleTypeOptions.map((option: any) => (
+                                    <option
+                                      key={option.vehicleType}
+                                      value={option.vehicleType}
+                                    >
+                                      {option.vehicleType}
+                                    </option>
+                                  ))}
+                                </Field>
                                 <div className="text-eRed text-sm italic mt-2">
                                   <ErrorMessage name="vehicleType" />
                                 </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
-                            <div>
-                              <label
-                                htmlFor="carryingCapacityInGoods"
-                                className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
-                              >
-                                Carrying Capacity (In Goods)
-                              </label>
-                            </div>
-                            <div className="sm:col-span-2">
-                              <Field
-                                type="text"
-                                name="carryingCapacityInGoods"
-                                placeholder="Enter Vehicle Carrying Capacity In Goods"
-                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                              />
-                              <div className="text-eRed text-sm italic mt-2">
-                                <ErrorMessage name="carryingCapacityInGoods" />
+                            <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-2 sm:space-y-0 sm:px-3 sm:py-5">
+                              <div>
+                                <label
+                                  htmlFor="vehicleSubType"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Vehicle Sub Type
+                                </label>
                               </div>
-                            </div>
-                          </div>
-                          <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
-                            <div>
-                              <label
-                                htmlFor="carryingCapacityInPersons"
-                                className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
-                              >
-                                Carrying Capacity (In Persons)
-                              </label>
-                            </div>
-                            <div className="sm:col-span-2">
-                              <Field
-                                type="text"
-                                name="carryingCapacityInPersons"
-                                placeholder="Enter Vehicle Carrying Capacity In Persons"
-                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                              />
-                              <div className="text-eRed text-sm italic mt-2">
-                                <ErrorMessage name="carryingCapacityInPersons" />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
-                            <div>
-                              <label
-                                htmlFor="vehicleStatus"
-                                className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
-                              >
-                                Vehicle Status
-                              </label>
-                            </div>
-                            <div className="sm:col-span-2">
-                              <Field
-                                as="select"
-                                name="vehicleStatus"
-                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                              >
-                                <option disabled value="">
-                                  Select Vehicle Status
-                                </option>
-                                {vehicleStatusOption.map((option: any) => (
-                                  <option
-                                    key={option.value}
-                                    value={option.value}
-                                  >
-                                    {option.label}
+                              <div className="sm:col-span-2">
+                                <Field
+                                  as="select"
+                                  name="vehicleSubType"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                >
+                                  <option disabled value="">
+                                    Select Vehicle Sub Type
                                   </option>
-                                ))}
-                              </Field>
-                              <div className="text-eRed text-sm italic mt-2">
-                                <ErrorMessage name="vehicleStatus" />
+                                  {vehicleSubTypeOptions.map((option: any) => (
+                                    <option
+                                      key={option.vehicleSubType}
+                                      value={option.vehicleSubType}
+                                    >
+                                      {option.vehicleSubType}
+                                    </option>
+                                  ))}
+                                </Field>
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="vehicleSubType" />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-2 sm:space-y-0 sm:px-3 sm:py-5">
+                              <div>
+                                <label
+                                  htmlFor="vehicleDetails"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Vehicle Detail
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  as="select"
+                                  name="vehicleDetails"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                >
+                                  <option disabled value="">
+                                    Select Vehicle Details
+                                  </option>
+                                  {vehicleDetailOptions.map((option: any) => (
+                                    <option
+                                      key={option.vehicleDetail}
+                                      value={option.vehicleDetail}
+                                    >
+                                      {option.vehicleDetail}
+                                    </option>
+                                  ))}
+                                </Field>
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="vehicleDetails" />
+                                </div>
                               </div>
                             </div>
                           </div>
-                          <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
-                            <div>
-                              <label
-                                htmlFor="mobileNumber"
-                                className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
-                              >
-                                Insured Mobile Number
-                              </label>
+                          <div className="space-x-1 grid grid-cols-3 gap-1">
+                            <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-2 sm:space-y-0 sm:px-3 sm:py-5">
+                              <div>
+                                <label
+                                  htmlFor="vehicleUsage"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Usage
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  as="select"
+                                  name="vehicleUsage"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                >
+                                  <option disabled value="">
+                                    Select Usage
+                                  </option>
+                                  {vehicleUsageOptions.map((option: any) => (
+                                    <option
+                                      key={option.vehicleUsage}
+                                      value={option.vehicleUsage}
+                                    >
+                                      {option.vehicleUsage}
+                                    </option>
+                                  ))}
+                                </Field>
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="vehicleUsage" />
+                                </div>
+                              </div>
                             </div>
-                            <div className="sm:col-span-2">
-                              <Field
-                                type="text"
-                                name="mobileNumber"
-                                placeholder="Enter Insured Mobile Number"
-                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                              />
-                              <div className="text-eRed text-sm italic mt-2">
-                                <ErrorMessage name="mobileNumber" />
+                            <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-2 sm:space-y-0 sm:px-3 sm:py-5">
+                              <div>
+                                <label
+                                  htmlFor="vehicleCategory"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Vehicle Category
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  as="select"
+                                  name="vehicleCategory"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                >
+                                  <option disabled value="">
+                                    Select Usage
+                                  </option>
+                                  {vehicleCategoryOptions.map((option: any) => (
+                                    <option
+                                      key={option.vehicleCategory}
+                                      value={option.vehicleCategory}
+                                    >
+                                      {option.vehicleCategory}
+                                    </option>
+                                  ))}
+                                </Field>
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="vehicleCategory" />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-2 sm:space-y-0 sm:px-3 sm:py-5">
+                              <div>
+                                <label
+                                  htmlFor="passengerNumber"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Passenger Number
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  type="number"
+                                  name="passengerNumber"
+                                  placeholder="Enter Passenger Number"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="passengerNumber" />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="space-x-1 grid grid-cols-3 gap-1">
+                            <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-2 sm:space-y-0 sm:px-3 sm:py-5">
+                              <div>
+                                <label
+                                  htmlFor="carryingCapacityInGoods"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Carrying Capacity In Goods
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  type="text"
+                                  name="carryingCapacityInGoods"
+                                  placeholder="Enter Carrying Capacity"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="carryingCapacityInGoods" />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-2 sm:space-y-0 sm:px-3 sm:py-5">
+                              <div>
+                                <label
+                                  htmlFor="purchasedYear"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Purchased Year
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  type="number"
+                                  name="purchasedYear"
+                                  placeholder="Enter Purchased Year"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="purchasedYear" />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-2 sm:space-y-0 sm:px-3 sm:py-5">
+                              <div>
+                                <label
+                                  htmlFor="dutyFreeValue"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Duty Free Value
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  type="number"
+                                  step="any"
+                                  name="dutyFreeValue"
+                                  placeholder="Enter Duty Free Value"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="dutyFreeValue" />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="space-x-1 grid grid-cols-3 gap-1">
+                            <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-2 sm:space-y-0 sm:px-3 sm:py-5">
+                              <div>
+                                <label
+                                  htmlFor="dutyPaidValue"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Duty Paid Value
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  type="number"
+                                  step="any"
+                                  name="dutyPaidValue"
+                                  placeholder="Enter Duty Paid Value"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="dutyPaidValue" />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-2 sm:space-y-0 sm:px-3 sm:py-5">
+                              <div>
+                                <label
+                                  htmlFor="vehicleStatus"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Vehicle Status
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  as="select"
+                                  name="vehicleStatus"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                >
+                                  <option disabled value="">
+                                    Select Vehicle Status
+                                  </option>
+                                  {vehicleStatusOptions.map((option: any) => (
+                                    <option
+                                      key={option.value}
+                                      value={option.value}
+                                    >
+                                      {option.label}
+                                    </option>
+                                  ))}
+                                </Field>
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="vehicleStatus" />
+                                </div>
                               </div>
                             </div>
                           </div>

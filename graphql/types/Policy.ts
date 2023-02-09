@@ -270,7 +270,6 @@ export const policyUpdateInput = inputObjectType({
   name: "policyUpdateInput",
   definition(t) {
     t.date("policyStartDate");
-    // t.date("policyExpireDate");
     t.string("policyIssuedConditions");
     t.string("personsEntitledToUse");
   },

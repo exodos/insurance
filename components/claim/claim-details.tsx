@@ -346,7 +346,7 @@ const ClaimDetails = ({ claim }) => {
                                   Premium Tarif
                                 </dt>
                                 <dd className="text-sm text-gray-900">
-                                  {claim?.certificates?.tariffs?.premiumTarif}
+                                  {claim?.certificates?.premiumTarif}
                                 </dd>
                               </div>
                             </div>

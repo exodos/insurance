@@ -10,6 +10,7 @@ import { gql, useLazyQuery } from "@apollo/client";
 import VehicleDetails from "./detail-vehicle";
 import DeleteVehicleModal from "./delete-vehicle";
 import EditBranchVehicleModal from "./branch-edit-vehicle";
+import EditVehicleModal from "./edit-vehicle";
 
 const VehicleByPlateNumber = gql`
   query VehicleByPlateNumber($plateNumber: String!) {
@@ -59,7 +60,13 @@ const VehicleByPlateNumber = gql`
   }
 `;
 
-const ListBranchVehicle = ({ vehicleData, regionCode, codeList, branchId }) => {
+const ListBranchVehicle = ({
+  vehicleData,
+  regionCode,
+  codeList,
+  branchId,
+  tariffData,
+}) => {
   const { data: session, status } = useSession();
   const [showEditModal, setShowEditModal] = useState(false);
   const [editList, setEditList] = useState(null);
@@ -197,6 +204,12 @@ const ListBranchVehicle = ({ vehicleData, regionCode, codeList, branchId }) => {
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
                         Usage
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      >
+                        Premium Tarif
                       </th>
                       <th
                         scope="col"
@@ -341,6 +354,9 @@ const ListBranchVehicle = ({ vehicleData, regionCode, codeList, branchId }) => {
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {item.vehicleUsage}
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            {item.premiumTarif}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {item.passengerNumber}
@@ -505,12 +521,13 @@ const ListBranchVehicle = ({ vehicleData, regionCode, codeList, branchId }) => {
         </div>
       </div>
       {showEditModal ? (
-        <EditBranchVehicleModal
+        <EditVehicleModal
           vehicle={editList}
           regionCode={regionCode}
           codeList={codeList}
           href={asPath}
-          branchId={branchId}
+          // branchData={branch}
+          tariffData={tariffData}
         />
       ) : null}
       {showDetailModal ? <VehicleDetails vehicle={detailList} /> : null}

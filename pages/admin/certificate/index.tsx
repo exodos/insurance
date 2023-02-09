@@ -11,6 +11,7 @@ import ListCertificate from "@/certificate/list-certificate";
 import AddCertificateModal from "@/certificate/add-certificate";
 import { useRouter } from "next/router";
 import SiteHeader from "@/components/layout/header";
+import Link from "next/link";
 
 const FeedCertificate = gql`
   query FeedCertificate(
@@ -29,6 +30,7 @@ const FeedCertificate = gql`
         id
         certificateNumber
         issuedDate
+        premiumTarif
         updatedAt
         policies {
           policyNumber
@@ -39,9 +41,6 @@ const FeedCertificate = gql`
         }
         vehicles {
           plateNumber
-        }
-        tariffs {
-          tariffCode
         }
       }
       totalCertificate
@@ -64,11 +63,8 @@ const AdminCertificatePage = ({
       data,
     }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
-  const [showAddModal, setShowAddModal] = useState(false);
+  const { pathname } = useRouter();
 
-  const handleAdd = () => {
-    setShowAddModal((prev) => !prev);
-  };
   return (
     <>
       <SiteHeader
@@ -89,16 +85,23 @@ const AdminCertificatePage = ({
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
                 {session.user.memberships.role === "SUPERADMIN" && (
-                  <button
-                    type="button"
-                    className="inline-flex items-center"
-                    onClick={() => handleAdd()}
+                  <Link
+                    href={{
+                      pathname: "/admin/certificate/add-certificate",
+                      query: {
+                        returnPage: pathname,
+                      },
+                    }}
+                    passHref
+                    legacyBehavior
                   >
-                    <BsPlusCircleFill
-                      className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
-                      aria-hidden="true"
-                    />
-                  </button>
+                    <button type="button" className="inline-flex items-center">
+                      <BsPlusCircleFill
+                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </Link>
                 )}
                 {session.user.memberships.role === "SUPERADMIN" && (
                   <button type="button" className="inline-flex items-center">
@@ -114,12 +117,12 @@ const AdminCertificatePage = ({
         </div>
         <ListCertificate certificateData={data.feedCertificate} />
       </div>
-      {showAddModal ? (
+      {/* {showAddModal ? (
         <AddCertificateModal
           regionCode={data.regionCode}
           codeList={data.plateCode}
         />
-      ) : null}
+      ) : null} */}
     </>
   );
 };

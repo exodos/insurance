@@ -17,6 +17,8 @@ const UpdateVehicle = gql`
     updateVehicle(id: $updateVehicleId, input: $input) {
       id
       plateNumber
+      engineNumber
+      chassisNumber
       vehicleModel
       bodyType
       horsePower
@@ -25,6 +27,8 @@ const UpdateVehicle = gql`
       vehicleSubType
       vehicleDetails
       vehicleUsage
+      vehicleCategory
+      premiumTarif
       passengerNumber
       carryingCapacityInGoods
       purchasedYear
@@ -40,16 +44,29 @@ const EditVehicleModal = ({
   regionCode,
   codeList,
   href,
-  branchData,
+  tariffData,
 }) => {
   const notificationCtx = useContext(NotificationContext);
   const [plateRegionOption, setPlateRegionOption] = useState(regionCode);
   const [plateCodeOption, setPlateCodeOption] = useState(codeList);
   const [open, setOpen] = useState<boolean>(true);
   const [formValues, setFormValues] = useState(null);
-  const [branchOptions, setBranchOptions] = useState(branchData);
 
-  console.log(branchData);
+  const [vehicleTypeOptions, setVehicleTypeOptions] = useState(
+    tariffData.tariffVehicleType
+  );
+  const [vehicleSubTypeOptions, setVehicleSubTypeOptions] = useState(
+    tariffData.tariffVehicleSubType
+  );
+  const [vehicleDetailOptions, setVehicleDetailOptions] = useState(
+    tariffData.tariffVehicleDetail
+  );
+  const [vehicleUsageOptions, setVehicleUsageOptions] = useState(
+    tariffData.tariffVehicleUsage
+  );
+  const [vehicleCategoryOptions, setVehicleCategoryOptions] = useState(
+    tariffData.tariffVehicleCategory
+  );
 
   const [updateVehicle] = useMutation(UpdateVehicle);
 
@@ -69,6 +86,7 @@ const EditVehicleModal = ({
     vehicleSubType: vehicle.vehicleSubType,
     vehicleDetails: vehicle.vehicleDetails,
     vehicleUsage: vehicle.vehicleUsage,
+    vehicleCategory: vehicle.vehicleCategory,
     passengerNumber: vehicle.passengerNumber,
     carryingCapacityInGoods: vehicle.carryingCapacityInGoods,
     purchasedYear: vehicle.purchasedYear,
@@ -95,15 +113,12 @@ const EditVehicleModal = ({
     vehicleSubType: Yup.string().required("Vehicle Sub Type Is Required"),
     vehicleDetails: Yup.string().required("Vehicle Detail Is Required"),
     vehicleUsage: Yup.string().required("Usage Is Required"),
+    vehicleCategory: Yup.string().required("Vehicle Category Is Required"),
     passengerNumber: Yup.string().required("Passenger Number Is Required"),
     purchasedYear: Yup.number().required("Purchased Year Is Required"),
     dutyFreeValue: Yup.number().required("Duty Free Value Is Required"),
     dutyPaidValue: Yup.string().required("Duty Paid Value Is Required"),
     vehicleStatus: Yup.string().required("Vehicle Status Is Required"),
-    // mobileNumber: Yup.string()
-    //   .matches(phoneRegExp, "Phone Number Is Not Valid")
-    //   .required("Insured Phone Number Is Required"),
-    // branchName: Yup.string().required("Branch Name Is Required"),
   });
 
   const vehicleStatusOptions = [
@@ -123,6 +138,7 @@ const EditVehicleModal = ({
       vehicleSubType: values.vehicleSubType,
       vehicleDetails: values.vehicleDetails,
       vehicleUsage: values.vehicleUsage,
+      vehicleCategory: values.vehicleCategory,
       passengerNumber: values.passengerNumber,
       carryingCapacityInGoods: values.carryingCapacityInGoods,
       purchasedYear: values.purchasedYear,
@@ -403,11 +419,19 @@ const EditVehicleModal = ({
                               </div>
                               <div className="sm:col-span-2">
                                 <Field
-                                  type="text"
+                                  as="select"
                                   name="vehicleType"
-                                  placeholder="Enter Vehicle Type"
                                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                />
+                                >
+                                  {vehicleTypeOptions.map((option: any) => (
+                                    <option
+                                      key={option.vehicleType}
+                                      value={option.vehicleType}
+                                    >
+                                      {option.vehicleType}
+                                    </option>
+                                  ))}
+                                </Field>
                                 <div className="text-eRed text-sm italic mt-2">
                                   <ErrorMessage name="vehicleType" />
                                 </div>
@@ -424,11 +448,19 @@ const EditVehicleModal = ({
                               </div>
                               <div className="sm:col-span-2">
                                 <Field
-                                  type="text"
+                                  as="select"
                                   name="vehicleSubType"
-                                  placeholder="Enter Vehicle Sub Type"
                                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                />
+                                >
+                                  {vehicleSubTypeOptions.map((option: any) => (
+                                    <option
+                                      key={option.vehicleSubType}
+                                      value={option.vehicleSubType}
+                                    >
+                                      {option.vehicleSubType}
+                                    </option>
+                                  ))}
+                                </Field>
                                 <div className="text-eRed text-sm italic mt-2">
                                   <ErrorMessage name="vehicleSubType" />
                                 </div>
@@ -447,11 +479,19 @@ const EditVehicleModal = ({
                               </div>
                               <div className="sm:col-span-2">
                                 <Field
-                                  type="text"
+                                  as="select"
                                   name="vehicleDetails"
-                                  placeholder="Enter Vehicle Detail"
                                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                />
+                                >
+                                  {vehicleDetailOptions.map((option: any) => (
+                                    <option
+                                      key={option.vehicleDetail}
+                                      value={option.vehicleDetail}
+                                    >
+                                      {option.vehicleDetail}
+                                    </option>
+                                  ))}
+                                </Field>
                                 <div className="text-eRed text-sm italic mt-2">
                                   <ErrorMessage name="vehicleDetails" />
                                 </div>
@@ -468,16 +508,55 @@ const EditVehicleModal = ({
                               </div>
                               <div className="sm:col-span-2">
                                 <Field
-                                  type="text"
+                                  as="select"
                                   name="vehicleUsage"
-                                  placeholder="Enter Vehicle Usage"
                                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                />
+                                >
+                                  {vehicleUsageOptions.map((option: any) => (
+                                    <option
+                                      key={option.vehicleUsage}
+                                      value={option.vehicleUsage}
+                                    >
+                                      {option.vehicleUsage}
+                                    </option>
+                                  ))}
+                                </Field>
                                 <div className="text-eRed text-sm italic mt-2">
                                   <ErrorMessage name="vehicleUsage" />
                                 </div>
                               </div>
                             </div>
+                            <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-1 sm:space-y-0 sm:px-3 sm:py-5">
+                              <div>
+                                <label
+                                  htmlFor="vehicleCategory"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Vehicle Category
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  as="select"
+                                  name="vehicleCategory"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                >
+                                  {vehicleCategoryOptions.map((option: any) => (
+                                    <option
+                                      key={option.vehicleCategory}
+                                      value={option.vehicleCategory}
+                                    >
+                                      {option.vehicleCategory}
+                                    </option>
+                                  ))}
+                                </Field>
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="vehicleCategory" />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="space-x-1 grid grid-cols-3 gap-1">
                             <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-1 sm:space-y-0 sm:px-3 sm:py-5">
                               <div>
                                 <label
@@ -489,7 +568,7 @@ const EditVehicleModal = ({
                               </div>
                               <div className="sm:col-span-2">
                                 <Field
-                                  type="text"
+                                  type="number"
                                   name="passengerNumber"
                                   placeholder="Enter Number Of Passenger"
                                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
@@ -499,8 +578,6 @@ const EditVehicleModal = ({
                                 </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="space-x-1 grid grid-cols-3 gap-1">
                             <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-1 sm:space-y-0 sm:px-6 sm:py-5">
                               <div>
                                 <label
@@ -543,6 +620,8 @@ const EditVehicleModal = ({
                                 </div>
                               </div>
                             </div>
+                          </div>
+                          <div className="space-x-1 grid grid-cols-3 gap-1">
                             <div className="space-y-1 px-3 sm:grid sm:grid-cols-3 sm:gap-1 sm:space-y-0 sm:px-3 sm:py-5">
                               <div>
                                 <label
@@ -565,8 +644,6 @@ const EditVehicleModal = ({
                                 </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="space-x-1 grid grid-cols-2 gap-1">
                             <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-1 sm:space-y-0 sm:px-6 sm:py-5">
                               <div>
                                 <label
@@ -618,55 +695,6 @@ const EditVehicleModal = ({
                               </div>
                             </div>
                           </div>
-                          {/* <div className="space-x-1 grid grid-cols-2 gap-1">
-                            <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-1 sm:space-y-0 sm:px-6 sm:py-5">
-                              <div>
-                                <label
-                                  htmlFor="mobileNumber"
-                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
-                                >
-                                  Insurer Mobile Number
-                                </label>
-                              </div>
-                              <div className="sm:col-span-2">
-                                <Field
-                                  type="text"
-                                  name="mobileNumber"
-                                  placeholder="Enter Insurer Mobile Number"
-                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                />
-                                <div className="text-eRed text-sm italic mt-2">
-                                  <ErrorMessage name="mobileNumber" />
-                                </div>
-                              </div>
-                            </div>
-                            <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-1 sm:space-y-0 sm:px-6 sm:py-5">
-                              <div>
-                                <label
-                                  htmlFor="branchName"
-                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
-                                >
-                                  Branch
-                                </label>
-                              </div>
-                              <div className="sm:col-span-2">
-                                <Field
-                                  as="select"
-                                  name="branchName"
-                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                >
-                                  {branchOptions.map((option: any) => (
-                                    <option key={option.id} value={option.uid}>
-                                      {option.branchName}
-                                    </option>
-                                  ))}
-                                </Field>
-                                <div className="text-eRed text-sm italic mt-2">
-                                  <ErrorMessage name="branchName" />
-                                </div>
-                              </div>
-                            </div>
-                          </div> */}
                         </div>
                       </div>
                       <div className="flex-shrink-0 border-t border-gray-200 px-4 py-5 sm:px-6">

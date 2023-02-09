@@ -15,8 +15,6 @@ const ListTariff = ({ tariffData }) => {
   const [editList, setEditList] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteList, setDeleteList] = useState([]);
-  const [showRestModal, setShowRestModal] = useState(false);
-  const [resetList, setResetList] = useState([]);
 
   const router = useRouter();
   const { asPath } = useRouter();
@@ -39,11 +37,6 @@ const ListTariff = ({ tariffData }) => {
   const handleDelete = (Delete: any) => {
     setShowDeleteModal((prev) => !prev);
     setDeleteList(Delete);
-  };
-
-  const handleReset = (Reset: any) => {
-    setShowRestModal((prev) => !prev);
-    setResetList(Reset);
   };
 
   return (
@@ -85,6 +78,12 @@ const ListTariff = ({ tariffData }) => {
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
                         Usage
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      >
+                        Vehicle Category
                       </th>
                       <th
                         scope="col"
@@ -138,8 +137,11 @@ const ListTariff = ({ tariffData }) => {
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {item.vehicleDetail}
                           </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <td className="whitespace-normal px-3 py-4 text-sm text-gray-500">
                             {item.vehicleUsage}
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            {item.vehicleCategory}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {item.premiumTarif}

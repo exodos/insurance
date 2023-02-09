@@ -1,14 +1,15 @@
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { SessionProvider, useSession } from "next-auth/react";
+import { getServerSession } from "next-auth";
+import { useSession } from "next-auth/react";
 import { gql } from "@apollo/client";
 import { BsPlusCircleFill, BsFillArrowUpCircleFill } from "react-icons/bs";
 import { useState } from "react";
 import ListUser from "@/users/list-user";
+import AddUserModalByBranch from "@/users/branch-add-user";
 import { useRouter } from "next/router";
 import SiteHeader from "@/components/layout/header";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { initializeApollo } from "@/lib/apollo";
+import { authOptions } from "@/pages/api/auth/[...nextauth]";
 
 const FeedUserBranch = gql`
   query FeedUserBranch(
@@ -17,7 +18,6 @@ const FeedUserBranch = gql`
     $skip: Int
     $take: Int
     $orderBy: [UserOrderByInput!]
-    $input: orgRoleDescInput!
   ) {
     feedUserBranch(
       branchId: $branchId
@@ -50,27 +50,24 @@ const FeedUserBranch = gql`
       totalUser
       maxPage
     }
-    feedRoleByOrgDesc(input: $input) {
-      membership {
-        id
-        role
-      }
+    branchRoleList {
+      id
+      role
     }
   }
 `;
 
-const UserPage = ({
-  data,
-  branchId,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+const POliceBranchUserPage = ({
+      data,
+      branchId,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
-  // const [showAddModal, setShowAddModal] = useState(false);
-
+  const [showAddModal, setShowAddModal] = useState(false);
   const { asPath } = useRouter();
 
-  // const handleAdd = () => {
-  //   setShowAddModal((prev) => !prev);
-  // };
+  const handleAdd = () => {
+    setShowAddModal((prev) => !prev);
+  };
   return (
     <>
       <SiteHeader
@@ -86,9 +83,9 @@ const UserPage = ({
                 List Of All Users Of The Branch
               </p>
             </div>
-            {/* {session?.user && (
+            {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
-                {session.user.memberships.role === "TRAFFICPOLICEMEMBER" && (
+                {session.user.memberships.role === "MEMBER" && (
                   <button
                     type="button"
                     className="inline-flex items-center"
@@ -100,7 +97,7 @@ const UserPage = ({
                     />
                   </button>
                 )}
-                {session.user.memberships.role === "TRAFFICPOLICEMEMBER" && (
+                {session.user.memberships.role === "INSURER" && (
                   <button type="button" className="inline-flex items-center">
                     <BsFillArrowUpCircleFill
                       className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
@@ -109,21 +106,21 @@ const UserPage = ({
                   </button>
                 )}
               </div>
-            )} */}
+            )}
           </div>
         </div>
         <ListUser
           userData={data.feedUserBranch}
-          roleList={data.feedRoleByOrgDesc.membership}
+          roleList={data.branchRoleList}
         />
       </div>
-      {/* {showAddModal ? (
+      {showAddModal ? (
         <AddUserModalByBranch
           branchId={branchId}
-          roleList={data.feedRoleByOrgDesc.membership}
+          roleList={data.branchRoleList}
           href={asPath}
         />
-      ) : null} */}
+      ) : null}
     </>
   );
 };
@@ -154,14 +151,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const apolloClient = initializeApollo();
 
   const branchId = session.user.memberships.branchId;
-  console.log(branchId);
+  // console.log(branchId);
 
   const { data } = await apolloClient.query({
     query: FeedUserBranch,
     variables: {
-      input: {
-        description: "TRAFFICPOLICE",
-      },
       branchId: branchId,
       filter: filter,
       skip: skip,
@@ -183,4 +177,4 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   };
 };
 
-export default UserPage;
+export default POliceBranchUserPage;

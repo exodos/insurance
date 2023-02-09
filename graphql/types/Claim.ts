@@ -26,8 +26,8 @@ export const Claim = objectType({
     t.float("damageEstimate");
     t.date("claimedAt");
     t.date("updatedAt");
-    t.boolean("deleted");
-    t.nullable.date("deletedTime");
+    // t.boolean("deleted");
+    // t.nullable.date("deletedTime");
     t.field("insuredPoliceReports", {
       type: "InsuredPoliceReport",
       async resolve(_parent, _args, ctx) {
@@ -95,10 +95,12 @@ export const ClaimPagination = extendType({
       async resolve(parent, args, ctx) {
         const where = args.filter
           ? {
-              deleted: false,
+              // deleted: false,
               claimNumber: args.filter,
             }
-          : { deleted: false };
+          : {
+              // deleted: false
+            };
 
         const claim = await ctx.prisma.claim.findMany({
           where,
@@ -139,11 +141,14 @@ export const ClaimBranchPagination = extendType({
       async resolve(parent, args, ctx) {
         const where = args.filter
           ? {
-              deleted: false,
+              // deleted: false,
               branchId: args.branchId,
               claimNumber: args.filter,
             }
-          : { deleted: false, branchId: args.branchId };
+          : {
+              //  deleted: false,
+              branchId: args.branchId,
+            };
 
         const claim = await ctx.prisma.claim.findMany({
           where,
@@ -184,14 +189,14 @@ export const ClaimInsurerPagination = extendType({
       async resolve(parent, args, ctx) {
         const where = args.filter
           ? {
-              deleted: false,
+              // deleted: false,
               branchs: {
                 orgId: args.orgId,
               },
               claimNumber: args.filter,
             }
           : {
-              deleted: false,
+              // deleted: false,
               branchs: {
                 orgId: args.orgId,
               },
@@ -236,7 +241,7 @@ export const ClaimPolicePagination = extendType({
       async resolve(parent, args, ctx) {
         const where = args.filter
           ? {
-              deleted: false,
+              // deleted: false,
               insuredPoliceReports: {
                 policeBranch: {
                   id: args.branchId,
@@ -245,7 +250,7 @@ export const ClaimPolicePagination = extendType({
               claimNumber: args.filter,
             }
           : {
-              deleted: false,
+              // deleted: false,
               insuredPoliceReports: {
                 policeBranch: {
                   id: args.branchId,
@@ -287,7 +292,7 @@ export const claimByIDQuery = extendType({
         return ctx.prisma.claim.findFirst({
           where: {
             id: args.id,
-            deleted: false,
+            // deleted: false,
           },
         });
       },
@@ -305,7 +310,7 @@ export const claimByClaimNumberQuery = extendType({
         return ctx.prisma.claim.findFirst({
           where: {
             claimNumber: args.claimNumber,
-            deleted: false,
+            // deleted: false,
           },
         });
       },
@@ -435,13 +440,9 @@ export const deleteClaimMutation = extendType({
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
-        return await ctx.prisma.claim.update({
+        return await ctx.prisma.claim.delete({
           where: {
             id: args.id,
-          },
-          data: {
-            deleted: true,
-            deletedTime: new Date(),
           },
         });
       },

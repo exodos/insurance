@@ -21,12 +21,23 @@ const VehicleByPlateNumber = gql`
       vehicleModel
       bodyType
       horsePower
+      manufacturedYear
       vehicleType
       vehicleSubType
       vehicleDetails
       vehicleUsage
+      vehicleCategory
+      premiumTarif
+      passengerNumber
+      carryingCapacityInGoods
+      purchasedYear
+      dutyFreeValue
+      dutyPaidValue
       vehicleStatus
+      status
       isInsured
+      createdAt
+      updatedAt
       insureds {
         id
         firstName
@@ -45,6 +56,7 @@ const VehicleByPlateNumber = gql`
       certificates {
         id
         certificateNumber
+        premiumTarif
         issuedDate
         policies {
           id
@@ -59,7 +71,13 @@ const VehicleByPlateNumber = gql`
   }
 `;
 
-const ListVehicle = ({ vehicleData, regionCode, codeList, branch }) => {
+const ListVehicle = ({
+  vehicleData,
+  regionCode,
+  codeList,
+  branch,
+  tariffData,
+}) => {
   const { data: session, status } = useSession();
   const [showEditModal, setShowEditModal] = useState(false);
   const [editList, setEditList] = useState(null);
@@ -67,6 +85,8 @@ const ListVehicle = ({ vehicleData, regionCode, codeList, branch }) => {
   const [detailList, setDetailtList] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteList, setDeleteList] = useState([]);
+
+  console.log(tariffData);
 
   const router = useRouter();
   const { asPath } = useRouter();
@@ -197,6 +217,12 @@ const ListVehicle = ({ vehicleData, regionCode, codeList, branch }) => {
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
                         Usage
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      >
+                        Premium Tarif
                       </th>
                       <th
                         scope="col"
@@ -341,6 +367,9 @@ const ListVehicle = ({ vehicleData, regionCode, codeList, branch }) => {
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {item.vehicleUsage}
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            {item.premiumTarif}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {item.passengerNumber}
@@ -510,7 +539,8 @@ const ListVehicle = ({ vehicleData, regionCode, codeList, branch }) => {
           regionCode={regionCode}
           codeList={codeList}
           href={asPath}
-          branchData={branch}
+          // branchData={branch}
+          tariffData={tariffData}
         />
       ) : null}
       {showDetailModal ? <VehicleDetails vehicle={detailList} /> : null}

@@ -251,6 +251,49 @@ export const insuredByMobileNumberQuery = extendType({
   },
 });
 
+export const insuredBranchByMobileNumberQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.field("insuredBranchByMobileNumber", {
+      type: Insured,
+      args: {
+        mobileNumber: nonNull(stringArg()),
+        branchId: nonNull(stringArg()),
+      },
+      resolve(_parent, args, ctx) {
+        return ctx.prisma.insured.findFirst({
+          where: {
+            mobileNumber: args.mobileNumber,
+            branchId: args.branchId,
+          },
+        });
+      },
+    });
+  },
+});
+export const insuredInsurerByMobileNumberQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.field("insuredInsurerByMobileNumber", {
+      type: Insured,
+      args: {
+        mobileNumber: nonNull(stringArg()),
+        orgId: nonNull(stringArg()),
+      },
+      resolve(_parent, args, ctx) {
+        return ctx.prisma.insured.findFirst({
+          where: {
+            mobileNumber: args.mobileNumber,
+            branchs: {
+              orgId: args.orgId,
+            },
+          },
+        });
+      },
+    });
+  },
+});
+
 export const createInsuredMutation = extendType({
   type: "Mutation",
   definition(t) {
@@ -268,7 +311,12 @@ export const createInsuredMutation = extendType({
             memberships: true,
           },
         });
-        if (!user || user.memberships.role !== "SUPERADMIN") {
+        if (
+          !user ||
+          (user.memberships.role !== "SUPERADMIN" &&
+            user.memberships.role !== "INSURER" &&
+            user.memberships.role !== "MEMBER")
+        ) {
           throw new Error(`You do not have permission to perform action`);
         }
         return await ctx.prisma.insured.create({

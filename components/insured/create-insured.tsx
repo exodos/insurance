@@ -13,7 +13,9 @@ const CreateInsured = gql`
   mutation CreateInsured($input: InsuredCreateInput!) {
     createInsured(input: $input) {
       id
-      insuredName
+      firstName
+      lastName
+      occupation
       region
       city
       subCity
@@ -23,14 +25,11 @@ const CreateInsured = gql`
       mobileNumber
       createdAt
       updatedAt
-      branchs {
-        id
-      }
     }
   }
 `;
 
-const AddInsuredModal = ({ branchData }) => {
+const AddInsuredModal = ({ branchData, href }) => {
   const notificationCtx = useContext(NotificationContext);
   const [open, setOpen] = useState<boolean>(true);
   const [branchOption, setBranchOption] = useState(branchData);
@@ -42,6 +41,7 @@ const AddInsuredModal = ({ branchData }) => {
   const initialValues = {
     firstName: "",
     lastName: "",
+    occupation: "",
     region: "",
     city: "",
     subCity: "",
@@ -73,7 +73,9 @@ const AddInsuredModal = ({ branchData }) => {
     // const vehicleId = eligible.vehicleId;
 
     const input = {
-      insuredName: values.insuredName,
+      firstName: values.firstName,
+      lastName: values.lastName,
+      occupation: values.occupation,
       region: values.region,
       city: values.city,
       subCity: values.subCity,
@@ -116,7 +118,7 @@ const AddInsuredModal = ({ branchData }) => {
           },
         });
       },
-    }).then(() => router.push("/admin/insured"));
+    }).then(() => router.push(href));
   };
 
   return (
@@ -218,6 +220,28 @@ const AddInsuredModal = ({ branchData }) => {
                             <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
                               <div>
                                 <label
+                                  htmlFor="occupation"
+                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                                >
+                                  Occupation
+                                </label>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Field
+                                  type="text"
+                                  name="occupation"
+                                  id="occupation"
+                                  placeholder="Enter Occupation"
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                                <div className="text-eRed text-sm italic mt-2">
+                                  <ErrorMessage name="occupation" />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
+                              <div>
+                                <label
                                   htmlFor="region"
                                   className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
                                 >
@@ -237,6 +261,8 @@ const AddInsuredModal = ({ branchData }) => {
                                 </div>
                               </div>
                             </div>
+                          </div>
+                          <div className="space-x-1 grid grid-cols-2 gap-1">
                             <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
                               <div>
                                 <label
@@ -258,8 +284,6 @@ const AddInsuredModal = ({ branchData }) => {
                                 </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="space-x-1 grid grid-cols-2 gap-1">
                             <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
                               <div>
                                 <label
@@ -281,6 +305,8 @@ const AddInsuredModal = ({ branchData }) => {
                                 </div>
                               </div>
                             </div>
+                          </div>
+                          <div className="space-x-1 grid grid-cols-2 gap-1">
                             <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
                               <div>
                                 <label
@@ -302,8 +328,6 @@ const AddInsuredModal = ({ branchData }) => {
                                 </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="space-x-1 grid grid-cols-2 gap-1">
                             <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
                               <div>
                                 <label
@@ -325,6 +349,8 @@ const AddInsuredModal = ({ branchData }) => {
                                 </div>
                               </div>
                             </div>
+                          </div>
+                          <div className="space-x-1 grid grid-cols-2 gap-1">
                             <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
                               <div>
                                 <label
@@ -346,9 +372,6 @@ const AddInsuredModal = ({ branchData }) => {
                                 </div>
                               </div>
                             </div>
-                          </div>
-
-                          <div className="space-x-1 grid grid-cols-2 gap-1">
                             <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
                               <div>
                                 <label

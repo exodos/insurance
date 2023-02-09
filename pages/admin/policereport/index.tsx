@@ -47,7 +47,7 @@ const FeedInsuredPoliceReport = gql`
           plateNumber
           insureds {
             id
-            insuredName
+            firstName
             mobileNumber
           }
         }
@@ -60,7 +60,7 @@ const FeedInsuredPoliceReport = gql`
           plateNumber
           insureds {
             id
-            insuredName
+            firstName
             mobileNumber
           }
         }
@@ -83,8 +83,8 @@ const FeedInsuredPoliceReport = gql`
 `;
 
 const AdminInsuredPoliceReport = ({
-  data,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const { asPath } = useRouter();
 

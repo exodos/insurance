@@ -35,7 +35,7 @@ const FeedClaimInsurer = gql`
         }
         insureds {
           id
-          insuredName
+          firstName
           mobileNumber
         }
         vehicles {
@@ -59,8 +59,8 @@ const FeedClaimInsurer = gql`
 `;
 
 const InsurerClaimPage = ({
-  data,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
 
   const { asPath } = useRouter();

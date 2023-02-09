@@ -39,7 +39,7 @@ const ClaimByClaimNumber = gql`
       }
       insureds {
         id
-        insuredName
+        firstName
         region
         city
         mobileNumber
@@ -61,6 +61,7 @@ const ClaimByClaimNumber = gql`
         id
         certificateNumber
         issuedDate
+        premiumTarif
         policies {
           id
           policyNumber
@@ -68,11 +69,6 @@ const ClaimByClaimNumber = gql`
           policyExpireDate
           policyIssuedConditions
           personsEntitledToUse
-        }
-        tariffs {
-          id
-          tariffCode
-          premiumTarif
         }
       }
     }

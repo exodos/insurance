@@ -177,10 +177,10 @@ const ListUser = ({ userData, roleList }) => {
                             {item.mobileNumber}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {item.memberships.role}
+                            {item?.memberships?.role}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {item.memberships.branchs.branchName}
+                            {item?.memberships?.branchs.branchName}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {format(new Date(item.createdAt), "MMM-dd-yyyy")}

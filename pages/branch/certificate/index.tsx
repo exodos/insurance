@@ -1,16 +1,15 @@
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { getServerSession, unstable_getServerSession } from "next-auth";
-import { SessionProvider, useSession } from "next-auth/react";
+import { getServerSession } from "next-auth";
+import { useSession } from "next-auth/react";
 import Head from "next/head";
 import { initializeApollo } from "../../../lib/apollo";
 import { gql } from "@apollo/client";
 import { authOptions } from "../../api/auth/[...nextauth]";
 import { BsPlusCircleFill, BsFillArrowUpCircleFill } from "react-icons/bs";
-import { useState } from "react";
 import ListCertificate from "@/certificate/list-certificate";
-import BranchAddCertificateModal from "@/certificate/branch-add-certificate";
 import { useRouter } from "next/router";
 import SiteHeader from "@/components/layout/header";
+import Link from "next/link";
 
 const FeedCertificateBranch = gql`
   query FeedCertificateBranch(
@@ -31,6 +30,7 @@ const FeedCertificateBranch = gql`
         id
         certificateNumber
         issuedDate
+        premiumTarif
         updatedAt
         policies {
           id
@@ -45,10 +45,6 @@ const FeedCertificateBranch = gql`
         vehicles {
           id
           plateNumber
-        }
-        tariffs {
-          id
-          premiumTarif
         }
       }
       totalCertificate
@@ -66,15 +62,11 @@ const FeedCertificateBranch = gql`
 `;
 
 const BranchCertificate = ({
-      data,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  data,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
-  const [showAddModal, setShowAddModal] = useState(false);
   const { pathname } = useRouter();
 
-  const handleAdd = () => {
-    setShowAddModal((prev) => !prev);
-  };
   return (
     <>
       <SiteHeader
@@ -95,16 +87,23 @@ const BranchCertificate = ({
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
                 {session.user.memberships.role === "MEMBER" && (
-                  <button
-                    type="button"
-                    className="inline-flex items-center"
-                    onClick={() => handleAdd()}
+                  <Link
+                    href={{
+                      pathname: "/branch/certificate/branch-add-certificate",
+                      query: {
+                        returnPage: pathname,
+                      },
+                    }}
+                    passHref
+                    legacyBehavior
                   >
-                    <BsPlusCircleFill
-                      className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
-                      aria-hidden="true"
-                    />
-                  </button>
+                    <button type="button" className="inline-flex items-center">
+                      <BsPlusCircleFill
+                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </Link>
                 )}
                 {session.user.memberships.role === "MEMBER" && (
                   <button type="button" className="inline-flex items-center">
@@ -120,13 +119,6 @@ const BranchCertificate = ({
         </div>
         <ListCertificate certificateData={data.feedCertificateBranch} />
       </div>
-      {showAddModal ? (
-        <BranchAddCertificateModal
-          regionCode={data.regionCode}
-          codeList={data.plateCode}
-          href={pathname}
-        />
-      ) : null}
     </>
   );
 };

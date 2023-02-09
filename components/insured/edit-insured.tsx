@@ -16,7 +16,9 @@ const UpdateInsured = gql`
   ) {
     updateInsured(id: $updateInsuredId, input: $input) {
       id
-      insuredName
+      firstName
+      lastName
+      occupation
       region
       city
       subCity
@@ -39,6 +41,7 @@ const AdminInsuredEdit = ({ insured, href }) => {
   const initialValues = {
     firstName: insured.firstName,
     lastName: insured.lastName,
+    occupation: insured.occupation,
     region: insured.region,
     city: insured.city,
     subCity: insured.subCity,
@@ -67,7 +70,9 @@ const AdminInsuredEdit = ({ insured, href }) => {
 
   const onSubmit = async (values: any) => {
     const input = {
-      insuredName: values.insuredName,
+      firstName: values.firstName,
+      lastName: values.lastName,
+      occupation: values.occupation,
       region: values.region,
       city: values.city,
       subCity: values.subCity,

@@ -23,9 +23,6 @@ const UpdateCertificate = gql`
         policyIssuedConditions
         personsEntitledToUse
       }
-      tariffs {
-        tariffCode
-      }
     }
   }
 `;
@@ -44,7 +41,6 @@ const EditCertificateModal = ({ certificate, href }) => {
     policyStartDate: certificate.policies.policyStartDate,
     policyIssuedConditions: certificate.policies.policyIssuedConditions,
     personsEntitledToUse: certificate.policies.personsEntitledToUse,
-    tariffCode: certificate.tariffs.tariffCode,
   };
 
   const validate = Yup.object().shape({
@@ -55,7 +51,6 @@ const EditCertificateModal = ({ certificate, href }) => {
     personsEntitledToUse: Yup.string().required(
       "Persons Entitled To Use/Drive Is Required"
     ),
-    tariffCode: Yup.string().required("Tariff Code Is Required"),
   });
   const [formValues, setFormValues] = useState(null);
 
@@ -67,9 +62,6 @@ const EditCertificateModal = ({ certificate, href }) => {
         policyStartDate: new Date(values.policyStartDate),
         policyIssuedConditions: values.policyIssuedConditions,
         personsEntitledToUse: values.personsEntitledToUse,
-      },
-      tariffs: {
-        tariffCode: values.tariffCode,
       },
     };
 
@@ -182,26 +174,6 @@ const EditCertificateModal = ({ certificate, href }) => {
                               </div>
                             </div>
                           </div>
-                          {/* <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
-                            <div>
-                              <label
-                                htmlFor="policyExpireDate"
-                                className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
-                              >
-                                Policy Expire Date
-                              </label>
-                            </div>
-                            <div className="sm:col-span-2">
-                              <Field
-                                type="date"
-                                name="policyExpireDate"
-                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                              />
-                              <div className="text-eRed text-sm italic mt-2">
-                                <ErrorMessage name="policyExpireDate" />
-                              </div>
-                            </div>
-                          </div> */}
                           <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
                             <div>
                               <label
@@ -241,27 +213,6 @@ const EditCertificateModal = ({ certificate, href }) => {
                               />
                               <div className="text-eRed text-sm italic mt-2">
                                 <ErrorMessage name="personsEntitledToUse" />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
-                            <div>
-                              <label
-                                htmlFor="tariffCode"
-                                className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
-                              >
-                                Tariff Code
-                              </label>
-                            </div>
-                            <div className="sm:col-span-2">
-                              <Field
-                                type="text"
-                                name="tariffCode"
-                                placeholder="Enter Tariff Code"
-                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                              />
-                              <div className="text-eRed text-sm italic mt-2">
-                                <ErrorMessage name="tariffCode" />
                               </div>
                             </div>
                           </div>

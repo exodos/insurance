@@ -11,7 +11,7 @@ import {
   stringArg,
 } from "nexus";
 import { UserOrderByInput } from "./User";
-import { OrgDesc, organizationConnectInput } from "./Organization";
+import { OrgDesc } from "./Organization";
 import { branchConnectInput } from "./Branch";
 
 export const Membership = objectType({
@@ -183,6 +183,7 @@ export const MembershipRole = enumType({
   members: [
     "SUPERADMIN",
     "INSURER",
+    "BRANCHADMIN",
     "MEMBER",
     "USER",
     "TRAFFICPOLICEADMIN",

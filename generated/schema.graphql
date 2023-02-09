@@ -54,8 +54,6 @@ type Certificate {
   branchs: Branch
   certificateNumber: String
   claims: [Claim]
-  deleted: Boolean
-  deletedTime: DateTime
   id: String
   insureds: Insured
   issuedDate: DateTime
@@ -68,7 +66,6 @@ type Certificate {
 input CertificateCreateInput {
   branchs: branchConnectInput
   policies: policyCreateInput
-  premiumTarif: Float
 }
 
 input CertificateOrderByInput {
@@ -87,8 +84,6 @@ type Claim {
   claimNumber: String
   claimedAt: DateTime
   damageEstimate: Float
-  deleted: Boolean
-  deletedTime: DateTime
   id: String
   insuredPoliceReports: InsuredPoliceReport
   insureds: Insured
@@ -398,6 +393,14 @@ type FeedUnInsuredPoliceReportPolice {
   unInsuredPoliceReports: [UnInsuredPoliceReport!]!
 }
 
+type FeedUniqueTariff {
+  tariffVehicleCategory: [Tariff!]!
+  tariffVehicleDetail: [Tariff!]!
+  tariffVehicleSubType: [Tariff!]!
+  tariffVehicleType: [Tariff!]!
+  tariffVehicleUsage: [Tariff!]!
+}
+
 type FeedUser {
   maxPage: Int
   totalUser: Int!
@@ -583,6 +586,7 @@ type Membership {
 }
 
 enum MembershipRole {
+  BRANCHADMIN
   INSURER
   MEMBER
   SUPERADMIN
@@ -739,11 +743,12 @@ type Query {
   feedPolicy(filter: String, orderBy: [PolicyOrderByInput!], skip: Int, take: Int): FeedPolicy!
   feedRegionList: FeedRegionList!
   feedRoleByOrgDesc(input: orgRoleDescInput!): FeedRoleByOrgDesc
-  feedTariff(filter: String, skip: Int, take: Int): FeedTariff!
+  feedTariff(filter: String, orderBy: [TariffOrderByInput!], skip: Int, take: Int): FeedTariff!
   feedTariffDetal(filter: String, orderBy: [TariffDetalOrderByInput!], skip: Int, take: Int): FeedTariffDetal!
   feedThirdPartyLogs(filter: String, orderBy: [LogOrderByInput!], skip: Int, take: Int): FeedThirdPartyLogs!
   feedUnInsuredPoliceReport(filter: String, orderBy: [UnInsuredPoliceReportOrderByInput!], skip: Int, take: Int): FeedUnInsuredPoliceReport!
   feedUnInsuredPoliceReportPolice(branchId: String!, filter: String, orderBy: [UnInsuredPoliceReportOrderByInput!], skip: Int, take: Int): FeedUnInsuredPoliceReportPolice!
+  feedUniqueTariff: FeedUniqueTariff
   feedUser(filter: String, orderBy: [UserOrderByInput!], skip: Int, take: Int): FeedUser!
   feedUserBranch(branchId: String!, filter: String, orderBy: [UserOrderByInput!], skip: Int, take: Int): FeedUserBranch!
   feedUserInsurer(filter: String, orderBy: [UserOrderByInput!], orgId: String!, skip: Int, take: Int): FeedUserInsurer!
@@ -753,8 +758,10 @@ type Query {
   feedVictim(filter: String, orderBy: [PolicyOrderByInput!], skip: Int, take: Int): FeedVictim!
   hitAndRunByIncidentNumber(incidentNumber: String!): HitAndRunPoliceReport!
   incidentNumberToClaim(incidentNumber: String!): InsuredPoliceReport!
+  insuredBranchByMobileNumber(branchId: String!, mobileNumber: String!): Insured
   insuredByID(id: String!): Insured!
   insuredByMobileNumber(mobileNumber: String!): Insured
+  insuredInsurerByMobileNumber(mobileNumber: String!, orgId: String!): Insured
   insuredPoliceReportByIncidentNumber(incidentNumber: String!): InsuredPoliceReport!
   listAllBranch: [Branch]
   listAllOrganization: [Organization]
@@ -763,6 +770,7 @@ type Query {
   policeRoleList: [Membership!]!
   policyByID(id: String!): Policy!
   policyByPolicyNumber(policyNumber: String!): Policy!
+  premiumTariffVehicle(vehicleDetail: String!, vehicleSubType: String!, vehicleType: String!, vehicleUsage: String!): Tariff
   regionCode: [RegionList!]!
   roleList: [Membership!]!
   tariffByID(id: Int!): Tariff!
@@ -773,8 +781,10 @@ type Query {
   unInsuredPoliceReportByIncidentNumber(incidentNumber: String!): UnInsuredPoliceReport!
   userByEmail(email: String!): User!
   usersByID(userId: String!): User!
+  vehicleBranchByPlateNumber(branchId: String!, plateNumber: String!): Vehicle
   vehicleByID(id: String!): Vehicle!
   vehicleByPlateNumber(plateNumber: String!): Vehicle
+  vehicleInsurerByPlateNumber(orgId: String!, plateNumber: String!): Vehicle
   victimByID(id: String!): Victim!
 }
 
@@ -783,6 +793,12 @@ type RegionList {
   id: Int
   regionApp: String
   regionName: String
+}
+
+enum STATUS {
+  APPROVED
+  SUSPENDED
+  TRANSFERABLE
 }
 
 enum Sort {
@@ -795,6 +811,7 @@ type Tariff {
   id: Int
   premiumTarif: Float
   updatedAt: DateTime
+  vehicleCategory: VehicleCategory
   vehicleDetail: String
   vehicleSubType: String
   vehicleType: String
@@ -803,6 +820,7 @@ type Tariff {
 
 input TariffCreateInput {
   premiumTarif: Float
+  vehicleCategory: VehicleCategory
   vehicleDetail: String
   vehicleSubType: String
   vehicleType: String
@@ -832,6 +850,7 @@ input TariffOrderByInput {
 
 input TariffUpdateInput {
   premiumTarif: Float
+  vehicleCategory: VehicleCategory
   vehicleDetail: String
   vehicleSubType: String
   vehicleType: String
@@ -985,16 +1004,24 @@ type Vehicle {
   insureds: Insured
   isInsured: IsInsured
   manufacturedYear: Int
-  passengerNumber: String
+  passengerNumber: Int
   plateNumber: String
+  premiumTarif: Float
   purchasedYear: Int
+  status: STATUS
   updatedAt: DateTime
+  vehicleCategory: VehicleCategory
   vehicleDetails: String
   vehicleModel: String
   vehicleStatus: VehicleStatus
   vehicleSubType: String
   vehicleType: String
   vehicleUsage: String
+}
+
+enum VehicleCategory {
+  BUSINESSUSE
+  PRIVATEUSE
 }
 
 input VehicleOrderByInput {
@@ -1258,9 +1285,10 @@ input vehicleCreateInput {
   horsePower: String
   insureds: insuredConnectInput
   manufacturedYear: Int
-  passengerNumber: String
+  passengerNumber: Int
   plateNumber: String
   purchasedYear: Int
+  vehicleCategory: VehicleCategory
   vehicleDetails: String
   vehicleModel: String
   vehicleStatus: VehicleStatus
@@ -1280,9 +1308,10 @@ input vehicleUpdateInput {
   dutyPaidValue: Float
   horsePower: String
   manufacturedYear: Int
-  passengerNumber: String
+  passengerNumber: Int
   plateNumber: String
   purchasedYear: Int
+  vehicleCategory: VehicleCategory
   vehicleDetails: String
   vehicleModel: String
   vehicleStatus: VehicleStatus

@@ -11,7 +11,6 @@ import {
   objectType,
   stringArg,
 } from "nexus";
-import { PolicyOrderByInput } from "./Policy";
 import { Sort } from "./User";
 
 export const Tariff = objectType({
@@ -22,20 +21,10 @@ export const Tariff = objectType({
     t.string("vehicleSubType");
     t.string("vehicleDetail");
     t.string("vehicleUsage");
+    t.field("vehicleCategory", { type: VehicleCategory });
     t.float("premiumTarif");
     t.date("createdAt");
     t.date("updatedAt");
-
-    // t.nonNull.list.nonNull.field("certificates", {
-    //   type: "Certificate",
-    //   async resolve(_parent, _args, ctx) {
-    //     return await ctx.prisma.tariff
-    //       .findUnique({
-    //         where: { id: _parent.id },
-    //       })
-    //       .certificates();
-    //   },
-    // });
   },
 });
 
@@ -48,7 +37,7 @@ export const TariffPagination = extendType({
         filter: stringArg(),
         skip: intArg(),
         take: intArg(),
-        // orderBy: arg({ type: list(nonNull(TariffOrderByInput)) }),
+        orderBy: arg({ type: list(nonNull(TariffOrderByInput)) }),
       },
       async resolve(parent, args, ctx) {
         const where = args.filter
@@ -58,7 +47,7 @@ export const TariffPagination = extendType({
                 { vehicleSubType: args.filter },
                 { vehicleDetail: args.filter },
                 { vehiclUsage: args.filter },
-                // { premiumTarif: Number(args.filter) },
+                { premiumTarif: Number(args.filter) },
               ],
             }
           : {};
@@ -67,18 +56,18 @@ export const TariffPagination = extendType({
           where,
           skip: args?.skip as number | undefined,
           take: args?.take as number | undefined,
-          // orderBy: args?.orderBy as
-          //   | Prisma.Enumerable<Prisma.TariffOrderByWithRelationInput>
-          //   | undefined,
-          orderBy: {
-            id: "asc",
-          },
+          orderBy: args?.orderBy as
+            | Prisma.Enumerable<Prisma.TariffOrderByWithRelationInput>
+            | undefined,
+          // orderBy: {
+          //   id: "asc",
+          // },
         });
 
         const totalTariff = await ctx.prisma.tariff.count({
           where,
         });
-        const maxPage = Math.ceil(totalTariff / 20);
+        const maxPage = Math.ceil(totalTariff / 10);
 
         return {
           tariff,
@@ -100,6 +89,79 @@ export const tariffByIDQuery = extendType({
         return ctx.prisma.tariff.findUnique({
           where: {
             id: args.id,
+          },
+        });
+      },
+    });
+  },
+});
+
+export const FeedVehicleTypeQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nullable.field("feedUniqueTariff", {
+      type: FeedUniqueTariff,
+      resolve: async (_parent, _args, ctx) => {
+        const tariffVehicleType = await ctx.prisma.tariff.findMany({
+          distinct: ["vehicleType"],
+        });
+        const tariffVehicleSubType = await ctx.prisma.tariff.findMany({
+          distinct: ["vehicleSubType"],
+        });
+
+        const tariffVehicleDetail = await ctx.prisma.tariff.findMany({
+          distinct: ["vehicleDetail"],
+        });
+
+        const tariffVehicleUsage = await ctx.prisma.tariff.findMany({
+          distinct: ["vehicleUsage"],
+        });
+        const tariffVehicleCategory = await ctx.prisma.tariff.findMany({
+          distinct: ["vehicleCategory"],
+        });
+
+        return {
+          tariffVehicleType,
+          tariffVehicleSubType,
+          tariffVehicleDetail,
+          tariffVehicleUsage,
+          tariffVehicleCategory,
+        };
+      },
+    });
+  },
+});
+
+export const feedPremiumTariffVehicle = extendType({
+  type: "Query",
+  definition(t) {
+    t.field("premiumTariffVehicle", {
+      type: Tariff,
+      args: {
+        vehicleType: nonNull(stringArg()),
+        vehicleSubType: nonNull(stringArg()),
+        vehicleDetail: nonNull(stringArg()),
+        vehicleUsage: nonNull(stringArg()),
+      },
+      resolve(_parent, args, ctx) {
+        return ctx.prisma.tariff.findFirst({
+          where: {
+            vehicleType: {
+              equals: args.vehicleType,
+              mode: "insensitive",
+            },
+            vehicleSubType: {
+              equals: args.vehicleSubType,
+              mode: "insensitive",
+            },
+            vehicleDetail: {
+              equals: args.vehicleDetail,
+              mode: "insensitive",
+            },
+            vehicleUsage: {
+              equals: args.vehicleUsage,
+              mode: "insensitive",
+            },
           },
         });
       },
@@ -135,6 +197,7 @@ export const createTariffMutation = extendType({
             vehicleSubType: args.input.vehicleSubType,
             vehicleDetail: args.input.vehicleDetail,
             vehicleUsage: args.input.vehicleUsage,
+            vehicleCategory: args.input.vehicleCategory,
             premiumTarif: args.input.premiumTarif,
           },
         });
@@ -240,9 +303,20 @@ export const deleteTariffMutation = extendType({
 export const FeedTariff = objectType({
   name: "FeedTariff",
   definition(t) {
-    t.nonNull.list.nonNull.field("tariff", { type: Tariff }); // 1
-    t.nonNull.int("totalTariff"); // 2
+    t.nonNull.list.nonNull.field("tariff", { type: Tariff });
+    t.nonNull.int("totalTariff");
     t.int("maxPage");
+  },
+});
+
+export const FeedUniqueTariff = objectType({
+  name: "FeedUniqueTariff",
+  definition(t) {
+    t.nonNull.list.nonNull.field("tariffVehicleType", { type: Tariff });
+    t.nonNull.list.nonNull.field("tariffVehicleSubType", { type: Tariff });
+    t.nonNull.list.nonNull.field("tariffVehicleDetail", { type: Tariff });
+    t.nonNull.list.nonNull.field("tariffVehicleUsage", { type: Tariff });
+    t.nonNull.list.nonNull.field("tariffVehicleCategory", { type: Tariff });
   },
 });
 
@@ -253,6 +327,7 @@ export const tariffCreateInput = inputObjectType({
     t.string("vehicleSubType");
     t.string("vehicleDetail");
     t.string("vehicleUsage");
+    t.field("vehicleCategory", { type: VehicleCategory });
     t.float("premiumTarif");
     // t.field("thirdPartyLog", { type: thirdPartyLogCreateInput });
   },
@@ -265,6 +340,7 @@ export const tariffUpdateInput = inputObjectType({
     t.string("vehicleSubType");
     t.string("vehicleDetail");
     t.string("vehicleUsage");
+    t.field("vehicleCategory", { type: VehicleCategory });
     t.float("premiumTarif");
     // t.field("thirdPartyLog", { type: thirdPartyLogEditInput });
   },
@@ -283,4 +359,9 @@ export const TariffOrderByInput = inputObjectType({
     t.field("createdAt", { type: Sort });
     t.field("updatedAt", { type: Sort });
   },
+});
+
+export const VehicleCategory = enumType({
+  name: "VehicleCategory",
+  members: ["PRIVATEUSE", "BUSINESSUSE"],
 });

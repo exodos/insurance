@@ -17,8 +17,10 @@ const CertificateByCertificateNumber = gql`
       certificateNumber
       issuedDate
       id
+      premiumTarif
       insureds {
-        insuredName
+        firstName
+        lastName
         region
         city
         subCity
@@ -28,12 +30,17 @@ const CertificateByCertificateNumber = gql`
         mobileNumber
       }
       vehicles {
+        id
         plateNumber
         engineNumber
         chassisNumber
         vehicleType
+        premiumTarif
+        passengerNumber
         carryingCapacityInGoods
-        carryingCapacityInPersons
+        isInsured
+        createdAt
+        updatedAt
       }
       policies {
         policyNumber
@@ -47,10 +54,6 @@ const CertificateByCertificateNumber = gql`
         region
         city
         mobileNumber
-      }
-      tariffs {
-        tariffCode
-        premiumTarif
       }
     }
   }
@@ -174,6 +177,12 @@ const ListCertificate = ({ certificateData }) => {
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
+                        Premium Tarif
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      >
                         Updated At
                       </th>
                       {(session.user.memberships.role === "SUPERADMIN" ||
@@ -238,6 +247,9 @@ const ListCertificate = ({ certificateData }) => {
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {item?.vehicles?.plateNumber}
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            {item?.premiumTarif}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {format(new Date(item.updatedAt), "MMM-dd-yyyy")}

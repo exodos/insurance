@@ -508,7 +508,7 @@ export const createInsuredPoliceReportMutation = extendType({
                 damageEstimate: args.input.claims.damageEstimate,
                 insureds: {
                   connect: {
-                    mobileNumber: responsibleVehicle.insureds.mobileNumber,
+                    id: responsibleVehicle.insureds.id,
                   },
                 },
                 vehicles: {

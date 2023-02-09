@@ -205,7 +205,8 @@ const CertificateDetail = ({ certificate }) => {
                                     NAME OF INSURED
                                   </dt>
                                   <dd className="text-sm text-gray-900">
-                                    {certificate?.insureds?.insuredName}
+                                    {certificate?.insureds?.firstName} &nbsp;{" "}
+                                    {certificate?.insureds?.lastName}
                                   </dd>
                                 </div>
                                 <div className="grid-cols-1 sm:grid-cols-1 sm:mt-0">
@@ -318,10 +319,7 @@ const CertificateDetail = ({ certificate }) => {
                                     PERSONS
                                   </dt>
                                   <dd className="text-sm text-gray-900">
-                                    {
-                                      certificate?.vehicles
-                                        ?.carryingCapacityInPersons
-                                    }
+                                    {certificate?.vehicles?.passengerNumber}
                                   </dd>
                                 </div>
                               </div>
@@ -429,7 +427,7 @@ const CertificateDetail = ({ certificate }) => {
                                     Premium Tarif
                                   </dt>
                                   <dd className="text-sm text-gray-900">
-                                    {certificate?.tariffs?.premiumTarif}
+                                    {certificate?.premiumTarif}
                                   </dd>
                                 </div>
                               </div>

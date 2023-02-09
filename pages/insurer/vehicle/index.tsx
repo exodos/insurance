@@ -7,6 +7,8 @@ import { BsPlusCircleFill, BsFillArrowUpCircleFill } from "react-icons/bs";
 import ListVehicle from "@/vehicle/list-vehicles";
 import SiteHeader from "@/components/layout/header";
 import { getServerSession } from "next-auth";
+import { useRouter } from "next/router";
+import Link from "next/link";
 
 const FeedVehicleInsurer = gql`
   query FeedVehicleInsurer(
@@ -37,12 +39,15 @@ const FeedVehicleInsurer = gql`
         vehicleSubType
         vehicleDetails
         vehicleUsage
+        vehicleCategory
+        premiumTarif
         passengerNumber
         carryingCapacityInGoods
         purchasedYear
         dutyFreeValue
         dutyPaidValue
         vehicleStatus
+        status
         isInsured
         createdAt
         updatedAt
@@ -69,6 +74,23 @@ const FeedVehicleInsurer = gql`
       id
       regionApp
     }
+    feedUniqueTariff {
+      tariffVehicleType {
+        vehicleType
+      }
+      tariffVehicleSubType {
+        vehicleSubType
+      }
+      tariffVehicleDetail {
+        vehicleDetail
+      }
+      tariffVehicleUsage {
+        vehicleUsage
+      }
+      tariffVehicleCategory {
+        vehicleCategory
+      }
+    }
     feedBranchByOrg(orgId: $feedBranchByOrgOrgId2) {
       branchs {
         id
@@ -83,6 +105,8 @@ const InsurerVehiclePage = ({
       data,
     }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
+  const { pathname } = useRouter();
+
   // const [showAddModal, setShowAddModal] = useState(false);
 
   // const handleAdd = () => {
@@ -105,21 +129,26 @@ const InsurerVehiclePage = ({
             </div>
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
-                {/* {(session.user.memberships.role === "INSURER" ||
-                  session.user.memberships.role === "MEMBER") && (
-                  <button
-                    type="button"
-                    className="inline-flex items-center"
-                    onClick={() => handleAdd()}
+                {session.user.memberships.role === "INSURER" && (
+                  <Link
+                    href={{
+                      pathname: "/insurer/vehicle/insurer-add-vehicle",
+                      query: {
+                        returnPage: pathname,
+                      },
+                    }}
+                    passHref
+                    legacyBehavior
                   >
-                    <BsPlusCircleFill
-                      className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
-                      aria-hidden="true"
-                    />
-                  </button>
-                )} */}
-                {(session.user.memberships.role === "INSURER" ||
-                  session.user.memberships.role === "MEMBER") && (
+                    <button type="button" className="inline-flex items-center">
+                      <BsPlusCircleFill
+                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </Link>
+                )}
+                {session.user.memberships.role === "INSURER" && (
                   <button type="button" className="inline-flex items-center">
                     <BsFillArrowUpCircleFill
                       className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
@@ -136,15 +165,9 @@ const InsurerVehiclePage = ({
           regionCode={data.regionCode}
           codeList={data.plateCode}
           branch={data.feedBranchByOrg.branchs}
+          tariffData={data.feedUniqueTariff}
         />
       </div>
-      {/* {showAddModal ? (
-        <BranchAddVehicleModal
-          regionCode={data.regionCode}
-          codeList={data.plateCode}
-          branchId={branchId}
-        />
-      ) : null} */}
     </>
   );
 };

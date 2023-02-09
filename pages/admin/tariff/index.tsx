@@ -1,8 +1,4 @@
-import {
-  GetServerSideProps,
-  InferGetServerSidePropsType,
-  NextPage,
-} from "next";
+import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { getServerSession } from "next-auth";
 import { useSession } from "next-auth/react";
 import { initializeApollo } from "../../../lib/apollo";
@@ -10,22 +6,26 @@ import { gql } from "@apollo/client";
 import { authOptions } from "../../api/auth/[...nextauth]";
 import { BsPlusCircleFill, BsFillArrowUpCircleFill } from "react-icons/bs";
 import { useState } from "react";
-import ListUser from "@/users/list-user";
-import AddUserModal from "@/users/add-user";
 import { useRouter } from "next/router";
 import SiteHeader from "@/layout/header";
 import ListTariff from "@/components/tariff/list-tariff";
 import AddTariffModal from "@/components/tariff/add-tariff";
 
 const FeedTariff = gql`
-  query FeedTariff($filter: String, $skip: Int, $take: Int) {
-    feedTariff(filter: $filter, skip: $skip, take: $take) {
+  query FeedTariff(
+    $filter: String
+    $skip: Int
+    $take: Int
+    $orderBy: [TariffOrderByInput!]
+  ) {
+    feedTariff(filter: $filter, skip: $skip, take: $take, orderBy: $orderBy) {
       tariff {
         id
         vehicleType
         vehicleSubType
         vehicleDetail
         vehicleUsage
+        vehicleCategory
         premiumTarif
         createdAt
         updatedAt
@@ -120,7 +120,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const filter = query.search;
 
   const curPage: any = page;
-  const perPage = 20;
+  const perPage = 10;
 
   const take = perPage;
   const skip = (curPage - 1) * perPage;
@@ -133,6 +133,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       filter: filter,
       skip: skip,
       take: take,
+      orderBy: [
+        {
+          updatedAt: "desc",
+        },
+      ],
     },
   });
 

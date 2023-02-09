@@ -24,8 +24,8 @@ export const Certificate = objectType({
     t.float("premiumTarif");
     t.date("issuedDate");
     t.date("updatedAt");
-    t.boolean("deleted");
-    t.nullable.date("deletedTime");
+    // t.boolean("deleted");
+    // t.nullable.date("deletedTime");
     t.field("insureds", {
       type: "Insured",
       async resolve(_parent, _args, ctx) {
@@ -93,10 +93,12 @@ export const CertificatePagination = extendType({
       async resolve(parent, args, ctx) {
         const where = args.filter
           ? {
-              deleted: false,
+              // deleted: false,
               certificateNumber: args.filter,
             }
-          : { deleted: false };
+          : {
+              // deleted: false
+            };
 
         const certificate = await ctx.prisma.certificate.findMany({
           where,
@@ -137,11 +139,14 @@ export const CertificateBranchPagination = extendType({
       async resolve(parent, args, ctx) {
         const where = args.filter
           ? {
-              deleted: false,
+              // deleted: false,
               branchId: args.branchId,
               certificateNumber: args.filter,
             }
-          : { deleted: false, branchId: args.branchId };
+          : {
+              // deleted: false,
+              branchId: args.branchId,
+            };
 
         const certificate = await ctx.prisma.certificate.findMany({
           where,
@@ -181,14 +186,14 @@ export const CertificateInsurerPagination = extendType({
       async resolve(parent, args, ctx) {
         const where = args.filter
           ? {
-              deleted: false,
+              // deleted: false,
               branchs: {
                 orgId: args.orgId,
               },
               certificateNumber: args.filter,
             }
           : {
-              deleted: false,
+              // deleted: false,
               branchs: {
                 orgId: args.orgId,
               },
@@ -228,7 +233,7 @@ export const certificateByCertificateNumberQuery = extendType({
         return ctx.prisma.certificate.findFirst({
           where: {
             certificateNumber: args.certificateNumber,
-            deleted: false,
+            // deleted: false,
           },
         });
       },
@@ -254,7 +259,12 @@ export const createCertificateMutation = extendType({
             memberships: true,
           },
         });
-        if (!user || user.memberships.role !== "SUPERADMIN") {
+        if (
+          !user ||
+          (user.memberships.role !== "SUPERADMIN" &&
+            user.memberships.role !== "INSURER" &&
+            user.memberships.role !== "MEMBER")
+        ) {
           throw new Error(`You do not have permission to perform action`);
         }
         const vehicleDetail = await ctx.prisma.vehicle.findFirst({
@@ -264,7 +274,8 @@ export const createCertificateMutation = extendType({
           include: {
             insureds: {
               select: {
-                mobileNumber: true,
+                id: true,
+                // mobileNumber: true,
               },
             },
             branchs: {
@@ -287,10 +298,10 @@ export const createCertificateMutation = extendType({
             data: {
               ...args.input,
               certificateNumber: `CN-${format(new Date(), "yyMMiHms")}`,
-              premiumTarif: args.input.premiumTarif,
+              premiumTarif: vehicleDetail.premiumTarif,
               insureds: {
                 connect: {
-                  mobileNumber: vehicleDetail.insureds.mobileNumber,
+                  id: vehicleDetail.insureds.id,
                 },
               },
               vehicles: {
@@ -395,9 +406,9 @@ export const createCertificateBranchMutation = extendType({
         [certData, vehicleData] = await ctx.prisma.$transaction([
           ctx.prisma.certificate.create({
             data: {
-              ...args.input,
+              // ...args.input,
               certificateNumber: `CN-${format(new Date(), "yyMMiHms")}`,
-              premiumTarif: args.input.premiumTarif,
+              premiumTarif: vehicleDetail.premiumTarif,
               insureds: {
                 connect: {
                   id: vehicleDetail.insureds.id,
@@ -731,7 +742,7 @@ export const CertificateOrderByInput = inputObjectType({
 export const CertificateCreateInput = inputObjectType({
   name: "CertificateCreateInput",
   definition(t) {
-    t.float("premiumTarif");
+    // t.float("premiumTarif");
     t.field("policies", { type: policyCreateInput });
     t.field("branchs", { type: branchConnectInput });
     // t.field("tariffs", { type: tariffConnectInput });

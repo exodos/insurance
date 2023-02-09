@@ -14,8 +14,13 @@ const CreateCertificate = gql`
     $input: CertificateCreateInput!
   ) {
     createCertificate(plateNumber: $plateNumber, input: $input) {
+      id
+      certificateNumber
+      premiumTarif
+      issuedDate
+      updatedAt
       insureds {
-        mobileNumber
+        id
       }
       vehicles {
         plateNumber
@@ -27,18 +32,13 @@ const CreateCertificate = gql`
         policyIssuedConditions
         personsEntitledToUse
       }
-      tariffs {
-        tariffCode
-      }
     }
   }
 `;
 
-const AddCertificateModal = ({ regionCode, codeList }) => {
+const AddCertificateModal = ({ vehicle, href }) => {
   const notificationCtx = useContext(NotificationContext);
   const [open, setOpen] = useState<boolean>(true);
-  const [plateRegionOption, setPlateRegionOption] = useState(regionCode);
-  const [plateCodeOption, setPlateCodeOption] = useState(codeList);
 
   const [createCertificate, { data, error, loading }] =
     useMutation(CreateCertificate);
@@ -46,17 +46,12 @@ const AddCertificateModal = ({ regionCode, codeList }) => {
     console.log(error);
   }
 
-  const plateNumberRegExp = /^([A-Da-d])?\d{5}$/;
-
   const initialValues = {
     policyNumber: "",
     policyStartDate: "",
     policyIssuedConditions: "",
     personsEntitledToUse: "",
-    plateCode: "",
-    plateRegion: "",
-    plateNumber: "",
-    tariffCode: "",
+    // premiumTarif: "",
   };
   const validate = Yup.object().shape({
     policyNumber: Yup.string().required("Policy Number Is Required"),
@@ -67,12 +62,7 @@ const AddCertificateModal = ({ regionCode, codeList }) => {
     personsEntitledToUse: Yup.string().required(
       "Persons Entitled To Use/Drive Is Required"
     ),
-    plateCode: Yup.string().required("Plate Code Is Required"),
-    plateRegion: Yup.string().required("Plate Region Is Required"),
-    plateNumber: Yup.string()
-      .matches(plateNumberRegExp, "Plate Number Is Not Valid")
-      .required("Plate Number Is Required"),
-    tariffCode: Yup.string().required("Tariff Code Is Required"),
+    // premiumTarif: Yup.number().required("Tariff Code Is Required"),
   });
   const [formValues, setFormValues] = useState(null);
 
@@ -87,16 +77,13 @@ const AddCertificateModal = ({ regionCode, codeList }) => {
         policyIssuedConditions: values.policyIssuedConditions,
         personsEntitledToUse: values.personsEntitledToUse,
       },
-      tariffs: {
-        tariffCode: values.tariffCode,
-      },
     };
 
-    console.log(input);
+    // console.log(input);
 
     await createCertificate({
       variables: {
-        plateNumber: fullPlateNumber,
+        plateNumber: vehicle.plateNumber,
         input,
       },
       onError: (error) => {
@@ -125,7 +112,7 @@ const AddCertificateModal = ({ regionCode, codeList }) => {
           },
         });
       },
-    }).then(() => router.push("/admin/certificate"));
+    }).then(() => router.push(href));
   };
 
   return (
@@ -182,96 +169,6 @@ const AddCertificateModal = ({ regionCode, codeList }) => {
                           </div>
                         </div>
                         <div className="space-y-4 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0 mt-8">
-                          <div className="space-x-1 grid grid-cols-2 gap-1">
-                            <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
-                              <div>
-                                <label
-                                  htmlFor="plateCode"
-                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
-                                >
-                                  Plate Code
-                                </label>
-                              </div>
-                              <div className="sm:col-span-2">
-                                <Field
-                                  type="text"
-                                  as="select"
-                                  name="plateCode"
-                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                >
-                                  <option disabled value="">
-                                    Select Plate Code
-                                  </option>
-                                  {plateCodeOption.map((option: any) => (
-                                    <option
-                                      key={option.code}
-                                      value={option.code}
-                                    >
-                                      {option.code}
-                                    </option>
-                                  ))}
-                                </Field>
-                                <div className="text-eRed text-sm italic mt-2">
-                                  <ErrorMessage name="plateCode" />
-                                </div>
-                              </div>
-                            </div>
-                            <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
-                              <div>
-                                <label
-                                  htmlFor="plateRegion"
-                                  className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
-                                >
-                                  Plate Region
-                                </label>
-                              </div>
-                              <div className="sm:col-span-2">
-                                <Field
-                                  type="text"
-                                  as="select"
-                                  name="plateRegion"
-                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                >
-                                  <option disabled value="">
-                                    Select Plate Region
-                                  </option>
-                                  {plateRegionOption.map((option: any) => (
-                                    <option
-                                      key={option.regionApp}
-                                      value={option.regionApp}
-                                    >
-                                      {option.regionApp}
-                                    </option>
-                                  ))}
-                                </Field>
-                                <div className="text-eRed text-sm italic mt-2">
-                                  <ErrorMessage name="plateRegion" />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
-                            <div>
-                              <label
-                                htmlFor="plateNumber"
-                                className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
-                              >
-                                Plate Number
-                              </label>
-                            </div>
-                            <div className="sm:col-span-2">
-                              <Field
-                                type="text"
-                                name="plateNumber"
-                                id="plateNumber"
-                                placeholder="Enter Vehicle Plate Number"
-                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                              />
-                              <div className="text-eRed text-sm italic mt-2">
-                                <ErrorMessage name="plateNumber" />
-                              </div>
-                            </div>
-                          </div>
                           <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
                             <div>
                               <label
@@ -352,27 +249,6 @@ const AddCertificateModal = ({ regionCode, codeList }) => {
                               />
                               <div className="text-eRed text-sm italic mt-2">
                                 <ErrorMessage name="personsEntitledToUse" />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
-                            <div>
-                              <label
-                                htmlFor="tariffCode"
-                                className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
-                              >
-                                Tariff Code
-                              </label>
-                            </div>
-                            <div className="sm:col-span-2">
-                              <Field
-                                type="text"
-                                name="tariffCode"
-                                placeholder="Enter Tariff Code"
-                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                              />
-                              <div className="text-eRed text-sm italic mt-2">
-                                <ErrorMessage name="tariffCode" />
                               </div>
                             </div>
                           </div>

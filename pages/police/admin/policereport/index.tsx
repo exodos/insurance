@@ -49,7 +49,7 @@ const FeedInsuredPoliceReportPolice = gql`
           plateNumber
           insureds {
             id
-            insuredName
+            firstName
             mobileNumber
           }
         }
@@ -62,7 +62,7 @@ const FeedInsuredPoliceReportPolice = gql`
           plateNumber
           insureds {
             id
-            insuredName
+            firstName
             mobileNumber
           }
         }
@@ -85,8 +85,8 @@ const FeedInsuredPoliceReportPolice = gql`
 `;
 
 const InsuredPoliceReportPage = ({
-      data,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  data,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   // const [showAddModal, setShowAddModal] = useState(false);
 
@@ -117,7 +117,12 @@ const InsuredPoliceReportPage = ({
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
                 {session.user.memberships.role === "TRAFFICPOLICEADMIN" && (
                   <Link
-                    href={"/police-admin/policereport/add-police-report"}
+                    href={{
+                      pathname: "/police/admin/policereport/add-police-report",
+                      query: {
+                        returnPage: pathname,
+                      },
+                    }}
                     passHref
                   >
                     <button type="button" className="inline-flex items-center">

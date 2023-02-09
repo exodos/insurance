@@ -10,9 +10,10 @@ import {
   objectType,
   stringArg,
 } from "nexus";
-import { insuredConnectInput, insuredMobileInput } from "./Insured";
+import { insuredConnectInput } from "./Insured";
 import { Sort } from "./User";
 import { branchConnectInput } from "./Branch";
+import { VehicleCategory } from "./Tariff";
 
 export const Vehicle = objectType({
   name: "Vehicle",
@@ -29,13 +30,16 @@ export const Vehicle = objectType({
     t.string("vehicleSubType");
     t.string("vehicleDetails");
     t.string("vehicleUsage");
-    t.string("passengerNumber");
+    t.field("vehicleCategory", { type: VehicleCategory });
+    t.float("premiumTarif");
+    t.int("passengerNumber");
     t.nullable.string("carryingCapacityInGoods");
     t.int("purchasedYear");
     t.float("dutyFreeValue");
     t.float("dutyPaidValue");
     t.string("carryingCapacityInGoods");
     t.field("vehicleStatus", { type: VehicleStatus });
+    t.field("status", { type: STATUS });
     t.field("isInsured", { type: IsInsured });
     t.date("createdAt");
     t.date("updatedAt");
@@ -258,7 +262,63 @@ export const vehicleByPlateNumberQuery = extendType({
       resolve(_parent, args, ctx) {
         return ctx.prisma.vehicle.findFirst({
           where: {
-            plateNumber: args.plateNumber,
+            plateNumber: {
+              equals: args.plateNumber,
+              mode: "insensitive",
+            },
+            status: "APPROVED",
+          },
+        });
+      },
+    });
+  },
+});
+
+export const vehicleBranchByPlateNumberQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.field("vehicleBranchByPlateNumber", {
+      type: Vehicle,
+      args: {
+        plateNumber: nonNull(stringArg()),
+        branchId: nonNull(stringArg()),
+      },
+      resolve(_parent, args, ctx) {
+        return ctx.prisma.vehicle.findFirst({
+          where: {
+            plateNumber: {
+              equals: args.plateNumber,
+              mode: "insensitive",
+            },
+            branchId: args.branchId,
+            status: "APPROVED",
+          },
+        });
+      },
+    });
+  },
+});
+
+export const vehicleInsurerByPlateNumberQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.field("vehicleInsurerByPlateNumber", {
+      type: Vehicle,
+      args: {
+        plateNumber: nonNull(stringArg()),
+        orgId: nonNull(stringArg()),
+      },
+      resolve(_parent, args, ctx) {
+        return ctx.prisma.vehicle.findFirst({
+          where: {
+            plateNumber: {
+              equals: args.plateNumber,
+              mode: "insensitive",
+            },
+            branchs: {
+              orgId: args.orgId,
+            },
+            status: "APPROVED",
           },
         });
       },
@@ -301,6 +361,29 @@ export const createVehicleMutation = extendType({
             `We Could\'n find Insured with the provided mobile number`
           );
         }
+
+        const tariffPremium = await ctx.prisma.tariff.findFirst({
+          where: {
+            vehicleType: args.input.vehicleType,
+            vehicleSubType: args.input.vehicleSubType,
+            vehicleDetail: args.input.vehicleDetails,
+            vehicleUsage: args.input.vehicleUsage,
+          },
+        });
+        if (!tariffPremium) {
+          throw new Error(
+            `We Could\'n find Premium Tariff with the provided data`
+          );
+        }
+        let calPremiumTarif = 0;
+        if (args.input.vehicleCategory === "PRIVATEUSE") {
+          calPremiumTarif =
+            20 * args.input.passengerNumber + tariffPremium.premiumTarif;
+        } else {
+          calPremiumTarif =
+            40 * args.input.passengerNumber + tariffPremium.premiumTarif;
+        }
+
         return await ctx.prisma.vehicle.create({
           data: {
             plateNumber: args.input.plateNumber,
@@ -314,6 +397,8 @@ export const createVehicleMutation = extendType({
             vehicleSubType: args.input.vehicleSubType,
             vehicleDetails: args.input.vehicleDetails,
             vehicleUsage: args.input.vehicleUsage,
+            vehicleCategory: args.input.vehicleCategory,
+            premiumTarif: calPremiumTarif,
             passengerNumber: args.input.passengerNumber,
             carryingCapacityInGoods: args.input.carryingCapacityInGoods,
             purchasedYear: args.input.purchasedYear,
@@ -363,10 +448,31 @@ export const updateVehicleMutation = extendType({
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
+
+        const tariffPremium = await ctx.prisma.tariff.findFirst({
+          where: {
+            vehicleType: args.input.vehicleType,
+            vehicleSubType: args.input.vehicleSubType,
+            vehicleDetail: args.input.vehicleDetails,
+            vehicleUsage: args.input.vehicleUsage,
+          },
+        });
+        if (!tariffPremium) {
+          throw new Error(
+            `We Could\'n find Premium Tariff with the provided data`
+          );
+        }
+        let calPremiumTarif = 0;
+        if (args.input.vehicleCategory === "PRIVATEUSE") {
+          calPremiumTarif =
+            20 * args.input.passengerNumber + tariffPremium.premiumTarif;
+        } else {
+          calPremiumTarif =
+            40 * args.input.passengerNumber + tariffPremium.premiumTarif;
+        }
         return await ctx.prisma.vehicle.update({
           where: { id: args.id },
           data: {
-            // ...args.input,
             plateNumber: args.input.plateNumber,
             vehicleModel: args.input.vehicleModel,
             bodyType: args.input.bodyType,
@@ -376,23 +482,14 @@ export const updateVehicleMutation = extendType({
             vehicleSubType: args.input.vehicleSubType,
             vehicleDetails: args.input.vehicleDetails,
             vehicleUsage: args.input.vehicleUsage,
-            passengerNumber: args.input.passengerNumber,
+            vehicleCategory: args.input.vehicleCategory,
+            premiumTarif: calPremiumTarif,
+            passengerNumber: Number(args.input.passengerNumber),
             carryingCapacityInGoods: args.input.carryingCapacityInGoods,
             purchasedYear: args.input.purchasedYear,
             dutyFreeValue: args.input.dutyFreeValue,
             dutyPaidValue: args.input.dutyPaidValue,
             vehicleStatus: args.input.vehicleStatus,
-
-            // insureds: {
-            //   connect: {
-            //     id: args.input.insureds.id,
-            //   },
-            // },
-            // branchs: {
-            //   connect: {
-            //     id: args.input.branchs.id,
-            //   },
-            // },
           },
         });
       },
@@ -477,7 +574,9 @@ export const vehicleCreateInput = inputObjectType({
     t.string("vehicleSubType");
     t.string("vehicleDetails");
     t.string("vehicleUsage");
-    t.string("passengerNumber");
+    t.field("vehicleCategory", { type: VehicleCategory });
+    // t.float("premiumTarif");
+    t.int("passengerNumber");
     t.nullable.string("carryingCapacityInGoods");
     t.int("purchasedYear");
     t.float("dutyFreeValue");
@@ -502,7 +601,9 @@ export const vehicleUpdateInput = inputObjectType({
     t.string("vehicleSubType");
     t.string("vehicleDetails");
     t.string("vehicleUsage");
-    t.string("passengerNumber");
+    t.field("vehicleCategory", { type: VehicleCategory });
+    // t.float("premiumTarif");
+    t.int("passengerNumber");
     t.nullable.string("carryingCapacityInGoods");
     t.int("purchasedYear");
     t.float("dutyFreeValue");
@@ -523,6 +624,11 @@ export const VehicleStatus = enumType({
 export const IsInsured = enumType({
   name: "IsInsured",
   members: ["INSURED", "NOTINSURED"],
+});
+
+export const STATUS = enumType({
+  name: "STATUS",
+  members: ["APPROVED", "SUSPENDED", "TRANSFERABLE"],
 });
 
 export const vehicleConnectInput = inputObjectType({

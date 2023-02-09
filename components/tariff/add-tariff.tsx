@@ -16,6 +16,7 @@ const CreateTariff = gql`
       vehicleSubType
       vehicleDetail
       vehicleUsage
+      vehicleCategory
       premiumTarif
       createdAt
       updatedAt
@@ -32,18 +33,25 @@ const AddTariffModal = () => {
     console.log(error);
   }
 
+  const categoryOptions = [
+    { value: "PRIVATEUSE", label: "PRIVATEUSE" },
+    { value: "BUSINESSUSE", label: "BUSINESSUSE" },
+  ];
+
   const initialValues = {
     vehicleType: "",
     vehicleSubType: "",
     vehicleDetail: "",
     vehicleUsage: "",
     premiumTarif: "",
+    vehicleCategory: "",
   };
   const validate = Yup.object().shape({
     vehicleType: Yup.string().required("Vehicle Type Is Required"),
     vehicleSubType: Yup.string().required("Vehicle Sub Type Is Required"),
     vehicleDetail: Yup.string().required("Vehicle Detail Is Required"),
     vehicleUsage: Yup.string().required("Vehicle Usage Is Required"),
+    vehicleCategory: Yup.string().required("Vehicle Category Is Required"),
     premiumTarif: Yup.number().required("Premium Tarif Is Required"),
   });
   const [formValues, setFormValues] = useState(null);
@@ -56,6 +64,7 @@ const AddTariffModal = () => {
       vehicleSubType: values.vehicleSubType,
       vehicleDetail: values.vehicleDetail,
       vehicleUsage: values.vehicleUsage,
+      vehicleCategory: values.vehicleCategory,
       premiumTarif: values.premiumTarif,
     };
 
@@ -229,6 +238,38 @@ const AddTariffModal = () => {
                               />
                               <div className="text-eRed text-sm italic mt-2">
                                 <ErrorMessage name="vehicleUsage" />
+                              </div>
+                            </div>
+                          </div>
+                          <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
+                            <div>
+                              <label
+                                htmlFor="vehicleCategory"
+                                className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                              >
+                                Vehicle Category
+                              </label>
+                            </div>
+                            <div className="sm:col-span-2">
+                              <Field
+                                as="select"
+                                name="vehicleCategory"
+                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                              >
+                                <option disabled value="">
+                                  Select Plate Code
+                                </option>
+                                {categoryOptions.map((option: any) => (
+                                  <option
+                                    key={option.value}
+                                    value={option.value}
+                                  >
+                                    {option.label}
+                                  </option>
+                                ))}
+                              </Field>
+                              <div className="text-eRed text-sm italic mt-2">
+                                <ErrorMessage name="vehicleCategory" />
                               </div>
                             </div>
                           </div>

@@ -47,7 +47,7 @@ const FeedInsuredPoliceReportInsurer = gql`
           plateNumber
           insureds {
             id
-            insuredName
+            firstName
             mobileNumber
           }
         }
@@ -60,7 +60,7 @@ const FeedInsuredPoliceReportInsurer = gql`
           plateNumber
           insureds {
             id
-            insuredName
+            firstName
             mobileNumber
           }
         }
@@ -85,8 +85,8 @@ const FeedInsuredPoliceReportInsurer = gql`
 `;
 
 const InsurerPoliceReportPage = ({
-      data,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  data,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   return (
     <>
       <SiteHeader

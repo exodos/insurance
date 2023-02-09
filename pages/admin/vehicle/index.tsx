@@ -1,6 +1,6 @@
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { getServerSession, unstable_getServerSession } from "next-auth";
-import { SessionProvider, useSession } from "next-auth/react";
+import { getServerSession } from "next-auth";
+import { useSession } from "next-auth/react";
 import { initializeApollo } from "../../../lib/apollo";
 import { gql } from "@apollo/client";
 import { authOptions } from "../../api/auth/[...nextauth]";
@@ -10,6 +10,7 @@ import ListVehicle from "@/vehicle/list-vehicles";
 import AddVehicleModal from "@/vehicle/add-vehicle";
 import { useRouter } from "next/router";
 import SiteHeader from "@/components/layout/header";
+import Link from "next/link";
 
 const FeedVehicle = gql`
   query FeedVehicle(
@@ -33,12 +34,15 @@ const FeedVehicle = gql`
         vehicleSubType
         vehicleDetails
         vehicleUsage
+        vehicleCategory
+        premiumTarif
         passengerNumber
         carryingCapacityInGoods
         purchasedYear
         dutyFreeValue
         dutyPaidValue
         vehicleStatus
+        status
         isInsured
         createdAt
         updatedAt
@@ -64,6 +68,23 @@ const FeedVehicle = gql`
       id
       regionApp
     }
+    feedUniqueTariff {
+      tariffVehicleType {
+        vehicleType
+      }
+      tariffVehicleSubType {
+        vehicleSubType
+      }
+      tariffVehicleDetail {
+        vehicleDetail
+      }
+      tariffVehicleUsage {
+        vehicleUsage
+      }
+      tariffVehicleCategory {
+        vehicleCategory
+      }
+    }
     feedBranchByOrgDesc(input: $input) {
       branchs {
         id
@@ -74,11 +95,11 @@ const FeedVehicle = gql`
 `;
 
 const AdminVehiclePage = ({
-  data,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
-  const { asPath } = useRouter();
+  const { pathname } = useRouter();
 
   const handleAdd = () => {
     setShowAddModal((prev) => !prev);
@@ -101,16 +122,23 @@ const AdminVehiclePage = ({
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
                 {session.user.memberships.role === "SUPERADMIN" && (
-                  <button
-                    type="button"
-                    className="inline-flex items-center"
-                    onClick={() => handleAdd()}
+                  <Link
+                    href={{
+                      pathname: "/admin/vehicle/add-vehicle",
+                      query: {
+                        returnPage: pathname,
+                      },
+                    }}
+                    passHref
+                    legacyBehavior
                   >
-                    <BsPlusCircleFill
-                      className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
-                      aria-hidden="true"
-                    />
-                  </button>
+                    <button type="button" className="inline-flex items-center">
+                      <BsPlusCircleFill
+                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </Link>
                 )}
                 {session.user.memberships.role === "SUPERADMIN" && (
                   <button type="button" className="inline-flex items-center">
@@ -129,16 +157,9 @@ const AdminVehiclePage = ({
           regionCode={data.regionCode}
           codeList={data.plateCode}
           branch={data.feedBranchByOrgDesc.branchs}
+          tariffData={data.feedUniqueTariff}
         />
       </div>
-      {showAddModal ? (
-        <AddVehicleModal
-          regionCode={data.regionCode}
-          codeList={data.plateCode}
-          branch={data.feedBranchByOrgDesc.branchs}
-          href={asPath}
-        />
-      ) : null}
     </>
   );
 };

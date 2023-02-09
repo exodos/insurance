@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "MembershipRole" AS ENUM ('SUPERADMIN', 'INSURER', 'MEMBER', 'USER', 'TRAFFICPOLICEADMIN', 'TRAFFICPOLICEMEMBER');
+CREATE TYPE "MembershipRole" AS ENUM ('SUPERADMIN', 'INSURER', 'BRANCHADMIN', 'MEMBER', 'USER', 'TRAFFICPOLICEADMIN', 'TRAFFICPOLICEMEMBER');
 
 -- CreateEnum
 CREATE TYPE "OrgDesc" AS ENUM ('MINISTRY', 'INSURANCE', 'TRAFFICPOLICE');
@@ -20,13 +20,16 @@ CREATE TYPE "PaymentFor" AS ENUM ('THIRDPARTY', 'CLAIM');
 CREATE TYPE "IsInsured" AS ENUM ('INSURED', 'NOTINSURED');
 
 -- CreateEnum
-CREATE TYPE "STATUS" AS ENUM ('SUSPENDED', 'BLOCKED');
+CREATE TYPE "STATUS" AS ENUM ('APPROVED', 'SUSPENDED', 'TRANSFERABLE');
 
 -- CreateEnum
 CREATE TYPE "InjuryType" AS ENUM ('SIMPLE', 'CRITICAL', 'DEATH');
 
 -- CreateEnum
 CREATE TYPE "VictimedCondition" AS ENUM ('PASSENGER', 'PEDESTRIAN', 'DRIVER', 'ASSISTANT');
+
+-- CreateEnum
+CREATE TYPE "VehicleCategory" AS ENUM ('PRIVATEUSE', 'BUSINESSUSE');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -90,15 +93,12 @@ CREATE TABLE "Certificate" (
     "id" TEXT NOT NULL,
     "certificateNumber" TEXT NOT NULL,
     "issuedDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "insuredMobileNumber" TEXT NOT NULL,
-    "vehiclePlateNumber" TEXT NOT NULL,
     "policyId" TEXT NOT NULL,
+    "insuredId" TEXT NOT NULL,
+    "vehiclePlateNumber" TEXT NOT NULL,
     "branchId" TEXT NOT NULL,
-    "tariffCode" TEXT NOT NULL,
     "premiumTarif" DOUBLE PRECISION NOT NULL,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "deleted" BOOLEAN NOT NULL DEFAULT false,
-    "deletedTime" TIMESTAMP(3),
 
     CONSTRAINT "Certificate_pkey" PRIMARY KEY ("id")
 );
@@ -106,7 +106,9 @@ CREATE TABLE "Certificate" (
 -- CreateTable
 CREATE TABLE "Insured" (
     "id" TEXT NOT NULL,
-    "insuredName" TEXT NOT NULL,
+    "firstName" TEXT NOT NULL,
+    "lastName" TEXT NOT NULL,
+    "occupation" TEXT,
     "region" TEXT NOT NULL,
     "city" TEXT NOT NULL,
     "subCity" TEXT NOT NULL,
@@ -116,8 +118,7 @@ CREATE TABLE "Insured" (
     "mobileNumber" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "deleted" BOOLEAN NOT NULL DEFAULT false,
-    "deletedTime" TIMESTAMP(3),
+    "branchId" TEXT NOT NULL,
 
     CONSTRAINT "Insured_pkey" PRIMARY KEY ("id")
 );
@@ -128,12 +129,25 @@ CREATE TABLE "Vehicle" (
     "plateNumber" TEXT NOT NULL,
     "engineNumber" TEXT NOT NULL,
     "chassisNumber" TEXT NOT NULL,
+    "vehicleModel" TEXT NOT NULL,
+    "bodyType" TEXT NOT NULL,
+    "horsePower" TEXT NOT NULL,
+    "manufacturedYear" INTEGER NOT NULL,
     "vehicleType" TEXT NOT NULL,
-    "carryingCapacityInGoods" TEXT NOT NULL,
-    "carryingCapacityInPersons" TEXT NOT NULL,
+    "vehicleSubType" TEXT NOT NULL,
+    "vehicleDetails" TEXT NOT NULL,
+    "vehicleUsage" TEXT NOT NULL,
+    "vehicleCategory" "VehicleCategory" NOT NULL,
+    "premiumTarif" DOUBLE PRECISION NOT NULL,
+    "passengerNumber" TEXT NOT NULL,
+    "carryingCapacityInGoods" TEXT,
+    "purchasedYear" INTEGER NOT NULL,
+    "dutyFreeValue" DOUBLE PRECISION NOT NULL,
+    "dutyPaidValue" DOUBLE PRECISION NOT NULL,
     "vehicleStatus" "VEHICLESTATUS" NOT NULL DEFAULT 'NEW',
     "isInsured" "IsInsured" NOT NULL DEFAULT 'NOTINSURED',
-    "insuredMobileNumber" TEXT NOT NULL,
+    "status" "STATUS" DEFAULT 'SUSPENDED',
+    "insuredId" TEXT NOT NULL,
     "branchId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -162,13 +176,11 @@ CREATE TABLE "Claim" (
     "damageEstimate" DOUBLE PRECISION NOT NULL,
     "claimedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "incidentNumber" TEXT NOT NULL,
-    "claimantMobileNumber" TEXT NOT NULL,
+    "claimantId" TEXT NOT NULL,
     "claimantPlateNumber" TEXT NOT NULL,
     "certificateNumber" TEXT NOT NULL,
     "branchId" TEXT NOT NULL,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "deleted" BOOLEAN NOT NULL DEFAULT false,
-    "deletedTime" TIMESTAMP(3),
 
     CONSTRAINT "Claim_pkey" PRIMARY KEY ("id")
 );
@@ -300,11 +312,11 @@ CREATE TABLE "Victim" (
 -- CreateTable
 CREATE TABLE "Tariff" (
     "id" SERIAL NOT NULL,
-    "tariffCode" TEXT NOT NULL,
     "vehicleType" TEXT NOT NULL,
     "vehicleSubType" TEXT NOT NULL,
     "vehicleDetail" TEXT NOT NULL,
-    "usage" TEXT NOT NULL,
+    "vehicleUsage" TEXT NOT NULL,
+    "vehicleCategory" "VehicleCategory" NOT NULL DEFAULT 'PRIVATEUSE',
     "premiumTarif" DOUBLE PRECISION NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -334,7 +346,7 @@ CREATE TABLE "CodeList" (
 );
 
 -- CreateTable
-CREATE TABLE "TariffDetal" (
+CREATE TABLE "TariffDetails" (
     "id" TEXT NOT NULL,
     "vehicleType" TEXT NOT NULL,
     "vehicleSubType" TEXT NOT NULL,
@@ -344,7 +356,7 @@ CREATE TABLE "TariffDetal" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "TariffDetal_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "TariffDetails_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -372,12 +384,6 @@ CREATE TABLE "AccidentRecord" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "AccidentRecord_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "_insuredToBranch" (
-    "A" TEXT NOT NULL,
-    "B" TEXT NOT NULL
 );
 
 -- CreateTable
@@ -480,13 +486,13 @@ CREATE UNIQUE INDEX "Membership_userId_branchId_key" ON "Membership"("userId", "
 CREATE UNIQUE INDEX "Certificate_certificateNumber_key" ON "Certificate"("certificateNumber");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Certificate_vehiclePlateNumber_key" ON "Certificate"("vehiclePlateNumber");
-
--- CreateIndex
 CREATE UNIQUE INDEX "Certificate_policyId_key" ON "Certificate"("policyId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Insured_mobileNumber_key" ON "Insured"("mobileNumber");
+CREATE UNIQUE INDEX "Certificate_vehiclePlateNumber_key" ON "Certificate"("vehiclePlateNumber");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Insured_mobileNumber_branchId_key" ON "Insured"("mobileNumber", "branchId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Vehicle_plateNumber_key" ON "Vehicle"("plateNumber");
@@ -526,15 +532,6 @@ CREATE UNIQUE INDEX "UnInsuredPoliceReport_incidentNumber_key" ON "UnInsuredPoli
 
 -- CreateIndex
 CREATE UNIQUE INDEX "HitAndRunPoliceReport_incidentNumber_key" ON "HitAndRunPoliceReport"("incidentNumber");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Tariff_tariffCode_key" ON "Tariff"("tariffCode");
-
--- CreateIndex
-CREATE UNIQUE INDEX "_insuredToBranch_AB_unique" ON "_insuredToBranch"("A", "B");
-
--- CreateIndex
-CREATE INDEX "_insuredToBranch_B_index" ON "_insuredToBranch"("B");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "_BranchToThirdPartyLog_AB_unique" ON "_BranchToThirdPartyLog"("A", "B");
@@ -618,22 +615,22 @@ ALTER TABLE "Membership" ADD CONSTRAINT "Membership_userId_fkey" FOREIGN KEY ("u
 ALTER TABLE "Membership" ADD CONSTRAINT "Membership_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Certificate" ADD CONSTRAINT "Certificate_insuredMobileNumber_fkey" FOREIGN KEY ("insuredMobileNumber") REFERENCES "Insured"("mobileNumber") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Certificate" ADD CONSTRAINT "Certificate_policyId_fkey" FOREIGN KEY ("policyId") REFERENCES "Policy"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Certificate" ADD CONSTRAINT "Certificate_insuredId_fkey" FOREIGN KEY ("insuredId") REFERENCES "Insured"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Certificate" ADD CONSTRAINT "Certificate_vehiclePlateNumber_fkey" FOREIGN KEY ("vehiclePlateNumber") REFERENCES "Vehicle"("plateNumber") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Certificate" ADD CONSTRAINT "Certificate_policyId_fkey" FOREIGN KEY ("policyId") REFERENCES "Policy"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "Certificate" ADD CONSTRAINT "Certificate_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Certificate" ADD CONSTRAINT "Certificate_tariffCode_fkey" FOREIGN KEY ("tariffCode") REFERENCES "Tariff"("tariffCode") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Insured" ADD CONSTRAINT "Insured_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Vehicle" ADD CONSTRAINT "Vehicle_insuredMobileNumber_fkey" FOREIGN KEY ("insuredMobileNumber") REFERENCES "Insured"("mobileNumber") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Vehicle" ADD CONSTRAINT "Vehicle_insuredId_fkey" FOREIGN KEY ("insuredId") REFERENCES "Insured"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Vehicle" ADD CONSTRAINT "Vehicle_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -642,7 +639,7 @@ ALTER TABLE "Vehicle" ADD CONSTRAINT "Vehicle_branchId_fkey" FOREIGN KEY ("branc
 ALTER TABLE "Claim" ADD CONSTRAINT "Claim_incidentNumber_fkey" FOREIGN KEY ("incidentNumber") REFERENCES "InsuredPoliceReport"("incidentNumber") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Claim" ADD CONSTRAINT "Claim_claimantMobileNumber_fkey" FOREIGN KEY ("claimantMobileNumber") REFERENCES "Insured"("mobileNumber") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Claim" ADD CONSTRAINT "Claim_claimantId_fkey" FOREIGN KEY ("claimantId") REFERENCES "Insured"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Claim" ADD CONSTRAINT "Claim_claimantPlateNumber_fkey" FOREIGN KEY ("claimantPlateNumber") REFERENCES "Vehicle"("plateNumber") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -709,12 +706,6 @@ ALTER TABLE "ThirdPartyLog" ADD CONSTRAINT "ThirdPartyLog_claimUnInsuredId_fkey"
 
 -- AddForeignKey
 ALTER TABLE "AccidentRecord" ADD CONSTRAINT "AccidentRecord_plateNumber_fkey" FOREIGN KEY ("plateNumber") REFERENCES "Vehicle"("chassisNumber") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "_insuredToBranch" ADD CONSTRAINT "_insuredToBranch_A_fkey" FOREIGN KEY ("A") REFERENCES "Branch"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "_insuredToBranch" ADD CONSTRAINT "_insuredToBranch_B_fkey" FOREIGN KEY ("B") REFERENCES "Insured"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_BranchToThirdPartyLog" ADD CONSTRAINT "_BranchToThirdPartyLog_A_fkey" FOREIGN KEY ("A") REFERENCES "Branch"("id") ON DELETE CASCADE ON UPDATE CASCADE;
