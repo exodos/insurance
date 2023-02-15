@@ -766,6 +766,7 @@ type Query {
   exportInsuredPoliceReportBranch(branchId: String!, dateFrom: String!, dateTo: String!): [InsuredPoliceReport!]!
   exportInsuredPoliceReportInsurer(dateFrom: String!, dateTo: String!, orgId: String!): [InsuredPoliceReport!]!
   exportOrganization(dateFrom: String!, dateTo: String!): [Organization!]!
+  exportTariff(dateFrom: String!, dateTo: String!): [Tariff!]!
   exportThirdPartyLogLog(action: String!, dateFrom: String!, dateTo: String!, mode: String!): [ThirdPartyLog!]!
   exportUnInsuredClaim(dateFrom: String!, dateTo: String!): [ClaimUnInsured!]!
   exportUnInsuredClaimBranch(branchId: String!, dateFrom: String!, dateTo: String!): [ClaimUnInsured!]!

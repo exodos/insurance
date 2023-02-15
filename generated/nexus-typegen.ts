@@ -1505,6 +1505,7 @@ export interface NexusGenFieldTypes {
     exportInsuredPoliceReportBranch: NexusGenRootTypes['InsuredPoliceReport'][]; // [InsuredPoliceReport!]!
     exportInsuredPoliceReportInsurer: NexusGenRootTypes['InsuredPoliceReport'][]; // [InsuredPoliceReport!]!
     exportOrganization: NexusGenRootTypes['Organization'][]; // [Organization!]!
+    exportTariff: NexusGenRootTypes['Tariff'][]; // [Tariff!]!
     exportThirdPartyLogLog: NexusGenRootTypes['ThirdPartyLog'][]; // [ThirdPartyLog!]!
     exportUnInsuredClaim: NexusGenRootTypes['ClaimUnInsured'][]; // [ClaimUnInsured!]!
     exportUnInsuredClaimBranch: NexusGenRootTypes['ClaimUnInsured'][]; // [ClaimUnInsured!]!
@@ -2222,6 +2223,7 @@ export interface NexusGenFieldTypeNames {
     exportInsuredPoliceReportBranch: 'InsuredPoliceReport'
     exportInsuredPoliceReportInsurer: 'InsuredPoliceReport'
     exportOrganization: 'Organization'
+    exportTariff: 'Tariff'
     exportThirdPartyLogLog: 'ThirdPartyLog'
     exportUnInsuredClaim: 'ClaimUnInsured'
     exportUnInsuredClaimBranch: 'ClaimUnInsured'
@@ -2727,6 +2729,10 @@ export interface NexusGenArgTypes {
       orgId: string; // String!
     }
     exportOrganization: { // args
+      dateFrom: string; // String!
+      dateTo: string; // String!
+    }
+    exportTariff: { // args
       dateFrom: string; // String!
       dateTo: string; // String!
     }

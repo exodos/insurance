@@ -169,6 +169,32 @@ export const feedPremiumTariffVehicle = extendType({
   },
 });
 
+export const exportTariffQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.list.nonNull.field("exportTariff", {
+      type: Tariff,
+      args: {
+        dateFrom: nonNull(stringArg()),
+        dateTo: nonNull(stringArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        return await ctx.prisma.tariff.findMany({
+          where: {
+            updatedAt: {
+              lte: new Date(args.dateTo),
+              gte: new Date(args.dateFrom),
+            },
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
+        });
+      },
+    });
+  },
+});
+
 export const createTariffMutation = extendType({
   type: "Mutation",
   definition(t) {
