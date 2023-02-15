@@ -12,11 +12,13 @@ import {
 } from "nexus";
 import { Sort } from "./User";
 import { branchConnectInput } from "./Branch";
+import { format } from "date-fns";
 
 export const Insured = objectType({
   name: "Insured",
   definition(t) {
     t.string("id");
+    t.string("regNumber");
     t.string("firstName");
     t.string("lastName");
     t.nullable.string("occupation");
@@ -81,6 +83,7 @@ export const InsuredPagination = extendType({
                 { firstName: args.filter },
                 { lastName: args.filter },
                 { mobileNumber: args.filter },
+                { regNumber: args.filter },
               ],
             }
           : {};
@@ -131,6 +134,7 @@ export const InsuredBranchPagination = extendType({
                 { firstName: args.filter },
                 { lastName: args.filter },
                 { mobileNumber: args.filter },
+                { regNumber: args.filter },
               ],
             }
           : {
@@ -185,6 +189,7 @@ export const InsuredInsurerPagination = extendType({
                 { firstName: args.filter },
                 { lastName: args.filter },
                 { mobileNumber: args.filter },
+                { regNumber: args.filter },
               ],
             }
           : {
@@ -294,6 +299,90 @@ export const insuredInsurerByMobileNumberQuery = extendType({
   },
 });
 
+export const exportInsuredQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.list.nonNull.field("exportInsured", {
+      type: Insured,
+      args: {
+        dateFrom: nonNull(stringArg()),
+        dateTo: nonNull(stringArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        return await ctx.prisma.insured.findMany({
+          where: {
+            updatedAt: {
+              lte: new Date(args.dateTo),
+              gte: new Date(args.dateFrom),
+            },
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
+        });
+      },
+    });
+  },
+});
+
+export const exportInsuredInsurerQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.list.nonNull.field("exportInsuredInsurer", {
+      type: Insured,
+      args: {
+        orgId: nonNull(stringArg()),
+        dateFrom: nonNull(stringArg()),
+        dateTo: nonNull(stringArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        return await ctx.prisma.insured.findMany({
+          where: {
+            branchs: {
+              orgId: args.orgId,
+            },
+            updatedAt: {
+              lte: new Date(args.dateTo),
+              gte: new Date(args.dateFrom),
+            },
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
+        });
+      },
+    });
+  },
+});
+
+export const exportInsuredBranchQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.list.nonNull.field("exportInsuredBranch", {
+      type: Insured,
+      args: {
+        branchId: nonNull(stringArg()),
+        dateFrom: nonNull(stringArg()),
+        dateTo: nonNull(stringArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        return await ctx.prisma.insured.findMany({
+          where: {
+            branchId: args.branchId,
+            updatedAt: {
+              lte: new Date(args.dateTo),
+              gte: new Date(args.dateFrom),
+            },
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
+        });
+      },
+    });
+  },
+});
+
 export const createInsuredMutation = extendType({
   type: "Mutation",
   definition(t) {
@@ -321,6 +410,7 @@ export const createInsuredMutation = extendType({
         }
         return await ctx.prisma.insured.create({
           data: {
+            regNumber: `REG-${format(new Date(), "yyMMiHms")}`,
             firstName: args.input.firstName,
             lastName: args.input.lastName,
             occupation: args.input.occupation,
@@ -361,7 +451,12 @@ export const updateInsuredMutation = extendType({
             memberships: true,
           },
         });
-        if (!user || user.memberships.role !== "SUPERADMIN") {
+        if (
+          !user ||
+          (user.memberships.role !== "SUPERADMIN" &&
+            user.memberships.role !== "INSURER" &&
+            user.memberships.role !== "MEMBER")
+        ) {
           throw new Error(`You do not have permission to perform action`);
         }
         return await ctx.prisma.insured.update({
@@ -398,18 +493,14 @@ export const deleteInsuredMutation = extendType({
             memberships: true,
           },
         });
-        if (!user || user.memberships.role !== "SUPERADMIN") {
+        if (
+          !user ||
+          (user.memberships.role !== "SUPERADMIN" &&
+            user.memberships.role !== "INSURER" &&
+            user.memberships.role !== "MEMBER")
+        ) {
           throw new Error(`You do not have permission to perform action`);
         }
-        // return await ctx.prisma.insured.update({
-        //   where: {
-        //     id: args.id,
-        //   },
-        //   data: {
-        //     deleted: true,
-        //     deletedTime: new Date(),
-        //   },
-        // });
         return await ctx.prisma.insured.delete({
           where: {
             id: args.id,

@@ -10,6 +10,7 @@ import ListUser from "@/users/list-user";
 import AddUserModalByBranch from "@/users/branch-add-user";
 import { useRouter } from "next/router";
 import SiteHeader from "@/components/layout/header";
+import Link from "next/link";
 
 const FeedUserBranch = gql`
   query FeedUserBranch(
@@ -97,13 +98,24 @@ const BranchUserPage = ({
                     />
                   </button>
                 )}
-                {session.user.memberships.role === "INSURER" && (
-                  <button type="button" className="inline-flex items-center">
-                    <BsFillArrowUpCircleFill
-                      className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
-                      aria-hidden="true"
-                    />
-                  </button>
+                {session.user.memberships.role === "MEMBER" && (
+                  <Link
+                    href={{
+                      pathname: "/branch/users/export-branch-user",
+                      query: {
+                        returnPage: asPath,
+                      },
+                    }}
+                    passHref
+                    legacyBehavior
+                  >
+                    <button type="button" className="inline-flex items-center">
+                      <BsFillArrowUpCircleFill
+                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </Link>
                 )}
               </div>
             )}

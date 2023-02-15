@@ -63,7 +63,7 @@ const AdminCertificatePage = ({
       data,
     }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
-  const { pathname } = useRouter();
+  const { pathname, asPath } = useRouter();
 
   return (
     <>
@@ -104,12 +104,23 @@ const AdminCertificatePage = ({
                   </Link>
                 )}
                 {session.user.memberships.role === "SUPERADMIN" && (
-                  <button type="button" className="inline-flex items-center">
-                    <BsFillArrowUpCircleFill
-                      className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
-                      aria-hidden="true"
-                    />
-                  </button>
+                  <Link
+                    href={{
+                      pathname: "/admin/certificate/export-certificate",
+                      query: {
+                        returnPage: asPath,
+                      },
+                    }}
+                    passHref
+                    legacyBehavior
+                  >
+                    <button type="button" className="inline-flex items-center">
+                      <BsFillArrowUpCircleFill
+                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </Link>
                 )}
               </div>
             )}

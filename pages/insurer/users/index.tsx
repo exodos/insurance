@@ -10,6 +10,7 @@ import InsurerAddUserModal from "@/users/insurer-add-user";
 import { useRouter } from "next/router";
 import SiteHeader from "@/components/layout/header";
 import { getServerSession } from "next-auth";
+import Link from "next/link";
 
 const FeedUserInsurer = gql`
   query FeedUserInsurer(
@@ -69,9 +70,9 @@ const FeedUserInsurer = gql`
 `;
 
 const InsurerUserPage = ({
-  data,
-  orgId,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+      orgId,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -110,12 +111,23 @@ const InsurerUserPage = ({
                   </button>
                 )}
                 {session.user.memberships.role === "INSURER" && (
-                  <button type="button" className="inline-flex items-center">
-                    <BsFillArrowUpCircleFill
-                      className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
-                      aria-hidden="true"
-                    />
-                  </button>
+                  <Link
+                    href={{
+                      pathname: "/insurer/users/export-insurer-user",
+                      query: {
+                        returnPage: asPath,
+                      },
+                    }}
+                    passHref
+                    legacyBehavior
+                  >
+                    <button type="button" className="inline-flex items-center">
+                      <BsFillArrowUpCircleFill
+                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </Link>
                 )}
               </div>
             )}

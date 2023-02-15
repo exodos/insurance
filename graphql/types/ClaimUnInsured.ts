@@ -214,6 +214,90 @@ export const updateUnInsuredClaimMutation = extendType({
   },
 });
 
+export const exportUnInsuredClaimRunQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.list.nonNull.field("exportUnInsuredClaim", {
+      type: ClaimUnInsured,
+      args: {
+        dateFrom: nonNull(stringArg()),
+        dateTo: nonNull(stringArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        return await ctx.prisma.claimUnInsured.findMany({
+          where: {
+            updatedAt: {
+              lte: new Date(args.dateTo),
+              gte: new Date(args.dateFrom),
+            },
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
+        });
+      },
+    });
+  },
+});
+
+export const exportUnInsuredClaimInsurerQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.list.nonNull.field("exportUnInsuredClaimInsurer", {
+      type: ClaimUnInsured,
+      args: {
+        orgId: nonNull(stringArg()),
+        dateFrom: nonNull(stringArg()),
+        dateTo: nonNull(stringArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        return await ctx.prisma.claimUnInsured.findMany({
+          where: {
+            branchs: {
+              orgId: args.orgId,
+            },
+            updatedAt: {
+              lte: new Date(args.dateTo),
+              gte: new Date(args.dateFrom),
+            },
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
+        });
+      },
+    });
+  },
+});
+
+export const exportUnInsuredClaimBranchQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.list.nonNull.field("exportUnInsuredClaimBranch", {
+      type: ClaimUnInsured,
+      args: {
+        branchId: nonNull(stringArg()),
+        dateFrom: nonNull(stringArg()),
+        dateTo: nonNull(stringArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        return await ctx.prisma.claimUnInsured.findMany({
+          where: {
+            branchId: args.branchId,
+            updatedAt: {
+              lte: new Date(args.dateTo),
+              gte: new Date(args.dateFrom),
+            },
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
+        });
+      },
+    });
+  },
+});
+
 export const FeedClaimUnInsured = objectType({
   name: "FeedClaimUnInsured",
   definition(t) {

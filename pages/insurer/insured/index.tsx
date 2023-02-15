@@ -10,6 +10,7 @@ import ListInsured from "@/insured/list-insured";
 import AddInsuredModal from "@/insured/create-insured";
 import SiteHeader from "@/components/layout/header";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 const FeedInsuredInsurer = gql`
   query FeedInsuredInsurer(
@@ -29,6 +30,7 @@ const FeedInsuredInsurer = gql`
     ) {
       insured {
         id
+        regNumber
         firstName
         lastName
         occupation
@@ -60,7 +62,7 @@ const InsurerInsuredPage = ({
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
 
-  const { pathname } = useRouter();
+  const { pathname, asPath } = useRouter();
   const handleAdd = () => {
     setShowAddModal((prev) => !prev);
   };
@@ -92,12 +94,23 @@ const InsurerInsuredPage = ({
                   </button>
                 )}
                 {session.user.memberships.role === "INSURER" && (
-                  <button type="button" className="inline-flex items-center">
-                    <BsFillArrowUpCircleFill
-                      className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
-                      aria-hidden="true"
-                    />
-                  </button>
+                  <Link
+                    href={{
+                      pathname: "/insurer/insured/export-insured",
+                      query: {
+                        returnPage: asPath,
+                      },
+                    }}
+                    passHref
+                    legacyBehavior
+                  >
+                    <button type="button" className="inline-flex items-center">
+                      <BsFillArrowUpCircleFill
+                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </Link>
                 )}
               </div>
             )}

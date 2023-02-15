@@ -8,12 +8,11 @@ import {
   objectType,
   stringArg,
 } from "nexus";
-import { addYears } from "date-fns";
+import { addYears, endOfYear, startOfYear, subDays, subYears } from "date-fns";
 import { Prisma } from "@prisma/client";
 import { policyCreateInput, policyUpdateInput } from "./Policy";
 import { format } from "date-fns";
 import { Sort } from "./User";
-import { tariffConnectInput } from "./Tariff";
 import { branchConnectInput } from "./Branch";
 
 export const Certificate = objectType({
@@ -24,8 +23,6 @@ export const Certificate = objectType({
     t.float("premiumTarif");
     t.date("issuedDate");
     t.date("updatedAt");
-    // t.boolean("deleted");
-    // t.nullable.date("deletedTime");
     t.field("insureds", {
       type: "Insured",
       async resolve(_parent, _args, ctx) {
@@ -76,6 +73,16 @@ export const Certificate = objectType({
           .claims();
       },
     });
+    t.list.field("certificateRecords", {
+      type: "CertificateRecord",
+      async resolve(_parent, _args, ctx) {
+        return await ctx.prisma.certificate
+          .findUnique({
+            where: { id: _parent.id },
+          })
+          .certificateRecords();
+      },
+    });
   },
 });
 
@@ -93,12 +100,12 @@ export const CertificatePagination = extendType({
       async resolve(parent, args, ctx) {
         const where = args.filter
           ? {
-              // deleted: false,
-              certificateNumber: args.filter,
+              OR: [
+                { certificateNumber: args.filter },
+                { vehiclePlateNumber: args.filter },
+              ],
             }
-          : {
-              // deleted: false
-            };
+          : {};
 
         const certificate = await ctx.prisma.certificate.findMany({
           where,
@@ -141,7 +148,10 @@ export const CertificateBranchPagination = extendType({
           ? {
               // deleted: false,
               branchId: args.branchId,
-              certificateNumber: args.filter,
+              OR: [
+                { certificateNumber: args.filter },
+                { vehiclePlateNumber: args.filter },
+              ],
             }
           : {
               // deleted: false,
@@ -190,7 +200,10 @@ export const CertificateInsurerPagination = extendType({
               branchs: {
                 orgId: args.orgId,
               },
-              certificateNumber: args.filter,
+              OR: [
+                { certificateNumber: args.filter },
+                { vehiclePlateNumber: args.filter },
+              ],
             }
           : {
               // deleted: false,
@@ -218,6 +231,90 @@ export const CertificateInsurerPagination = extendType({
           maxPage,
           totalCertificate,
         };
+      },
+    });
+  },
+});
+
+export const exportCertificateQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.list.nonNull.field("exportCertificate", {
+      type: Certificate,
+      args: {
+        dateFrom: nonNull(stringArg()),
+        dateTo: nonNull(stringArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        return await ctx.prisma.certificate.findMany({
+          where: {
+            issuedDate: {
+              lte: new Date(args.dateTo),
+              gte: new Date(args.dateFrom),
+            },
+          },
+          orderBy: {
+            issuedDate: "desc",
+          },
+        });
+      },
+    });
+  },
+});
+
+export const exportCertificateInsurerQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.list.nonNull.field("exportCertificateInsurer", {
+      type: Certificate,
+      args: {
+        orgId: nonNull(stringArg()),
+        dateFrom: nonNull(stringArg()),
+        dateTo: nonNull(stringArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        return await ctx.prisma.certificate.findMany({
+          where: {
+            branchs: {
+              orgId: args.orgId,
+            },
+            issuedDate: {
+              lte: new Date(args.dateTo),
+              gte: new Date(args.dateFrom),
+            },
+          },
+          orderBy: {
+            issuedDate: "desc",
+          },
+        });
+      },
+    });
+  },
+});
+
+export const exportCertificateranchQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.list.nonNull.field("exportCertificateBranch", {
+      type: Certificate,
+      args: {
+        branchId: nonNull(stringArg()),
+        dateFrom: nonNull(stringArg()),
+        dateTo: nonNull(stringArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        return await ctx.prisma.certificate.findMany({
+          where: {
+            branchId: args.branchId,
+            issuedDate: {
+              lte: new Date(args.dateTo),
+              gte: new Date(args.dateFrom),
+            },
+          },
+          orderBy: {
+            issuedDate: "desc",
+          },
+        });
       },
     });
   },
@@ -291,14 +388,242 @@ export const createCertificateMutation = extendType({
             `We could not find vehicle with the provided plate number!! Please try again`
           );
         }
+        const lastyear = subYears(new Date(), 1);
+        const startYear = startOfYear(lastyear),
+          endYear = endOfYear(lastyear);
+
+        const countSlightBodilyInjury =
+          await ctx.prisma.accidentRecord.aggregate({
+            where: {
+              plateNumber: args.plateNumber,
+              bodilyInjury: "SlightBodilyInjury",
+              createdAt: {
+                gte: startYear,
+                lte: endYear,
+              },
+            },
+            _count: {
+              bodilyInjury: true,
+            },
+          });
+
+        const countSaviorBodilyInjury =
+          await ctx.prisma.accidentRecord.aggregate({
+            where: {
+              plateNumber: args.plateNumber,
+              bodilyInjury: "SaviorBodilyInjury",
+              createdAt: {
+                gte: startYear,
+                lte: endYear,
+              },
+            },
+            _count: {
+              bodilyInjury: true,
+            },
+          });
+
+        const countDeath = await ctx.prisma.accidentRecord.aggregate({
+          where: {
+            plateNumber: args.plateNumber,
+            bodilyInjury: "Death",
+            createdAt: {
+              gte: startYear,
+              lte: endYear,
+            },
+          },
+          _count: {
+            bodilyInjury: true,
+          },
+        });
+
+        const sumPropertyInjury = await ctx.prisma.accidentRecord.aggregate({
+          where: {
+            plateNumber: args.plateNumber,
+            createdAt: {
+              gte: startYear,
+              lte: endYear,
+            },
+          },
+          _count: {
+            propertyInjury: true,
+          },
+          _sum: {
+            propertyInjury: true,
+          },
+        });
+
+        let premiumTariffBodily = 0,
+          premiumTariffProperty = 0;
+
+        if (countSlightBodilyInjury._count.bodilyInjury === 1) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 10) / 100;
+        } else if (countSlightBodilyInjury._count.bodilyInjury === 2) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 20) / 100;
+        } else if (countSlightBodilyInjury._count.bodilyInjury === 3) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 50) / 100;
+        } else if (countSlightBodilyInjury._count.bodilyInjury === 4) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 80) / 100;
+        } else if (countSlightBodilyInjury._count.bodilyInjury >= 5) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 100) / 100;
+        }
+
+        if (countSaviorBodilyInjury._count.bodilyInjury === 1) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 10) / 100;
+        } else if (countSaviorBodilyInjury._count.bodilyInjury === 2) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 20) / 100;
+        } else if (countSaviorBodilyInjury._count.bodilyInjury === 3) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 50) / 100;
+        } else if (countSaviorBodilyInjury._count.bodilyInjury === 4) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 80) / 100;
+        } else if (countSaviorBodilyInjury._count.bodilyInjury >= 5) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 100) / 100;
+        }
+
+        if (countDeath._count.bodilyInjury === 1) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 10) / 100;
+        } else if (countDeath._count.bodilyInjury === 2) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 20) / 100;
+        } else if (countDeath._count.bodilyInjury === 3) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 50) / 100;
+        } else if (countDeath._count.bodilyInjury === 4) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 80) / 100;
+        } else if (countDeath._count.bodilyInjury >= 5) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 100) / 100;
+        }
+
+        if (sumPropertyInjury._count.propertyInjury === 1) {
+          if (
+            sumPropertyInjury._sum.propertyInjury > 0 &&
+            sumPropertyInjury._sum.propertyInjury < 5000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 10) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 5000 &&
+            sumPropertyInjury._sum.propertyInjury < 10000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 20) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 10000 &&
+            sumPropertyInjury._sum.propertyInjury < 50000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 50) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 50000 &&
+            sumPropertyInjury._sum.propertyInjury < 100000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 60) / 100;
+          } else if (sumPropertyInjury._sum.propertyInjury >= 100000) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 70) / 100;
+          }
+        } else if (sumPropertyInjury._count.propertyInjury === 2) {
+          if (
+            sumPropertyInjury._sum.propertyInjury > 0 &&
+            sumPropertyInjury._sum.propertyInjury < 5000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 20) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 5000 &&
+            sumPropertyInjury._sum.propertyInjury < 10000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 30) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 10000 &&
+            sumPropertyInjury._sum.propertyInjury < 50000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 75) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 50000 &&
+            sumPropertyInjury._sum.propertyInjury < 100000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 80) / 100;
+          } else if (sumPropertyInjury._sum.propertyInjury >= 100000) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 90) / 100;
+          }
+        } else if (sumPropertyInjury._count.propertyInjury === 3) {
+          if (
+            sumPropertyInjury._sum.propertyInjury > 0 &&
+            sumPropertyInjury._sum.propertyInjury < 5000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 30) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 5000 &&
+            sumPropertyInjury._sum.propertyInjury < 10000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 75) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 10000 &&
+            sumPropertyInjury._sum.propertyInjury < 50000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 100) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 50000 &&
+            sumPropertyInjury._sum.propertyInjury < 100000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 110) / 100;
+          } else if (sumPropertyInjury._sum.propertyInjury >= 100000) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 120) / 100;
+          }
+        } else if (sumPropertyInjury._count.propertyInjury === 4) {
+          if (
+            sumPropertyInjury._sum.propertyInjury > 0 &&
+            sumPropertyInjury._sum.propertyInjury < 5000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 50) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 5000 &&
+            sumPropertyInjury._sum.propertyInjury < 10000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 100) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 10000 &&
+            sumPropertyInjury._sum.propertyInjury < 50000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 120) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 50000 &&
+            sumPropertyInjury._sum.propertyInjury < 100000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 130) / 100;
+          } else if (sumPropertyInjury._sum.propertyInjury >= 100000) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 135) / 100;
+          }
+        } else if (sumPropertyInjury._count.propertyInjury >= 5) {
+          if (
+            sumPropertyInjury._sum.propertyInjury > 0 &&
+            sumPropertyInjury._sum.propertyInjury < 5000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 100) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 5000 &&
+            sumPropertyInjury._sum.propertyInjury < 10000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 120) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 10000 &&
+            sumPropertyInjury._sum.propertyInjury < 50000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 130) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 50000 &&
+            sumPropertyInjury._sum.propertyInjury < 100000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 140) / 100;
+          } else if (sumPropertyInjury._sum.propertyInjury >= 100000) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 150) / 100;
+          }
+        }
+
         return await ctx.prisma.$transaction(async (tx: any) => {
-          let certData = null;
-          let vehiUpdate = null;
+          let certData = null,
+            vehiUpdate = null;
           certData = await tx.certificate.create({
             data: {
               ...args.input,
               certificateNumber: `CN-${format(new Date(), "yyMMiHms")}`,
-              premiumTarif: vehicleDetail.premiumTarif,
+              premiumTarif:
+                vehicleDetail.premiumTarif +
+                premiumTariffBodily +
+                premiumTariffProperty,
               insureds: {
                 connect: {
                   id: vehicleDetail.insureds.id,
@@ -328,6 +653,30 @@ export const createCertificateMutation = extendType({
                   id: vehicleDetail.branchs.id,
                 },
               },
+              certificateRecords: {
+                create: {
+                  policies: {
+                    connect: {
+                      policyNumber: args.input.policies.policyNumber,
+                    },
+                  },
+                  insureds: {
+                    connect: {
+                      id: vehicleDetail.insureds.id,
+                    },
+                  },
+                  vehicles: {
+                    connect: {
+                      plateNumber: args.plateNumber,
+                    },
+                  },
+                  branchs: {
+                    connect: {
+                      id: vehicleDetail.branchs.id,
+                    },
+                  },
+                },
+              },
             },
           });
 
@@ -346,6 +695,7 @@ export const createCertificateMutation = extendType({
     });
   },
 });
+
 export const createCertificateBranchMutation = extendType({
   type: "Mutation",
   definition(t) {
@@ -388,6 +738,11 @@ export const createCertificateBranchMutation = extendType({
                 branchName: true,
               },
             },
+            certificates: {
+              include: {
+                policies: true,
+              },
+            },
           },
         });
         if (!vehicleDetail) {
@@ -400,15 +755,246 @@ export const createCertificateBranchMutation = extendType({
           );
         }
 
+        // const lastyear = subYears(new Date(), 1);
+        // const startYear = startOfYear(lastyear),
+        //   endYear = args.input.policies.policyStartDate;
+
+        const startYear = vehicleDetail.certificates.policies.policyExpireDate;
+        const endYear = new Date(args.input.policies.policyStartDate);
+        // const endYear = subDays(new Date(args.input.policies.policyStartDate), 1)
+
+        const countSlightBodilyInjury =
+          await ctx.prisma.accidentRecord.aggregate({
+            where: {
+              plateNumber: args.plateNumber,
+              bodilyInjury: "SlightBodilyInjury",
+              createdAt: {
+                gte: startYear,
+                lte: endYear,
+              },
+            },
+            _count: {
+              bodilyInjury: true,
+            },
+          });
+
+        const countSaviorBodilyInjury =
+          await ctx.prisma.accidentRecord.aggregate({
+            where: {
+              plateNumber: args.plateNumber,
+              bodilyInjury: "SaviorBodilyInjury",
+              createdAt: {
+                gte: startYear,
+                lte: endYear,
+              },
+            },
+            _count: {
+              bodilyInjury: true,
+            },
+          });
+
+        const countDeath = await ctx.prisma.accidentRecord.aggregate({
+          where: {
+            plateNumber: args.plateNumber,
+            bodilyInjury: "Death",
+            createdAt: {
+              gte: startYear,
+              lte: endYear,
+            },
+          },
+          _count: {
+            bodilyInjury: true,
+          },
+        });
+
+        const sumPropertyInjury = await ctx.prisma.accidentRecord.aggregate({
+          where: {
+            plateNumber: args.plateNumber,
+            createdAt: {
+              gte: startYear,
+              lte: endYear,
+            },
+          },
+          _count: {
+            propertyInjury: true,
+          },
+          _sum: {
+            propertyInjury: true,
+          },
+        });
+
+        let premiumTariffBodily = 0,
+          premiumTariffProperty = 0;
+
+        if (countSlightBodilyInjury._count.bodilyInjury === 1) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 10) / 100;
+        } else if (countSlightBodilyInjury._count.bodilyInjury === 2) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 20) / 100;
+        } else if (countSlightBodilyInjury._count.bodilyInjury === 3) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 50) / 100;
+        } else if (countSlightBodilyInjury._count.bodilyInjury === 4) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 80) / 100;
+        } else if (countSlightBodilyInjury._count.bodilyInjury >= 5) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 100) / 100;
+        }
+
+        if (countSaviorBodilyInjury._count.bodilyInjury === 1) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 10) / 100;
+        } else if (countSaviorBodilyInjury._count.bodilyInjury === 2) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 20) / 100;
+        } else if (countSaviorBodilyInjury._count.bodilyInjury === 3) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 50) / 100;
+        } else if (countSaviorBodilyInjury._count.bodilyInjury === 4) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 80) / 100;
+        } else if (countSaviorBodilyInjury._count.bodilyInjury >= 5) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 100) / 100;
+        }
+
+        if (countDeath._count.bodilyInjury === 1) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 10) / 100;
+        } else if (countDeath._count.bodilyInjury === 2) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 20) / 100;
+        } else if (countDeath._count.bodilyInjury === 3) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 50) / 100;
+        } else if (countDeath._count.bodilyInjury === 4) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 80) / 100;
+        } else if (countDeath._count.bodilyInjury >= 5) {
+          premiumTariffBodily += (vehicleDetail.premiumTarif * 100) / 100;
+        }
+
+        if (sumPropertyInjury._count.propertyInjury === 1) {
+          if (
+            sumPropertyInjury._sum.propertyInjury > 0 &&
+            sumPropertyInjury._sum.propertyInjury < 5000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 10) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 5000 &&
+            sumPropertyInjury._sum.propertyInjury < 10000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 20) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 10000 &&
+            sumPropertyInjury._sum.propertyInjury < 50000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 50) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 50000 &&
+            sumPropertyInjury._sum.propertyInjury < 100000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 60) / 100;
+          } else if (sumPropertyInjury._sum.propertyInjury >= 100000) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 70) / 100;
+          }
+        } else if (sumPropertyInjury._count.propertyInjury === 2) {
+          if (
+            sumPropertyInjury._sum.propertyInjury > 0 &&
+            sumPropertyInjury._sum.propertyInjury < 5000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 20) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 5000 &&
+            sumPropertyInjury._sum.propertyInjury < 10000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 30) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 10000 &&
+            sumPropertyInjury._sum.propertyInjury < 50000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 75) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 50000 &&
+            sumPropertyInjury._sum.propertyInjury < 100000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 80) / 100;
+          } else if (sumPropertyInjury._sum.propertyInjury >= 100000) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 90) / 100;
+          }
+        } else if (sumPropertyInjury._count.propertyInjury === 3) {
+          if (
+            sumPropertyInjury._sum.propertyInjury > 0 &&
+            sumPropertyInjury._sum.propertyInjury < 5000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 30) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 5000 &&
+            sumPropertyInjury._sum.propertyInjury < 10000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 75) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 10000 &&
+            sumPropertyInjury._sum.propertyInjury < 50000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 100) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 50000 &&
+            sumPropertyInjury._sum.propertyInjury < 100000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 110) / 100;
+          } else if (sumPropertyInjury._sum.propertyInjury >= 100000) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 120) / 100;
+          }
+        } else if (sumPropertyInjury._count.propertyInjury === 4) {
+          if (
+            sumPropertyInjury._sum.propertyInjury > 0 &&
+            sumPropertyInjury._sum.propertyInjury < 5000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 50) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 5000 &&
+            sumPropertyInjury._sum.propertyInjury < 10000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 100) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 10000 &&
+            sumPropertyInjury._sum.propertyInjury < 50000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 120) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 50000 &&
+            sumPropertyInjury._sum.propertyInjury < 100000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 130) / 100;
+          } else if (sumPropertyInjury._sum.propertyInjury >= 100000) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 135) / 100;
+          }
+        } else if (sumPropertyInjury._count.propertyInjury >= 5) {
+          if (
+            sumPropertyInjury._sum.propertyInjury > 0 &&
+            sumPropertyInjury._sum.propertyInjury < 5000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 100) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 5000 &&
+            sumPropertyInjury._sum.propertyInjury < 10000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 120) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 10000 &&
+            sumPropertyInjury._sum.propertyInjury < 50000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 130) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 50000 &&
+            sumPropertyInjury._sum.propertyInjury < 100000
+          ) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 140) / 100;
+          } else if (sumPropertyInjury._sum.propertyInjury >= 100000) {
+            premiumTariffProperty = (vehicleDetail.premiumTarif * 150) / 100;
+          }
+        }
+
         let certData = null;
         let vehicleData = null;
 
         [certData, vehicleData] = await ctx.prisma.$transaction([
           ctx.prisma.certificate.create({
             data: {
-              // ...args.input,
               certificateNumber: `CN-${format(new Date(), "yyMMiHms")}`,
-              premiumTarif: vehicleDetail.premiumTarif,
+              premiumTarif:
+                vehicleDetail.premiumTarif +
+                premiumTariffBodily +
+                premiumTariffProperty,
               insureds: {
                 connect: {
                   id: vehicleDetail.insureds.id,
@@ -438,6 +1024,30 @@ export const createCertificateBranchMutation = extendType({
                   id: vehicleDetail.branchs.id,
                 },
               },
+              certificateRecords: {
+                create: {
+                  policies: {
+                    connect: {
+                      policyNumber: args.input.policies.policyNumber,
+                    },
+                  },
+                  insureds: {
+                    connect: {
+                      id: vehicleDetail.insureds.id,
+                    },
+                  },
+                  vehicles: {
+                    connect: {
+                      plateNumber: args.plateNumber,
+                    },
+                  },
+                  branchs: {
+                    connect: {
+                      id: vehicleDetail.branchs.id,
+                    },
+                  },
+                },
+              },
             },
           }),
           ctx.prisma.vehicle.update({
@@ -451,62 +1061,6 @@ export const createCertificateBranchMutation = extendType({
         ]);
 
         return certData;
-
-        // return await ctx.prisma.$transaction(async (tx: any) => {
-        //   let certData = null;
-        //   let vehiUpdate = null;
-        //   certData = await tx.certificate.create({
-        //     data: {
-        //       ...args.input,
-        //       certificateNumber: `CN-${format(new Date(), "yyMMiHms")}`,
-        //       insureds: {
-        //         connect: {
-        //           mobileNumber: vehicleDetail.insureds.mobileNumber,
-        //         },
-        //       },
-        //       vehicles: {
-        //         connect: {
-        //           plateNumber: args.plateNumber,
-        //         },
-        //       },
-        //       policies: {
-        //         create: {
-        //           policyNumber: args.input.policies.policyNumber,
-        //           policyStartDate: args.input.policies.policyStartDate,
-        //           policyExpireDate: addYears(
-        //             new Date(args.input.policies.policyStartDate),
-        //             1
-        //           ),
-        //           policyIssuedConditions:
-        //             args.input.policies.policyIssuedConditions,
-        //           personsEntitledToUse:
-        //             args.input.policies.personsEntitledToUse,
-        //         },
-        //       },
-        //       branchs: {
-        //         connect: {
-        //           id: vehicleDetail.branchs.id,
-        //         },
-        //       },
-        //       tariffs: {
-        //         connect: {
-        //           tariffCode: args.input.tariffs.tariffCode,
-        //         },
-        //       },
-        //     },
-        //   });
-
-        //   vehiUpdate = tx.vehicle.update({
-        //     where: {
-        //       plateNumber: args.plateNumber,
-        //     },
-        //     data: {
-        //       isInsured: "INSURED",
-        //     },
-        //   });
-
-        //   return vehiUpdate;
-        // });
       },
     });
   },
@@ -544,8 +1098,234 @@ export const updateCertificateMutation = extendType({
           },
           include: {
             vehicles: true,
+            policies: true,
           },
         });
+
+        const startYear = vPlate.policies.policyExpireDate;
+        const endYear = new Date(args.input.policies.policyStartDate);
+        // const endYear = subDays(new Date(args.input.policies.policyStartDate), 1)
+
+        const countSlightBodilyInjury =
+          await ctx.prisma.accidentRecord.aggregate({
+            where: {
+              plateNumber: vPlate.vehiclePlateNumber,
+              bodilyInjury: "SlightBodilyInjury",
+              createdAt: {
+                gte: startYear,
+                lte: endYear,
+              },
+            },
+            _count: {
+              bodilyInjury: true,
+            },
+          });
+
+        const countSaviorBodilyInjury =
+          await ctx.prisma.accidentRecord.aggregate({
+            where: {
+              plateNumber: vPlate.vehiclePlateNumber,
+              bodilyInjury: "SaviorBodilyInjury",
+              createdAt: {
+                gte: startYear,
+                lte: endYear,
+              },
+            },
+            _count: {
+              bodilyInjury: true,
+            },
+          });
+
+        const countDeath = await ctx.prisma.accidentRecord.aggregate({
+          where: {
+            plateNumber: vPlate.vehiclePlateNumber,
+            bodilyInjury: "Death",
+            createdAt: {
+              gte: startYear,
+              lte: endYear,
+            },
+          },
+          _count: {
+            bodilyInjury: true,
+          },
+        });
+
+        const sumPropertyInjury = await ctx.prisma.accidentRecord.aggregate({
+          where: {
+            plateNumber: vPlate.vehiclePlateNumber,
+            createdAt: {
+              gte: startYear,
+              lte: endYear,
+            },
+          },
+          _count: {
+            propertyInjury: true,
+          },
+          _sum: {
+            propertyInjury: true,
+          },
+        });
+
+        let premiumTariffBodily = 0,
+          premiumTariffProperty = 0;
+
+        if (countSlightBodilyInjury._count.bodilyInjury === 1) {
+          premiumTariffBodily += (vPlate.premiumTarif * 10) / 100;
+        } else if (countSlightBodilyInjury._count.bodilyInjury === 2) {
+          premiumTariffBodily += (vPlate.premiumTarif * 20) / 100;
+        } else if (countSlightBodilyInjury._count.bodilyInjury === 3) {
+          premiumTariffBodily += (vPlate.premiumTarif * 50) / 100;
+        } else if (countSlightBodilyInjury._count.bodilyInjury === 4) {
+          premiumTariffBodily += (vPlate.premiumTarif * 80) / 100;
+        } else if (countSlightBodilyInjury._count.bodilyInjury >= 5) {
+          premiumTariffBodily += (vPlate.premiumTarif * 100) / 100;
+        }
+
+        if (countSaviorBodilyInjury._count.bodilyInjury === 1) {
+          premiumTariffBodily += (vPlate.premiumTarif * 10) / 100;
+        } else if (countSaviorBodilyInjury._count.bodilyInjury === 2) {
+          premiumTariffBodily += (vPlate.premiumTarif * 20) / 100;
+        } else if (countSaviorBodilyInjury._count.bodilyInjury === 3) {
+          premiumTariffBodily += (vPlate.premiumTarif * 50) / 100;
+        } else if (countSaviorBodilyInjury._count.bodilyInjury === 4) {
+          premiumTariffBodily += (vPlate.premiumTarif * 80) / 100;
+        } else if (countSaviorBodilyInjury._count.bodilyInjury >= 5) {
+          premiumTariffBodily += (vPlate.premiumTarif * 100) / 100;
+        }
+
+        if (countDeath._count.bodilyInjury === 1) {
+          premiumTariffBodily += (vPlate.premiumTarif * 10) / 100;
+        } else if (countDeath._count.bodilyInjury === 2) {
+          premiumTariffBodily += (vPlate.premiumTarif * 20) / 100;
+        } else if (countDeath._count.bodilyInjury === 3) {
+          premiumTariffBodily += (vPlate.premiumTarif * 50) / 100;
+        } else if (countDeath._count.bodilyInjury === 4) {
+          premiumTariffBodily += (vPlate.premiumTarif * 80) / 100;
+        } else if (countDeath._count.bodilyInjury >= 5) {
+          premiumTariffBodily += (vPlate.premiumTarif * 100) / 100;
+        }
+
+        if (sumPropertyInjury._count.propertyInjury === 1) {
+          if (
+            sumPropertyInjury._sum.propertyInjury > 0 &&
+            sumPropertyInjury._sum.propertyInjury < 5000
+          ) {
+            premiumTariffProperty = (vPlate.premiumTarif * 10) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 5000 &&
+            sumPropertyInjury._sum.propertyInjury < 10000
+          ) {
+            premiumTariffProperty = (vPlate.premiumTarif * 20) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 10000 &&
+            sumPropertyInjury._sum.propertyInjury < 50000
+          ) {
+            premiumTariffProperty = (vPlate.premiumTarif * 50) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 50000 &&
+            sumPropertyInjury._sum.propertyInjury < 100000
+          ) {
+            premiumTariffProperty = (vPlate.premiumTarif * 60) / 100;
+          } else if (sumPropertyInjury._sum.propertyInjury >= 100000) {
+            premiumTariffProperty = (vPlate.premiumTarif * 70) / 100;
+          }
+        } else if (sumPropertyInjury._count.propertyInjury === 2) {
+          if (
+            sumPropertyInjury._sum.propertyInjury > 0 &&
+            sumPropertyInjury._sum.propertyInjury < 5000
+          ) {
+            premiumTariffProperty = (vPlate.premiumTarif * 20) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 5000 &&
+            sumPropertyInjury._sum.propertyInjury < 10000
+          ) {
+            premiumTariffProperty = (vPlate.premiumTarif * 30) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 10000 &&
+            sumPropertyInjury._sum.propertyInjury < 50000
+          ) {
+            premiumTariffProperty = (vPlate.premiumTarif * 75) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 50000 &&
+            sumPropertyInjury._sum.propertyInjury < 100000
+          ) {
+            premiumTariffProperty = (vPlate.premiumTarif * 80) / 100;
+          } else if (sumPropertyInjury._sum.propertyInjury >= 100000) {
+            premiumTariffProperty = (vPlate.premiumTarif * 90) / 100;
+          }
+        } else if (sumPropertyInjury._count.propertyInjury === 3) {
+          if (
+            sumPropertyInjury._sum.propertyInjury > 0 &&
+            sumPropertyInjury._sum.propertyInjury < 5000
+          ) {
+            premiumTariffProperty = (vPlate.premiumTarif * 30) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 5000 &&
+            sumPropertyInjury._sum.propertyInjury < 10000
+          ) {
+            premiumTariffProperty = (vPlate.premiumTarif * 75) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 10000 &&
+            sumPropertyInjury._sum.propertyInjury < 50000
+          ) {
+            premiumTariffProperty = (vPlate.premiumTarif * 100) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 50000 &&
+            sumPropertyInjury._sum.propertyInjury < 100000
+          ) {
+            premiumTariffProperty = (vPlate.premiumTarif * 110) / 100;
+          } else if (sumPropertyInjury._sum.propertyInjury >= 100000) {
+            premiumTariffProperty = (vPlate.premiumTarif * 120) / 100;
+          }
+        } else if (sumPropertyInjury._count.propertyInjury === 4) {
+          if (
+            sumPropertyInjury._sum.propertyInjury > 0 &&
+            sumPropertyInjury._sum.propertyInjury < 5000
+          ) {
+            premiumTariffProperty = (vPlate.premiumTarif * 50) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 5000 &&
+            sumPropertyInjury._sum.propertyInjury < 10000
+          ) {
+            premiumTariffProperty = (vPlate.premiumTarif * 100) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 10000 &&
+            sumPropertyInjury._sum.propertyInjury < 50000
+          ) {
+            premiumTariffProperty = (vPlate.premiumTarif * 120) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 50000 &&
+            sumPropertyInjury._sum.propertyInjury < 100000
+          ) {
+            premiumTariffProperty = (vPlate.premiumTarif * 130) / 100;
+          } else if (sumPropertyInjury._sum.propertyInjury >= 100000) {
+            premiumTariffProperty = (vPlate.premiumTarif * 135) / 100;
+          }
+        } else if (sumPropertyInjury._count.propertyInjury >= 5) {
+          if (
+            sumPropertyInjury._sum.propertyInjury > 0 &&
+            sumPropertyInjury._sum.propertyInjury < 5000
+          ) {
+            premiumTariffProperty = (vPlate.premiumTarif * 100) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 5000 &&
+            sumPropertyInjury._sum.propertyInjury < 10000
+          ) {
+            premiumTariffProperty = (vPlate.premiumTarif * 120) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 10000 &&
+            sumPropertyInjury._sum.propertyInjury < 50000
+          ) {
+            premiumTariffProperty = (vPlate.premiumTarif * 130) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 50000 &&
+            sumPropertyInjury._sum.propertyInjury < 100000
+          ) {
+            premiumTariffProperty = (vPlate.premiumTarif * 140) / 100;
+          } else if (sumPropertyInjury._sum.propertyInjury >= 100000) {
+            premiumTariffProperty = (vPlate.premiumTarif * 150) / 100;
+          }
+        }
 
         let certDate = null;
         let vehicleData = null;
@@ -567,6 +1347,31 @@ export const updateCertificateMutation = extendType({
                     args.input.policies.policyIssuedConditions,
                   personsEntitledToUse:
                     args.input.policies.personsEntitledToUse,
+                },
+              },
+
+              certificateRecords: {
+                create: {
+                  policies: {
+                    connect: {
+                      policyNumber: vPlate.policies.policyNumber,
+                    },
+                  },
+                  insureds: {
+                    connect: {
+                      id: vPlate.insuredId,
+                    },
+                  },
+                  vehicles: {
+                    connect: {
+                      plateNumber: vPlate.vehicles.plateNumber,
+                    },
+                  },
+                  branchs: {
+                    connect: {
+                      id: vPlate.branchId,
+                    },
+                  },
                 },
               },
             },

@@ -4,7 +4,6 @@ import { useSession } from "next-auth/react";
 import { gql } from "@apollo/client";
 import { BsPlusCircleFill, BsFillArrowUpCircleFill } from "react-icons/bs";
 import ListInsuredPoliceReport from "@/policereport/insured/list-insured-police-report";
-import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import SiteHeader from "@/components/layout/header";
@@ -85,8 +84,8 @@ const FeedInsuredPoliceReportPolice = gql`
 `;
 
 const InsuredPoliceReportPage = ({
-  data,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   // const [showAddModal, setShowAddModal] = useState(false);
 

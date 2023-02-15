@@ -17,5 +17,6 @@ export * from "./ClaimHitAndRun";
 export * from "./UnInsuredPoliceReport";
 export * from "./ClaimUnInsured";
 export * from "./Branch";
-export * from "./AccidentRecord";
 export * from "./TariffDetal";
+export * from "./AccidentRecord";
+export * from "./CertificateRecord";

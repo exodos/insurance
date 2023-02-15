@@ -10,6 +10,7 @@ import ListBranchs from "@/branchs/list-branchs";
 import InsurerAddBranch from "@/branchs/insurer-add-branch";
 import { useRouter } from "next/router";
 import SiteHeader from "@/components/layout/header";
+import Link from "next/link";
 
 const FeedBranchInsurer = gql`
   query FeedBranchInsurer(
@@ -42,9 +43,9 @@ const FeedBranchInsurer = gql`
 `;
 
 const InsurerBranchPage = ({
-  data,
-  orgId,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+      orgId,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -83,12 +84,23 @@ const InsurerBranchPage = ({
                   </button>
                 )}
                 {session.user.memberships.role === "INSURER" && (
-                  <button type="button" className="inline-flex items-center">
-                    <BsFillArrowUpCircleFill
-                      className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
-                      aria-hidden="true"
-                    />
-                  </button>
+                  <Link
+                    href={{
+                      pathname: "/insurer/branch/export-branchs",
+                      query: {
+                        returnPage: asPath,
+                      },
+                    }}
+                    passHref
+                    legacyBehavior
+                  >
+                    <button type="button" className="inline-flex items-center">
+                      <BsFillArrowUpCircleFill
+                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </Link>
                 )}
               </div>
             )}

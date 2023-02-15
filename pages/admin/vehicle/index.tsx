@@ -98,12 +98,8 @@ const AdminVehiclePage = ({
       data,
     }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
-  const [showAddModal, setShowAddModal] = useState(false);
-  const { pathname } = useRouter();
+  const { pathname, asPath } = useRouter();
 
-  const handleAdd = () => {
-    setShowAddModal((prev) => !prev);
-  };
   return (
     <>
       <SiteHeader
@@ -141,12 +137,23 @@ const AdminVehiclePage = ({
                   </Link>
                 )}
                 {session.user.memberships.role === "SUPERADMIN" && (
-                  <button type="button" className="inline-flex items-center">
-                    <BsFillArrowUpCircleFill
-                      className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
-                      aria-hidden="true"
-                    />
-                  </button>
+                  <Link
+                    href={{
+                      pathname: "/admin/vehicle/export-vehicle",
+                      query: {
+                        returnPage: asPath,
+                      },
+                    }}
+                    passHref
+                    legacyBehavior
+                  >
+                    <button type="button" className="inline-flex items-center">
+                      <BsFillArrowUpCircleFill
+                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </Link>
                 )}
               </div>
             )}

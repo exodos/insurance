@@ -14,6 +14,7 @@ import ListUser from "@/users/list-user";
 import AddUserModal from "@/users/add-user";
 import { useRouter } from "next/router";
 import SiteHeader from "@/layout/header";
+import Link from "next/link";
 
 const FeedUser = gql`
   query FeedUser(
@@ -64,7 +65,7 @@ const AdminUserPage = ({
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
 
-  const { pathname } = useRouter();
+  const { asPath, pathname } = useRouter();
 
   const handleAdd = () => {
     setShowAddModal((prev) => !prev);
@@ -99,12 +100,23 @@ const AdminUserPage = ({
                   </button>
                 )}
                 {session.user.memberships.role === "SUPERADMIN" && (
-                  <button type="button" className="inline-flex items-center">
-                    <BsFillArrowUpCircleFill
-                      className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
-                      aria-hidden="true"
-                    />
-                  </button>
+                  <Link
+                    href={{
+                      pathname: "/admin/users/export-user",
+                      query: {
+                        returnPage: asPath,
+                      },
+                    }}
+                    passHref
+                    legacyBehavior
+                  >
+                    <button type="button" className="inline-flex items-center">
+                      <BsFillArrowUpCircleFill
+                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </Link>
                 )}
               </div>
             )}

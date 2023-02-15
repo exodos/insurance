@@ -326,6 +326,90 @@ export const vehicleInsurerByPlateNumberQuery = extendType({
   },
 });
 
+export const exportVehicleQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.list.nonNull.field("exportVehicle", {
+      type: Vehicle,
+      args: {
+        dateFrom: nonNull(stringArg()),
+        dateTo: nonNull(stringArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        return await ctx.prisma.vehicle.findMany({
+          where: {
+            updatedAt: {
+              lte: new Date(args.dateTo),
+              gte: new Date(args.dateFrom),
+            },
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
+        });
+      },
+    });
+  },
+});
+
+export const exportVehicleByInsurerQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.list.nonNull.field("exportVehicleByInsurer", {
+      type: Vehicle,
+      args: {
+        orgId: nonNull(stringArg()),
+        dateFrom: nonNull(stringArg()),
+        dateTo: nonNull(stringArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        return await ctx.prisma.vehicle.findMany({
+          where: {
+            branchs: {
+              orgId: args.orgId,
+            },
+            updatedAt: {
+              lte: new Date(args.dateTo),
+              gte: new Date(args.dateFrom),
+            },
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
+        });
+      },
+    });
+  },
+});
+
+export const exportVehicleByBranchQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.list.nonNull.field("exportVehicleByBranch", {
+      type: Vehicle,
+      args: {
+        branchId: nonNull(stringArg()),
+        dateFrom: nonNull(stringArg()),
+        dateTo: nonNull(stringArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        return await ctx.prisma.vehicle.findMany({
+          where: {
+            branchId: args.branchId,
+            updatedAt: {
+              lte: new Date(args.dateTo),
+              gte: new Date(args.dateFrom),
+            },
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
+        });
+      },
+    });
+  },
+});
+
 export const createVehicleMutation = extendType({
   type: "Mutation",
   definition(t) {

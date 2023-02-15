@@ -9,6 +9,9 @@ import ReactTooltip from "react-tooltip";
 import { gql, useLazyQuery } from "@apollo/client";
 import ClaimDetails from "./claim-details";
 import EditInsuredClaim from "./claim-edit";
+import { HiCheckBadge } from "react-icons/hi2";
+import CreateAccidentRecord from "./update-claim-status";
+import UpdateClaimStatus from "./update-claim-status";
 
 const ClaimByClaimNumber = gql`
   query ClaimByClaimNumber($claimNumber: String!) {
@@ -81,6 +84,8 @@ const ListClaim = ({ claimData, href }) => {
   const [editList, setEditList] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [detailList, setDetailtList] = useState([]);
+  const [showAccidentModal, setShowAccidentModal] = useState(false);
+  const [accidentList, setAccidentList] = useState([]);
 
   const router = useRouter();
   const handlePaginate = (page: any) => {
@@ -106,13 +111,17 @@ const ListClaim = ({ claimData, href }) => {
     setShowEditModal((prev) => !prev);
     setEditList(List);
   };
-  // const handleDelete = (Delete: any) => {};
 
   const handleDetails = () => {
     if (claimByClaimNumberData) {
       setShowDetailModal((prev) => !prev);
       setDetailtList(claimByClaimNumberData?.claimByClaimNumber);
     }
+  };
+
+  const handleAccident = (List: any) => {
+    setShowAccidentModal((prev) => !prev);
+    setAccidentList(List);
   };
 
   return (
@@ -191,8 +200,9 @@ const ListClaim = ({ claimData, href }) => {
                       >
                         Update At
                       </th>
-                      {(session.user.memberships.role ===
-                        "TRAFFICPOLICEADMIN" ||
+                      {(session.user.memberships.role === "SUPERADMIN" ||
+                        session.user.memberships.role ===
+                          "TRAFFICPOLICEADMIN" ||
                         session.user.memberships.role ===
                           "TRAFFICPOLICEMEMBER") && (
                         <>
@@ -207,6 +217,12 @@ const ListClaim = ({ claimData, href }) => {
                             className="relative py-3.5 pl-3 pr-4 sm:pr-6"
                           >
                             <span className="sr-only">Edit</span>
+                          </th>
+                          <th
+                            scope="col"
+                            className="relative py-3.5 pl-3 pr-4 sm:pr-6"
+                          >
+                            <span className="sr-only">Complete</span>
                           </th>
                         </>
                       )}
@@ -249,8 +265,9 @@ const ListClaim = ({ claimData, href }) => {
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {format(new Date(item.updatedAt), "dd-MMM-yyyy")}
                           </td>
-                          {(session.user.memberships.role ===
-                            "TRAFFICPOLICEADMIN" ||
+                          {(session.user.memberships.role === "SUPERADMIN" ||
+                            session.user.memberships.role ===
+                              "TRAFFICPOLICEMEMBER" ||
                             session.user.memberships.role ===
                               "TRAFFICPOLICEMEMBER") && (
                             <>
@@ -268,7 +285,7 @@ const ListClaim = ({ claimData, href }) => {
                                     }}
                                     className="text-indigo-600 hover:text-indigo-900"
                                     data-tip
-                                    data-type="success"
+                                    data-type="info"
                                     data-for="showDetails"
                                   >
                                     <BiShow
@@ -305,6 +322,29 @@ const ListClaim = ({ claimData, href }) => {
                                     effect="solid"
                                   >
                                     Edit Claim
+                                  </ReactTooltip>
+                                </>
+                              </td>
+                              <td className="relative whitespace-nowrap py-4 pl-2 pr-3 text-right text-sm font-medium sm:pr-6">
+                                <>
+                                  <button
+                                    onClick={() => handleAccident(item.id)}
+                                    className="text-indigo-600 hover:text-indigo-900"
+                                    data-tip
+                                    data-type="success"
+                                    data-for="accidentRecord"
+                                  >
+                                    <HiCheckBadge
+                                      className="flex-shrink-0 h-6 w-6 text-lightGreen"
+                                      aria-hidden="true"
+                                    />
+                                  </button>
+                                  <ReactTooltip
+                                    id="accidentRecord"
+                                    place="top"
+                                    effect="solid"
+                                  >
+                                    Complete
                                   </ReactTooltip>
                                 </>
                               </td>
@@ -353,6 +393,9 @@ const ListClaim = ({ claimData, href }) => {
       {showDetailModal ? <ClaimDetails claim={detailList} /> : null}
       {showEditModal ? (
         <EditInsuredClaim claims={editList} href={href} />
+      ) : null}
+      {showAccidentModal ? (
+        <UpdateClaimStatus accidentRecord={accidentList} href={href} />
       ) : null}
     </>
   );

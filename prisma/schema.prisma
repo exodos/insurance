@@ -53,6 +53,7 @@ model Branch {
   policeBranchs          InsuredPoliceReport[]   @relation(name: "ReporterPolice")
   unInsuredPoliceReports UnInsuredPoliceReport[] @relation(name: "unInsuredBranch")
   policeReport           UnInsuredPoliceReport[] @relation(name: "unInsuredPoliceReporter")
+  certificateRecords     CertificateRecord[]
 }
 
 model Organization {
@@ -85,45 +86,61 @@ model Membership {
 }
 
 model Certificate {
-  id                 String          @id @default(uuid())
-  certificateNumber  String          @unique
-  issuedDate         DateTime        @default(now())
-  policies           Policy          @relation(fields: [policyId], references: [id])
-  policyId           String          @unique
-  insureds           Insured         @relation(fields: [insuredId], references: [id], onUpdate: Cascade)
+  id                 String              @id @default(uuid())
+  certificateNumber  String              @unique
+  issuedDate         DateTime            @default(now())
+  policies           Policy              @relation(fields: [policyId], references: [id])
+  policyId           String              @unique
+  insureds           Insured             @relation(fields: [insuredId], references: [id], onUpdate: Cascade)
   insuredId          String
-  vehicles           Vehicle         @relation(fields: [vehiclePlateNumber], references: [plateNumber], onUpdate: Cascade, onDelete: Cascade)
-  vehiclePlateNumber String          @unique
-  branchs            Branch          @relation(fields: [branchId], references: [id])
+  vehicles           Vehicle             @relation(fields: [vehiclePlateNumber], references: [plateNumber], onUpdate: Cascade, onDelete: Cascade)
+  vehiclePlateNumber String              @unique
+  branchs            Branch              @relation(fields: [branchId], references: [id])
   branchId           String
   premiumTarif       Float
-  updatedAt          DateTime        @updatedAt
+  updatedAt          DateTime            @updatedAt
   // deleted            Boolean         @default(false)
   // deletedTime        DateTime?
   claims             Claim[]
   thirdPartyLogs     ThirdPartyLog[]
+  certificateRecords CertificateRecord[]
+}
+
+model CertificateRecord {
+  id           String        @id @default(uuid())
+  certificates Certificate[]
+  policies     Policy[]
+  insureds     Insured[]
+  vehicles     Vehicle[]
+  branchs      Branch[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  // deletedTime        DateTime?
+  // claims             Claim[]
 }
 
 model Insured {
-  id             String          @id @default(uuid())
-  firstName      String
-  lastName       String
-  occupation     String?
-  region         String
-  city           String
-  subCity        String
-  wereda         String
-  kebelle        String
-  houseNumber    String
-  mobileNumber   String
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  vehicles       Vehicle[]
-  certificates   Certificate[]
-  claims         Claim[]
-  branchs        Branch          @relation(fields: [branchId], references: [id])
-  branchId       String
-  thirdPartyLogs ThirdPartyLog[]
+  id                 String              @id @default(uuid())
+  regNumber          String              @unique
+  firstName          String
+  lastName           String
+  occupation         String?
+  region             String
+  city               String
+  subCity            String
+  wereda             String
+  kebelle            String
+  houseNumber        String
+  mobileNumber       String
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  vehicles           Vehicle[]
+  certificates       Certificate[]
+  claims             Claim[]
+  branchs            Branch              @relation(fields: [branchId], references: [id])
+  branchId           String
+  thirdPartyLogs     ThirdPartyLog[]
+  certificateRecords CertificateRecord[]
 
   @@unique([mobileNumber, branchId])
 }
@@ -163,18 +180,20 @@ model Vehicle {
   updatedAt               DateTime              @updatedAt
   thirdPartyLogs          ThirdPartyLog[]
   accidentRecords         AccidentRecord[]
+  certificateRecords      CertificateRecord[]
 }
 
 model Policy {
-  id                     String       @id @default(uuid())
-  policyNumber           String       @unique
-  policyStartDate        DateTime     @db.Date
-  policyExpireDate       DateTime     @db.Date
+  id                     String              @id @default(uuid())
+  policyNumber           String              @unique
+  policyStartDate        DateTime            @db.Date
+  policyExpireDate       DateTime            @db.Date
   policyIssuedConditions String?
   personsEntitledToUse   String?
   certificates           Certificate?
-  createdAt              DateTime     @default(now())
-  updatedAt              DateTime     @updatedAt
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  certificateRecords     CertificateRecord[]
 }
 
 enum MembershipRole {
@@ -203,6 +222,7 @@ model Claim {
   claimNumber          String              @unique
   damageEstimate       Float
   claimedAt            DateTime            @default(now())
+  claimStatus          ClaimProgress       @default(OnProgress)
   insuredPoliceReports InsuredPoliceReport @relation(fields: [incidentNumber], references: [incidentNumber])
   incidentNumber       String              @unique
   insureds             Insured             @relation(fields: [claimantId], references: [id])
@@ -214,9 +234,13 @@ model Claim {
   branchs              Branch              @relation(fields: [branchId], references: [id])
   branchId             String
   updatedAt            DateTime            @updatedAt
-  // deleted              Boolean             @default(false)
-  // deletedTime          DateTime?
+  accidentRecords      AccidentRecord[]
   thirdPartyLogs       ThirdPartyLog[]
+}
+
+enum ClaimProgress {
+  OnProgress
+  Completed
 }
 
 model ClaimUnInsured {
@@ -282,8 +306,8 @@ model InsuredPoliceReport {
   thirdPartyLogs                          ThirdPartyLog[]
   trafficPolices                          User            @relation(fields: [trafficPoliceId], references: [id])
   trafficPoliceId                         String
-  accidentRecords                         AccidentRecord? @relation(fields: [accidentRecordId], references: [id])
-  accidentRecordId                        String?
+  // accidentRecords                         AccidentRecord? @relation(fields: [accidentRecordId], references: [id])
+  // accidentRecordId                        String?
 }
 
 model UnInsuredPoliceReport {
@@ -415,20 +439,40 @@ model ThirdPartyLog {
   branchs              Branch[]
 }
 
+// model AccidentRecord {
+//   id                   String       @id @default(uuid())
+//   accidentTypes        ACCIDENTTYPE
+//   accidentSubType      String?
+//   propertyInjuryAmount Float?
+//   vehicles             Vehicle      @relation(fields: [plateNumber], references: [plateNumber], onUpdate: Cascade)
+//   plateNumber          String
+//   createdAt            DateTime     @default(now())
+//   updatedAt            DateTime     @updatedAt
+//   claims               Claim[]
+// }
+
+// enum ACCIDENTTYPE {
+//   BODILYINJURY
+//   PROPERTYINJURY
+// }
+
 model AccidentRecord {
-  id                   String                @id @default(uuid())
-  typeOfAccident       ACCIDENTTYPE
-  accidentSubType      String
-  vehicles             Vehicle               @relation(fields: [plateNumber], references: [chassisNumber], onUpdate: Cascade)
-  plateNumber          String
-  insuredPoliceReports InsuredPoliceReport[]
-  createdAt            DateTime              @default(now())
-  updatedAt            DateTime              @updatedAt
+  id             String           @id @default(uuid())
+  bodilyInjury   ACCIDENTSUBTYPE?
+  propertyInjury Float?
+  vehicles       Vehicle          @relation(fields: [plateNumber], references: [plateNumber], onUpdate: Cascade)
+  plateNumber    String
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  claims         Claim            @relation(fields: [claimNumber], references: [claimNumber])
+  claimNumber    String
+  // claims         Claim[]
 }
 
-enum ACCIDENTTYPE {
-  BODILYINJURY
-  PROPERTYINJURY
+enum ACCIDENTSUBTYPE {
+  SlightBodilyInjury
+  SaviorBodilyInjury
+  Death
 }
 
 enum VEHICLESTATUS {

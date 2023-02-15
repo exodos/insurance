@@ -62,6 +62,10 @@ export interface NexusGenInputs {
     policyExpireDate?: NexusGenEnums['Sort'] | null; // Sort
     policyStartDate?: NexusGenEnums['Sort'] | null; // Sort
   }
+  CertificateRecordOrderByInput: { // input type
+    createdAt?: NexusGenEnums['Sort'] | null; // Sort
+    updatedAt?: NexusGenEnums['Sort'] | null; // Sort
+  }
   CertificateUpdateInput: { // input type
     policies?: NexusGenInputs['policyUpdateInput'] | null; // policyUpdateInput
   }
@@ -100,6 +104,9 @@ export interface NexusGenInputs {
   ClaimOrderByInput: { // input type
     claimedAt?: NexusGenEnums['Sort'] | null; // Sort
     updatedAt?: NexusGenEnums['Sort'] | null; // Sort
+  }
+  ClaimStatusUpdateInput: { // input type
+    accidentRecords?: NexusGenInputs['accidentCreateInput'] | null; // accidentCreateInput
   }
   ClaimUnInsuredCreateInput: { // input type
     branchs?: NexusGenInputs['branchConnectInput'] | null; // branchConnectInput
@@ -257,6 +264,10 @@ export interface NexusGenInputs {
   VehicleOrderByInput: { // input type
     createdAt?: NexusGenEnums['Sort'] | null; // Sort
     updatedAt?: NexusGenEnums['Sort'] | null; // Sort
+  }
+  accidentCreateInput: { // input type
+    bodilyInjury?: NexusGenEnums['ACCIDENTSUBTYPE'] | null; // ACCIDENTSUBTYPE
+    propertyInjury?: number | null; // Float
   }
   branchConnectInput: { // input type
     id?: string | null; // String
@@ -496,7 +507,8 @@ export interface NexusGenInputs {
 }
 
 export interface NexusGenEnums {
-  ACCIDENTTYPE: "BODILYINJURY" | "PROPERTYINJURY"
+  ACCIDENTSUBTYPE: "Death" | "SaviorBodilyInjury" | "SlightBodilyInjury"
+  ClaimProgress: "Completed" | "OnProgress"
   InjuryType: "CRITICAL" | "DEATH" | "SIMPLE"
   IsInsured: "INSURED" | "NOTINSURED"
   MembershipRole: "BRANCHADMIN" | "INSURER" | "MEMBER" | "SUPERADMIN" | "TRAFFICPOLICEADMIN" | "TRAFFICPOLICEMEMBER" | "USER"
@@ -521,10 +533,10 @@ export interface NexusGenScalars {
 
 export interface NexusGenObjects {
   AccidentRecord: { // root type
-    accidentSubType?: string | null; // String
+    bodilyInjury?: NexusGenEnums['ACCIDENTSUBTYPE'] | null; // ACCIDENTSUBTYPE
     createdAt?: NexusGenScalars['DateTime'] | null; // DateTime
     id?: string | null; // String
-    typeOfAccident?: NexusGenEnums['ACCIDENTTYPE'] | null; // ACCIDENTTYPE
+    propertyInjury?: number | null; // Float
     updatedAt?: NexusGenScalars['DateTime'] | null; // DateTime
   }
   Branch: { // root type
@@ -543,8 +555,14 @@ export interface NexusGenObjects {
     premiumTarif?: number | null; // Float
     updatedAt?: NexusGenScalars['DateTime'] | null; // DateTime
   }
+  CertificateRecord: { // root type
+    createdAt?: NexusGenScalars['DateTime'] | null; // DateTime
+    id?: string | null; // String
+    updatedAt?: NexusGenScalars['DateTime'] | null; // DateTime
+  }
   Claim: { // root type
     claimNumber?: string | null; // String
+    claimStatus?: NexusGenEnums['ClaimProgress'] | null; // ClaimProgress
     claimedAt?: NexusGenScalars['DateTime'] | null; // DateTime
     damageEstimate?: number | null; // Float
     id?: string | null; // String
@@ -613,6 +631,11 @@ export interface NexusGenObjects {
     certificate: NexusGenRootTypes['Certificate'][]; // [Certificate!]!
     maxPage?: number | null; // Int
     totalCertificate: number; // Int!
+  }
+  FeedCertificateRecord: { // root type
+    certificateRecord: NexusGenRootTypes['CertificateRecord'][]; // [CertificateRecord!]!
+    maxPage?: number | null; // Int
+    totalCertificateRecord: number; // Int!
   }
   FeedClaim: { // root type
     claim: NexusGenRootTypes['Claim'][]; // [Claim!]!
@@ -813,6 +836,7 @@ export interface NexusGenObjects {
     lastName?: string | null; // String
     mobileNumber?: string | null; // String
     occupation?: string | null; // String
+    regNumber?: string | null; // String
     region?: string | null; // String
     subCity?: string | null; // String
     updatedAt?: NexusGenScalars['DateTime'] | null; // DateTime
@@ -991,11 +1015,11 @@ export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnu
 
 export interface NexusGenFieldTypes {
   AccidentRecord: { // field return type
-    accidentSubType: string | null; // String
+    bodilyInjury: NexusGenEnums['ACCIDENTSUBTYPE'] | null; // ACCIDENTSUBTYPE
+    claims: NexusGenRootTypes['Claim'] | null; // Claim
     createdAt: NexusGenScalars['DateTime'] | null; // DateTime
     id: string | null; // String
-    insuredPoliceReports: Array<NexusGenRootTypes['InsuredPoliceReport'] | null> | null; // [InsuredPoliceReport]
-    typeOfAccident: NexusGenEnums['ACCIDENTTYPE'] | null; // ACCIDENTTYPE
+    propertyInjury: number | null; // Float
     updatedAt: NexusGenScalars['DateTime'] | null; // DateTime
     vehicles: NexusGenRootTypes['Vehicle'] | null; // Vehicle
   }
@@ -1024,6 +1048,7 @@ export interface NexusGenFieldTypes {
   Certificate: { // field return type
     branchs: NexusGenRootTypes['Branch'] | null; // Branch
     certificateNumber: string | null; // String
+    certificateRecords: Array<NexusGenRootTypes['CertificateRecord'] | null> | null; // [CertificateRecord]
     claims: Array<NexusGenRootTypes['Claim'] | null> | null; // [Claim]
     id: string | null; // String
     insureds: NexusGenRootTypes['Insured'] | null; // Insured
@@ -1033,10 +1058,22 @@ export interface NexusGenFieldTypes {
     updatedAt: NexusGenScalars['DateTime'] | null; // DateTime
     vehicles: NexusGenRootTypes['Vehicle'] | null; // Vehicle
   }
+  CertificateRecord: { // field return type
+    branchs: Array<NexusGenRootTypes['Branch'] | null> | null; // [Branch]
+    certificates: Array<NexusGenRootTypes['Certificate'] | null> | null; // [Certificate]
+    createdAt: NexusGenScalars['DateTime'] | null; // DateTime
+    id: string | null; // String
+    insureds: Array<NexusGenRootTypes['Insured'] | null> | null; // [Insured]
+    policies: Array<NexusGenRootTypes['Policy'] | null> | null; // [Policy]
+    updatedAt: NexusGenScalars['DateTime'] | null; // DateTime
+    vehicles: Array<NexusGenRootTypes['Vehicle'] | null> | null; // [Vehicle]
+  }
   Claim: { // field return type
+    accidentRecords: Array<NexusGenRootTypes['AccidentRecord'] | null> | null; // [AccidentRecord]
     branchs: NexusGenRootTypes['Branch'] | null; // Branch
     certificates: NexusGenRootTypes['Certificate'] | null; // Certificate
     claimNumber: string | null; // String
+    claimStatus: NexusGenEnums['ClaimProgress'] | null; // ClaimProgress
     claimedAt: NexusGenScalars['DateTime'] | null; // DateTime
     damageEstimate: number | null; // Float
     id: string | null; // String
@@ -1112,6 +1149,11 @@ export interface NexusGenFieldTypes {
     certificate: NexusGenRootTypes['Certificate'][]; // [Certificate!]!
     maxPage: number | null; // Int
     totalCertificate: number; // Int!
+  }
+  FeedCertificateRecord: { // field return type
+    certificateRecord: NexusGenRootTypes['CertificateRecord'][]; // [CertificateRecord!]!
+    maxPage: number | null; // Int
+    totalCertificateRecord: number; // Int!
   }
   FeedClaim: { // field return type
     claim: NexusGenRootTypes['Claim'][]; // [Claim!]!
@@ -1319,6 +1361,7 @@ export interface NexusGenFieldTypes {
     lastName: string | null; // String
     mobileNumber: string | null; // String
     occupation: string | null; // String
+    regNumber: string | null; // String
     region: string | null; // String
     subCity: string | null; // String
     updatedAt: NexusGenScalars['DateTime'] | null; // DateTime
@@ -1396,6 +1439,7 @@ export interface NexusGenFieldTypes {
     updateClaim: NexusGenRootTypes['Claim']; // Claim!
     updateClaimHitAndRun: NexusGenRootTypes['ClaimHitAndRun']; // ClaimHitAndRun!
     updateClaimHitAndRunDamageEstimate: NexusGenRootTypes['ClaimHitAndRun']; // ClaimHitAndRun!
+    updateClaimStatus: NexusGenRootTypes['Claim']; // Claim!
     updateDamageEstimate: NexusGenRootTypes['Claim']; // Claim!
     updateHitAndRunPoliceReport: NexusGenRootTypes['HitAndRunPoliceReport']; // HitAndRunPoliceReport!
     updateInsured: NexusGenRootTypes['Insured']; // Insured!
@@ -1442,7 +1486,36 @@ export interface NexusGenFieldTypes {
     claimHitAndRunByID: NexusGenRootTypes['ClaimHitAndRun']; // ClaimHitAndRun!
     claimUnInsuredByClaimNumber: NexusGenRootTypes['ClaimUnInsured']; // ClaimUnInsured!
     claimUnInsuredByID: NexusGenRootTypes['ClaimUnInsured']; // ClaimUnInsured!
+    exportBranch: NexusGenRootTypes['Branch'][]; // [Branch!]!
+    exportBranchByInsurer: NexusGenRootTypes['Branch'][]; // [Branch!]!
+    exportCertificate: NexusGenRootTypes['Certificate'][]; // [Certificate!]!
+    exportCertificateBranch: NexusGenRootTypes['Certificate'][]; // [Certificate!]!
+    exportCertificateInsurer: NexusGenRootTypes['Certificate'][]; // [Certificate!]!
+    exportClaim: NexusGenRootTypes['Claim'][]; // [Claim!]!
+    exportClaimBranch: NexusGenRootTypes['Claim'][]; // [Claim!]!
+    exportClaimInsurer: NexusGenRootTypes['Claim'][]; // [Claim!]!
+    exportHitAndRun: NexusGenRootTypes['ClaimHitAndRun'][]; // [ClaimHitAndRun!]!
+    exportHitAndRunBranch: NexusGenRootTypes['ClaimHitAndRun'][]; // [ClaimHitAndRun!]!
+    exportHitAndRunInsurer: NexusGenRootTypes['ClaimHitAndRun'][]; // [ClaimHitAndRun!]!
+    exportHitAndRunPoliceReport: NexusGenRootTypes['HitAndRunPoliceReport'][]; // [HitAndRunPoliceReport!]!
+    exportInsured: NexusGenRootTypes['Insured'][]; // [Insured!]!
+    exportInsuredBranch: NexusGenRootTypes['Insured'][]; // [Insured!]!
+    exportInsuredInsurer: NexusGenRootTypes['Insured'][]; // [Insured!]!
+    exportInsuredPoliceReport: NexusGenRootTypes['InsuredPoliceReport'][]; // [InsuredPoliceReport!]!
+    exportInsuredPoliceReportBranch: NexusGenRootTypes['InsuredPoliceReport'][]; // [InsuredPoliceReport!]!
+    exportInsuredPoliceReportInsurer: NexusGenRootTypes['InsuredPoliceReport'][]; // [InsuredPoliceReport!]!
+    exportOrganization: NexusGenRootTypes['Organization'][]; // [Organization!]!
     exportThirdPartyLogLog: NexusGenRootTypes['ThirdPartyLog'][]; // [ThirdPartyLog!]!
+    exportUnInsuredClaim: NexusGenRootTypes['ClaimUnInsured'][]; // [ClaimUnInsured!]!
+    exportUnInsuredClaimBranch: NexusGenRootTypes['ClaimUnInsured'][]; // [ClaimUnInsured!]!
+    exportUnInsuredClaimInsurer: NexusGenRootTypes['ClaimUnInsured'][]; // [ClaimUnInsured!]!
+    exportUnInsuredPoliceReport: NexusGenRootTypes['UnInsuredPoliceReport'][]; // [UnInsuredPoliceReport!]!
+    exportUser: NexusGenRootTypes['User'][]; // [User!]!
+    exportUserBranch: NexusGenRootTypes['User'][]; // [User!]!
+    exportUserInsurer: NexusGenRootTypes['User'][]; // [User!]!
+    exportVehicle: NexusGenRootTypes['Vehicle'][]; // [Vehicle!]!
+    exportVehicleByBranch: NexusGenRootTypes['Vehicle'][]; // [Vehicle!]!
+    exportVehicleByInsurer: NexusGenRootTypes['Vehicle'][]; // [Vehicle!]!
     feedAccidentRecord: NexusGenRootTypes['FeedAccidentRecord']; // FeedAccidentRecord!
     feedBranch: NexusGenRootTypes['FeedBranch']; // FeedBranch!
     feedBranchByOrg: NexusGenRootTypes['FeedBranchByOrg'] | null; // FeedBranchByOrg
@@ -1451,6 +1524,7 @@ export interface NexusGenFieldTypes {
     feedCertificate: NexusGenRootTypes['FeedCertificate']; // FeedCertificate!
     feedCertificateBranch: NexusGenRootTypes['FeedCertificateBranch']; // FeedCertificateBranch!
     feedCertificateInsurer: NexusGenRootTypes['FeedCertificateInsurer']; // FeedCertificateInsurer!
+    feedCertificateRecord: NexusGenRootTypes['FeedCertificateRecord']; // FeedCertificateRecord!
     feedClaim: NexusGenRootTypes['FeedClaim']; // FeedClaim!
     feedClaimBranch: NexusGenRootTypes['FeedClaimBranch']; // FeedClaimBranch!
     feedClaimHitAndRun: NexusGenRootTypes['FeedClaimHitAndRun']; // FeedClaimHitAndRun!
@@ -1658,11 +1732,11 @@ export interface NexusGenFieldTypes {
 
 export interface NexusGenFieldTypeNames {
   AccidentRecord: { // field return type name
-    accidentSubType: 'String'
+    bodilyInjury: 'ACCIDENTSUBTYPE'
+    claims: 'Claim'
     createdAt: 'DateTime'
     id: 'String'
-    insuredPoliceReports: 'InsuredPoliceReport'
-    typeOfAccident: 'ACCIDENTTYPE'
+    propertyInjury: 'Float'
     updatedAt: 'DateTime'
     vehicles: 'Vehicle'
   }
@@ -1691,6 +1765,7 @@ export interface NexusGenFieldTypeNames {
   Certificate: { // field return type name
     branchs: 'Branch'
     certificateNumber: 'String'
+    certificateRecords: 'CertificateRecord'
     claims: 'Claim'
     id: 'String'
     insureds: 'Insured'
@@ -1700,10 +1775,22 @@ export interface NexusGenFieldTypeNames {
     updatedAt: 'DateTime'
     vehicles: 'Vehicle'
   }
+  CertificateRecord: { // field return type name
+    branchs: 'Branch'
+    certificates: 'Certificate'
+    createdAt: 'DateTime'
+    id: 'String'
+    insureds: 'Insured'
+    policies: 'Policy'
+    updatedAt: 'DateTime'
+    vehicles: 'Vehicle'
+  }
   Claim: { // field return type name
+    accidentRecords: 'AccidentRecord'
     branchs: 'Branch'
     certificates: 'Certificate'
     claimNumber: 'String'
+    claimStatus: 'ClaimProgress'
     claimedAt: 'DateTime'
     damageEstimate: 'Float'
     id: 'String'
@@ -1779,6 +1866,11 @@ export interface NexusGenFieldTypeNames {
     certificate: 'Certificate'
     maxPage: 'Int'
     totalCertificate: 'Int'
+  }
+  FeedCertificateRecord: { // field return type name
+    certificateRecord: 'CertificateRecord'
+    maxPage: 'Int'
+    totalCertificateRecord: 'Int'
   }
   FeedClaim: { // field return type name
     claim: 'Claim'
@@ -1986,6 +2078,7 @@ export interface NexusGenFieldTypeNames {
     lastName: 'String'
     mobileNumber: 'String'
     occupation: 'String'
+    regNumber: 'String'
     region: 'String'
     subCity: 'String'
     updatedAt: 'DateTime'
@@ -2063,6 +2156,7 @@ export interface NexusGenFieldTypeNames {
     updateClaim: 'Claim'
     updateClaimHitAndRun: 'ClaimHitAndRun'
     updateClaimHitAndRunDamageEstimate: 'ClaimHitAndRun'
+    updateClaimStatus: 'Claim'
     updateDamageEstimate: 'Claim'
     updateHitAndRunPoliceReport: 'HitAndRunPoliceReport'
     updateInsured: 'Insured'
@@ -2109,7 +2203,36 @@ export interface NexusGenFieldTypeNames {
     claimHitAndRunByID: 'ClaimHitAndRun'
     claimUnInsuredByClaimNumber: 'ClaimUnInsured'
     claimUnInsuredByID: 'ClaimUnInsured'
+    exportBranch: 'Branch'
+    exportBranchByInsurer: 'Branch'
+    exportCertificate: 'Certificate'
+    exportCertificateBranch: 'Certificate'
+    exportCertificateInsurer: 'Certificate'
+    exportClaim: 'Claim'
+    exportClaimBranch: 'Claim'
+    exportClaimInsurer: 'Claim'
+    exportHitAndRun: 'ClaimHitAndRun'
+    exportHitAndRunBranch: 'ClaimHitAndRun'
+    exportHitAndRunInsurer: 'ClaimHitAndRun'
+    exportHitAndRunPoliceReport: 'HitAndRunPoliceReport'
+    exportInsured: 'Insured'
+    exportInsuredBranch: 'Insured'
+    exportInsuredInsurer: 'Insured'
+    exportInsuredPoliceReport: 'InsuredPoliceReport'
+    exportInsuredPoliceReportBranch: 'InsuredPoliceReport'
+    exportInsuredPoliceReportInsurer: 'InsuredPoliceReport'
+    exportOrganization: 'Organization'
     exportThirdPartyLogLog: 'ThirdPartyLog'
+    exportUnInsuredClaim: 'ClaimUnInsured'
+    exportUnInsuredClaimBranch: 'ClaimUnInsured'
+    exportUnInsuredClaimInsurer: 'ClaimUnInsured'
+    exportUnInsuredPoliceReport: 'UnInsuredPoliceReport'
+    exportUser: 'User'
+    exportUserBranch: 'User'
+    exportUserInsurer: 'User'
+    exportVehicle: 'Vehicle'
+    exportVehicleByBranch: 'Vehicle'
+    exportVehicleByInsurer: 'Vehicle'
     feedAccidentRecord: 'FeedAccidentRecord'
     feedBranch: 'FeedBranch'
     feedBranchByOrg: 'FeedBranchByOrg'
@@ -2118,6 +2241,7 @@ export interface NexusGenFieldTypeNames {
     feedCertificate: 'FeedCertificate'
     feedCertificateBranch: 'FeedCertificateBranch'
     feedCertificateInsurer: 'FeedCertificateInsurer'
+    feedCertificateRecord: 'FeedCertificateRecord'
     feedClaim: 'FeedClaim'
     feedClaimBranch: 'FeedClaimBranch'
     feedClaimHitAndRun: 'FeedClaimHitAndRun'
@@ -2437,6 +2561,10 @@ export interface NexusGenArgTypes {
       damageEstimate: number; // Float!
       id: string; // String!
     }
+    updateClaimStatus: { // args
+      id: string; // String!
+      input: NexusGenInputs['ClaimStatusUpdateInput']; // ClaimStatusUpdateInput!
+    }
     updateDamageEstimate: { // args
       claimNumber: string; // String!
       damageEstimate: number; // Float!
@@ -2515,11 +2643,144 @@ export interface NexusGenArgTypes {
     claimUnInsuredByID: { // args
       id: string; // String!
     }
+    exportBranch: { // args
+      dateFrom: string; // String!
+      dateTo: string; // String!
+    }
+    exportBranchByInsurer: { // args
+      dateFrom: string; // String!
+      dateTo: string; // String!
+      orgId: string; // String!
+    }
+    exportCertificate: { // args
+      dateFrom: string; // String!
+      dateTo: string; // String!
+    }
+    exportCertificateBranch: { // args
+      branchId: string; // String!
+      dateFrom: string; // String!
+      dateTo: string; // String!
+    }
+    exportCertificateInsurer: { // args
+      dateFrom: string; // String!
+      dateTo: string; // String!
+      orgId: string; // String!
+    }
+    exportClaim: { // args
+      dateFrom: string; // String!
+      dateTo: string; // String!
+    }
+    exportClaimBranch: { // args
+      branchId: string; // String!
+      dateFrom: string; // String!
+      dateTo: string; // String!
+    }
+    exportClaimInsurer: { // args
+      dateFrom: string; // String!
+      dateTo: string; // String!
+      orgId: string; // String!
+    }
+    exportHitAndRun: { // args
+      dateFrom: string; // String!
+      dateTo: string; // String!
+    }
+    exportHitAndRunBranch: { // args
+      branchId: string; // String!
+      dateFrom: string; // String!
+      dateTo: string; // String!
+    }
+    exportHitAndRunInsurer: { // args
+      dateFrom: string; // String!
+      dateTo: string; // String!
+      orgId: string; // String!
+    }
+    exportHitAndRunPoliceReport: { // args
+      dateFrom: string; // String!
+      dateTo: string; // String!
+    }
+    exportInsured: { // args
+      dateFrom: string; // String!
+      dateTo: string; // String!
+    }
+    exportInsuredBranch: { // args
+      branchId: string; // String!
+      dateFrom: string; // String!
+      dateTo: string; // String!
+    }
+    exportInsuredInsurer: { // args
+      dateFrom: string; // String!
+      dateTo: string; // String!
+      orgId: string; // String!
+    }
+    exportInsuredPoliceReport: { // args
+      dateFrom: string; // String!
+      dateTo: string; // String!
+    }
+    exportInsuredPoliceReportBranch: { // args
+      branchId: string; // String!
+      dateFrom: string; // String!
+      dateTo: string; // String!
+    }
+    exportInsuredPoliceReportInsurer: { // args
+      dateFrom: string; // String!
+      dateTo: string; // String!
+      orgId: string; // String!
+    }
+    exportOrganization: { // args
+      dateFrom: string; // String!
+      dateTo: string; // String!
+    }
     exportThirdPartyLogLog: { // args
       action: string; // String!
       dateFrom: string; // String!
       dateTo: string; // String!
       mode: string; // String!
+    }
+    exportUnInsuredClaim: { // args
+      dateFrom: string; // String!
+      dateTo: string; // String!
+    }
+    exportUnInsuredClaimBranch: { // args
+      branchId: string; // String!
+      dateFrom: string; // String!
+      dateTo: string; // String!
+    }
+    exportUnInsuredClaimInsurer: { // args
+      dateFrom: string; // String!
+      dateTo: string; // String!
+      orgId: string; // String!
+    }
+    exportUnInsuredPoliceReport: { // args
+      dateFrom: string; // String!
+      dateTo: string; // String!
+    }
+    exportUser: { // args
+      dateFrom: string; // String!
+      dateTo: string; // String!
+    }
+    exportUserBranch: { // args
+      branchId: string; // String!
+      dateFrom: string; // String!
+      dateTo: string; // String!
+    }
+    exportUserInsurer: { // args
+      dateFrom: string; // String!
+      dateTo: string; // String!
+      orgId: string; // String!
+    }
+    exportVehicle: { // args
+      dateFrom: string; // String!
+      dateTo: string; // String!
+    }
+    exportVehicleByBranch: { // args
+      branchId: string; // String!
+      dateFrom: string; // String!
+      dateTo: string; // String!
+    }
+    exportVehicleByInsurer: { // args
+      dateFrom: string; // String!
+      dateTo: string; // String!
+      orgId: string; // String!
     }
     feedAccidentRecord: { // args
       filter?: string | null; // String
@@ -2563,6 +2824,12 @@ export interface NexusGenArgTypes {
       filter?: string | null; // String
       orderBy?: NexusGenInputs['CertificateOrderByInput'][] | null; // [CertificateOrderByInput!]
       orgId: string; // String!
+      skip?: number | null; // Int
+      take?: number | null; // Int
+    }
+    feedCertificateRecord: { // args
+      filter?: string | null; // String
+      orderBy?: NexusGenInputs['CertificateRecordOrderByInput'][] | null; // [CertificateRecordOrderByInput!]
       skip?: number | null; // Int
       take?: number | null; // Int
     }

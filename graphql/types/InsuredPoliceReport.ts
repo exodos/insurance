@@ -608,6 +608,90 @@ export const deleteInsuredPoliceReportMutation = extendType({
   },
 });
 
+export const exportInsuredPoliceReportQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.list.nonNull.field("exportInsuredPoliceReport", {
+      type: InsuredPoliceReport,
+      args: {
+        dateFrom: nonNull(stringArg()),
+        dateTo: nonNull(stringArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        return await ctx.prisma.insuredPoliceReport.findMany({
+          where: {
+            reportDate: {
+              lte: new Date(args.dateTo),
+              gte: new Date(args.dateFrom),
+            },
+          },
+          orderBy: {
+            reportDate: "desc",
+          },
+        });
+      },
+    });
+  },
+});
+
+export const exportInsuredPoliceReportInsurerQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.list.nonNull.field("exportInsuredPoliceReportInsurer", {
+      type: InsuredPoliceReport,
+      args: {
+        orgId: nonNull(stringArg()),
+        dateFrom: nonNull(stringArg()),
+        dateTo: nonNull(stringArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        return await ctx.prisma.insuredPoliceReport.findMany({
+          where: {
+            policeBranch: {
+              orgId: args.orgId,
+            },
+            reportDate: {
+              lte: new Date(args.dateTo),
+              gte: new Date(args.dateFrom),
+            },
+          },
+          orderBy: {
+            reportDate: "desc",
+          },
+        });
+      },
+    });
+  },
+});
+
+export const exportInsuredPoliceReportBranchQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.list.nonNull.field("exportInsuredPoliceReportBranch", {
+      type: InsuredPoliceReport,
+      args: {
+        branchId: nonNull(stringArg()),
+        dateFrom: nonNull(stringArg()),
+        dateTo: nonNull(stringArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        return await ctx.prisma.insuredPoliceReport.findMany({
+          where: {
+            policeBranchId: args.branchId,
+            reportDate: {
+              lte: new Date(args.dateTo),
+              gte: new Date(args.dateFrom),
+            },
+          },
+          orderBy: {
+            reportDate: "desc",
+          },
+        });
+      },
+    });
+  },
+});
+
 export const FeedInsuredPoliceReport = objectType({
   name: "FeedInsuredPoliceReport",
   definition(t) {

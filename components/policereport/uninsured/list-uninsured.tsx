@@ -7,7 +7,6 @@ import { useSession } from "next-auth/react";
 import { useState } from "react";
 import ReactTooltip from "react-tooltip";
 import { gql, useLazyQuery } from "@apollo/client";
-import AdminUnInsuredDetail from "./detail-uninsured-report";
 import DetailUnInsuredReport from "./detail-uninsured-report";
 import InsuredPoliceReportDelete from "./delete-uninsured-report";
 import EditUnInsuredPoliceReportModal from "./edit-uninsured-report";

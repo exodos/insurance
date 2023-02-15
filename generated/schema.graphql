@@ -2,17 +2,18 @@
 ### Do not make changes to this file directly
 
 
-enum ACCIDENTTYPE {
-  BODILYINJURY
-  PROPERTYINJURY
+enum ACCIDENTSUBTYPE {
+  Death
+  SaviorBodilyInjury
+  SlightBodilyInjury
 }
 
 type AccidentRecord {
-  accidentSubType: String
+  bodilyInjury: ACCIDENTSUBTYPE
+  claims: Claim
   createdAt: DateTime
   id: String
-  insuredPoliceReports: [InsuredPoliceReport]
-  typeOfAccident: ACCIDENTTYPE
+  propertyInjury: Float
   updatedAt: DateTime
   vehicles: Vehicle
 }
@@ -53,6 +54,7 @@ input BranchOrderByInput {
 type Certificate {
   branchs: Branch
   certificateNumber: String
+  certificateRecords: [CertificateRecord]
   claims: [Claim]
   id: String
   insureds: Insured
@@ -74,14 +76,32 @@ input CertificateOrderByInput {
   policyStartDate: Sort
 }
 
+type CertificateRecord {
+  branchs: [Branch]
+  certificates: [Certificate]
+  createdAt: DateTime
+  id: String
+  insureds: [Insured]
+  policies: [Policy]
+  updatedAt: DateTime
+  vehicles: [Vehicle]
+}
+
+input CertificateRecordOrderByInput {
+  createdAt: Sort
+  updatedAt: Sort
+}
+
 input CertificateUpdateInput {
   policies: policyUpdateInput
 }
 
 type Claim {
+  accidentRecords: [AccidentRecord]
   branchs: Branch
   certificates: Certificate
   claimNumber: String
+  claimStatus: ClaimProgress
   claimedAt: DateTime
   damageEstimate: Float
   id: String
@@ -144,6 +164,15 @@ input ClaimHitRunUpdateInput {
 input ClaimOrderByInput {
   claimedAt: Sort
   updatedAt: Sort
+}
+
+enum ClaimProgress {
+  Completed
+  OnProgress
+}
+
+input ClaimStatusUpdateInput {
+  accidentRecords: accidentCreateInput
 }
 
 type ClaimUnInsured {
@@ -225,6 +254,12 @@ type FeedCertificateInsurer {
   certificate: [Certificate!]!
   maxPage: Int
   totalCertificate: Int!
+}
+
+type FeedCertificateRecord {
+  certificateRecord: [CertificateRecord!]!
+  maxPage: Int
+  totalCertificateRecord: Int!
 }
 
 type FeedClaim {
@@ -480,6 +515,7 @@ type Insured {
   lastName: String
   mobileNumber: String
   occupation: String
+  regNumber: String
   region: String
   subCity: String
   updatedAt: DateTime
@@ -630,6 +666,7 @@ type Mutation {
   updateClaim(id: String!, input: ClaimUpdateInput!): Claim!
   updateClaimHitAndRun(id: String!, input: ClaimHitRunUpdateInput!): ClaimHitAndRun!
   updateClaimHitAndRunDamageEstimate(damageEstimate: Float!, id: String!): ClaimHitAndRun!
+  updateClaimStatus(id: String!, input: ClaimStatusUpdateInput!): Claim!
   updateDamageEstimate(claimNumber: String!, damageEstimate: Float!): Claim!
   updateHitAndRunPoliceReport(id: String!, input: hitAndRunUpdateInput!): HitAndRunPoliceReport!
   updateInsured(id: String!, input: insuredUpdateInput!): Insured!
@@ -710,7 +747,36 @@ type Query {
   claimHitAndRunByID(id: String!): ClaimHitAndRun!
   claimUnInsuredByClaimNumber(claimNumber: String!): ClaimUnInsured!
   claimUnInsuredByID(id: String!): ClaimUnInsured!
+  exportBranch(dateFrom: String!, dateTo: String!): [Branch!]!
+  exportBranchByInsurer(dateFrom: String!, dateTo: String!, orgId: String!): [Branch!]!
+  exportCertificate(dateFrom: String!, dateTo: String!): [Certificate!]!
+  exportCertificateBranch(branchId: String!, dateFrom: String!, dateTo: String!): [Certificate!]!
+  exportCertificateInsurer(dateFrom: String!, dateTo: String!, orgId: String!): [Certificate!]!
+  exportClaim(dateFrom: String!, dateTo: String!): [Claim!]!
+  exportClaimBranch(branchId: String!, dateFrom: String!, dateTo: String!): [Claim!]!
+  exportClaimInsurer(dateFrom: String!, dateTo: String!, orgId: String!): [Claim!]!
+  exportHitAndRun(dateFrom: String!, dateTo: String!): [ClaimHitAndRun!]!
+  exportHitAndRunBranch(branchId: String!, dateFrom: String!, dateTo: String!): [ClaimHitAndRun!]!
+  exportHitAndRunInsurer(dateFrom: String!, dateTo: String!, orgId: String!): [ClaimHitAndRun!]!
+  exportHitAndRunPoliceReport(dateFrom: String!, dateTo: String!): [HitAndRunPoliceReport!]!
+  exportInsured(dateFrom: String!, dateTo: String!): [Insured!]!
+  exportInsuredBranch(branchId: String!, dateFrom: String!, dateTo: String!): [Insured!]!
+  exportInsuredInsurer(dateFrom: String!, dateTo: String!, orgId: String!): [Insured!]!
+  exportInsuredPoliceReport(dateFrom: String!, dateTo: String!): [InsuredPoliceReport!]!
+  exportInsuredPoliceReportBranch(branchId: String!, dateFrom: String!, dateTo: String!): [InsuredPoliceReport!]!
+  exportInsuredPoliceReportInsurer(dateFrom: String!, dateTo: String!, orgId: String!): [InsuredPoliceReport!]!
+  exportOrganization(dateFrom: String!, dateTo: String!): [Organization!]!
   exportThirdPartyLogLog(action: String!, dateFrom: String!, dateTo: String!, mode: String!): [ThirdPartyLog!]!
+  exportUnInsuredClaim(dateFrom: String!, dateTo: String!): [ClaimUnInsured!]!
+  exportUnInsuredClaimBranch(branchId: String!, dateFrom: String!, dateTo: String!): [ClaimUnInsured!]!
+  exportUnInsuredClaimInsurer(dateFrom: String!, dateTo: String!, orgId: String!): [ClaimUnInsured!]!
+  exportUnInsuredPoliceReport(dateFrom: String!, dateTo: String!): [UnInsuredPoliceReport!]!
+  exportUser(dateFrom: String!, dateTo: String!): [User!]!
+  exportUserBranch(branchId: String!, dateFrom: String!, dateTo: String!): [User!]!
+  exportUserInsurer(dateFrom: String!, dateTo: String!, orgId: String!): [User!]!
+  exportVehicle(dateFrom: String!, dateTo: String!): [Vehicle!]!
+  exportVehicleByBranch(branchId: String!, dateFrom: String!, dateTo: String!): [Vehicle!]!
+  exportVehicleByInsurer(dateFrom: String!, dateTo: String!, orgId: String!): [Vehicle!]!
   feedAccidentRecord(filter: String, orderBy: [AccidentRecordOrderByInput!], skip: Int, take: Int): FeedAccidentRecord!
   feedBranch(filter: String, orderBy: [BranchOrderByInput!], skip: Int, take: Int): FeedBranch!
   feedBranchByOrg(orgId: String!): FeedBranchByOrg
@@ -719,6 +785,7 @@ type Query {
   feedCertificate(filter: String, orderBy: [CertificateOrderByInput!], skip: Int, take: Int): FeedCertificate!
   feedCertificateBranch(branchId: String!, filter: String, orderBy: [CertificateOrderByInput!], skip: Int, take: Int): FeedCertificateBranch!
   feedCertificateInsurer(filter: String, orderBy: [CertificateOrderByInput!], orgId: String!, skip: Int, take: Int): FeedCertificateInsurer!
+  feedCertificateRecord(filter: String, orderBy: [CertificateRecordOrderByInput!], skip: Int, take: Int): FeedCertificateRecord!
   feedClaim(filter: String, orderBy: [ClaimOrderByInput!], skip: Int, take: Int): FeedClaim!
   feedClaimBranch(branchId: String!, filter: String, orderBy: [ClaimOrderByInput!], skip: Int, take: Int): FeedClaimBranch!
   feedClaimHitAndRun(filter: String, orderBy: [ClaimOrderByInput!], skip: Int, take: Int): FeedClaimHitAndRun!
@@ -1054,6 +1121,11 @@ enum VictimedCondition {
   DRIVER
   PASSENGER
   PEDESTRIAN
+}
+
+input accidentCreateInput {
+  bodilyInjury: ACCIDENTSUBTYPE
+  propertyInjury: Float
 }
 
 input branchConnectInput {

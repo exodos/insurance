@@ -117,7 +117,7 @@ const ListInsured = ({ insuredData }) => {
                         scope="col"
                         className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
                       >
-                        #
+                        Registration #
                       </th>
                       <th
                         scope="col"
@@ -222,7 +222,7 @@ const ListInsured = ({ insuredData }) => {
                       insuredData?.insured?.map((item: any, i: any) => (
                         <tr key={i}>
                           <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                            {i + 1}
+                            {item.regNumber}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {item.firstName}

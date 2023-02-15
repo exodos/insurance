@@ -98,17 +98,12 @@ const FeedVehicleBranch = gql`
 `;
 
 const BranchVehiclePage = ({
-      data,
-      branchId,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  data,
+  branchId,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
-  // const [showAddModal, setShowAddModal] = useState(false);
 
-  const { pathname } = useRouter();
-
-  // const handleAdd = () => {
-  //   setShowAddModal((prev) => !prev);
-  // };
+  const { pathname, asPath } = useRouter();
   return (
     <>
       <SiteHeader
@@ -148,12 +143,23 @@ const BranchVehiclePage = ({
                 )}
                 {(session.user.memberships.role === "INSURER" ||
                   session.user.memberships.role === "MEMBER") && (
-                  <button type="button" className="inline-flex items-center">
-                    <BsFillArrowUpCircleFill
-                      className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
-                      aria-hidden="true"
-                    />
-                  </button>
+                  <Link
+                    href={{
+                      pathname: "/branch/vehicle/export-vehicle",
+                      query: {
+                        returnPage: asPath,
+                      },
+                    }}
+                    passHref
+                    legacyBehavior
+                  >
+                    <button type="button" className="inline-flex items-center">
+                      <BsFillArrowUpCircleFill
+                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </Link>
                 )}
               </div>
             )}

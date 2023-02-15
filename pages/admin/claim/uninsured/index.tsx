@@ -8,6 +8,7 @@ import { BsFillArrowUpCircleFill } from "react-icons/bs";
 import ListUnInsuredClaim from "@/claim/uninsured/list-uninsured-claim";
 import { useRouter } from "next/router";
 import SiteHeader from "@/components/layout/header";
+import Link from "next/link";
 
 const FeedClaimUnInsured = gql`
   query FeedClaimUnInsured(
@@ -43,8 +44,8 @@ const FeedClaimUnInsured = gql`
 `;
 
 const AdminClaimUnInsured = ({
-      data,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  data,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
 
   const { asPath } = useRouter();
@@ -69,12 +70,23 @@ const AdminClaimUnInsured = ({
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
                 {session.user.memberships.role === "SUPERADMIN" && (
-                  <button type="button" className="inline-flex items-center">
-                    <BsFillArrowUpCircleFill
-                      className="flex-shrink-0 mr-5 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-200"
-                      aria-hidden="true"
-                    />
-                  </button>
+                  <Link
+                    href={{
+                      pathname: "/admin/claim/uninsured/export-uninsured-claim",
+                      query: {
+                        returnPage: asPath,
+                      },
+                    }}
+                    passHref
+                    legacyBehavior
+                  >
+                    <button type="button" className="inline-flex items-center">
+                      <BsFillArrowUpCircleFill
+                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </Link>
                 )}
               </div>
             )}

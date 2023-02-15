@@ -9,6 +9,7 @@ import { authOptions } from "pages/api/auth/[...nextauth]";
 import ListHitAndRun from "@/policereport/hitandrun/list-hit-and-run";
 import { useRouter } from "next/router";
 import SiteHeader from "@/components/layout/header";
+import Link from "next/link";
 
 const FeedHitAndRunPoliceReport = gql`
   query FeedHitAndRunPoliceReport(
@@ -80,14 +81,25 @@ const AdminHitAndRunPoliceReport = ({
             </div>
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
-                {(session.user.memberships.role === "SUPERADMIN" ||
-                  session.user.memberships.role === "TRAFFICPOLICE") && (
-                  <button type="button" className="inline-flex items-center">
-                    <BsFillArrowUpCircleFill
-                      className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
-                      aria-hidden="true"
-                    />
-                  </button>
+                {session.user.memberships.role === "SUPERADMIN" && (
+                  <Link
+                    href={{
+                      pathname:
+                        "/admin/policereport/hitAndRun/export-hit-and-run",
+                      query: {
+                        returnPage: asPath,
+                      },
+                    }}
+                    passHref
+                    legacyBehavior
+                  >
+                    <button type="button" className="inline-flex items-center">
+                      <BsFillArrowUpCircleFill
+                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </Link>
                 )}
               </div>
             )}

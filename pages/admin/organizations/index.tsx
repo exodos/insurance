@@ -9,6 +9,8 @@ import { useState } from "react";
 import ListOrganizations from "@/organizations/list-organizations";
 import AddOrganizationModal from "@/organizations/add-organizations";
 import SiteHeader from "@/components/layout/header";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
 const FeedOrganization = gql`
   query FeedOrganization(
@@ -44,6 +46,8 @@ const AdminOrganizationPage = ({
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
 
+  const { asPath, pathname } = useRouter();
+
   const handleAdd = () => {
     setShowAddModal((prev) => !prev);
   };
@@ -77,12 +81,23 @@ const AdminOrganizationPage = ({
                   </button>
                 )}
                 {session.user.memberships.role === "SUPERADMIN" && (
-                  <button type="button" className="inline-flex items-center">
-                    <BsFillArrowUpCircleFill
-                      className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
-                      aria-hidden="true"
-                    />
-                  </button>
+                  <Link
+                    href={{
+                      pathname: "/admin/organizations/export-organization",
+                      query: {
+                        returnPage: asPath,
+                      },
+                    }}
+                    passHref
+                    legacyBehavior
+                  >
+                    <button type="button" className="inline-flex items-center">
+                      <BsFillArrowUpCircleFill
+                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </Link>
                 )}
               </div>
             )}

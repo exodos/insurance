@@ -10,6 +10,7 @@ import AddInsuredModal from "@/insured/create-insured";
 import SiteHeader from "@/components/layout/header";
 import ListInsured from "@/components/insured/list-insured";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 const FeedInsured = gql`
   query FeedInsured(
@@ -22,6 +23,7 @@ const FeedInsured = gql`
     feedInsured(filter: $filter, skip: $skip, take: $take, orderBy: $orderBy) {
       insured {
         id
+        regNumber
         firstName
         lastName
         occupation
@@ -48,12 +50,12 @@ const FeedInsured = gql`
 `;
 
 const AdminInsuredPage = ({
-  data,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
 
-  const { pathname } = useRouter();
+  const { pathname, asPath } = useRouter();
 
   const handleAdd = () => {
     setShowAddModal((prev) => !prev);
@@ -88,12 +90,23 @@ const AdminInsuredPage = ({
                   </button>
                 )}
                 {session.user.memberships.role === "SUPERADMIN" && (
-                  <button type="button" className="inline-flex items-center">
-                    <BsFillArrowUpCircleFill
-                      className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
-                      aria-hidden="true"
-                    />
-                  </button>
+                  <Link
+                    href={{
+                      pathname: "/admin/insured/export-insured",
+                      query: {
+                        returnPage: asPath,
+                      },
+                    }}
+                    passHref
+                    legacyBehavior
+                  >
+                    <button type="button" className="inline-flex items-center">
+                      <BsFillArrowUpCircleFill
+                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </Link>
                 )}
               </div>
             )}

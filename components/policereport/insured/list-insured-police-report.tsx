@@ -44,7 +44,7 @@ const InsuredPoliceReportByIncidentNumber = gql`
         plateNumber
         vehicleType
         insureds {
-          insuredName
+          firstName
           mobileNumber
         }
       }
@@ -72,7 +72,7 @@ const InsuredPoliceReportByIncidentNumber = gql`
         vehicleType
         insureds {
           id
-          insuredName
+          firstName
           mobileNumber
           region
           city
@@ -390,7 +390,7 @@ const ListInsuredPoliceReport = ({ policeReportData }) => {
                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                               {
                                 item.vehicle_PoliceReport_victimVehicle.insureds
-                                  .insuredName
+                                  .firstName
                               }
                             </td>
                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
@@ -411,7 +411,7 @@ const ListInsuredPoliceReport = ({ policeReportData }) => {
                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                               {
                                 item.vehicle_PoliceReport_responsibleVehicle
-                                  .insureds.insuredName
+                                  .insureds.firstName
                               }
                             </td>
                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">

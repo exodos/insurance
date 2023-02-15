@@ -6,7 +6,6 @@ import { gql, useMutation } from "@apollo/client";
 import { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/solid";
-import { changePhone } from "lib/config";
 import NotificationContext from "@/store/notification-context";
 
 const UpdateClaim = gql`

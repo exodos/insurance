@@ -223,7 +223,6 @@ const AddCertificate = ({
               </p>
             )}
           </div>
-
           {vehicleByPlateNumberData?.vehicleByPlateNumber && (
             <div className="px-1 sm:px-2 lg:px-4">
               <div className="mt-8 flex flex-col">

@@ -354,6 +354,32 @@ export const deleteHitRunPoliceReportMutation = extendType({
   },
 });
 
+export const exportHitAndRunPoliceReportQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.list.nonNull.field("exportHitAndRunPoliceReport", {
+      type: HitAndRunPoliceReport,
+      args: {
+        dateFrom: nonNull(stringArg()),
+        dateTo: nonNull(stringArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        return await ctx.prisma.hitAndRunPoliceReport.findMany({
+          where: {
+            reportDate: {
+              lte: new Date(args.dateTo),
+              gte: new Date(args.dateFrom),
+            },
+          },
+          orderBy: {
+            reportDate: "desc",
+          },
+        });
+      },
+    });
+  },
+});
+
 export const FeedHitAndRunPoliceReport = objectType({
   name: "FeedHitAndRunPoliceReport",
   definition(t) {

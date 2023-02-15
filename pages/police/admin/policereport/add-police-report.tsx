@@ -22,10 +22,10 @@ const PlateCode = gql`
 `;
 
 const AddPoliceReport = ({
-      data,
-      userId,
-      branchId,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  data,
+  userId,
+  branchId,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const router = useRouter();
   const path = router.query.returnPage;
 

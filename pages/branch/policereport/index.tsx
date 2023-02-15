@@ -50,7 +50,7 @@ const FeedInsuredPoliceReport = gql`
           plateNumber
           insureds {
             id
-            insuredName
+            firstName
             mobileNumber
           }
         }
@@ -63,7 +63,7 @@ const FeedInsuredPoliceReport = gql`
           plateNumber
           insureds {
             id
-            insuredName
+            firstName
             mobileNumber
           }
         }

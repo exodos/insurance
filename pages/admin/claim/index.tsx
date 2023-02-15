@@ -9,6 +9,7 @@ import { BsPlusCircleFill, BsFillArrowUpCircleFill } from "react-icons/bs";
 import ListClaim from "@/claim/list-claim";
 import { useRouter } from "next/router";
 import SiteHeader from "@/components/layout/header";
+import Link from "next/link";
 
 const FeedClaim = gql`
   query FeedClaim(
@@ -43,6 +44,7 @@ const FeedClaim = gql`
         branchs {
           id
           branchName
+          region
         }
       }
       totalClaim
@@ -76,12 +78,23 @@ const AdminClaimPage = ({
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
                 {session.user.memberships.role === "SUPERADMIN" && (
-                  <button type="button" className="inline-flex items-center">
-                    <BsFillArrowUpCircleFill
-                      className="flex-shrink-0 mr-5 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-200"
-                      aria-hidden="true"
-                    />
-                  </button>
+                  <Link
+                    href={{
+                      pathname: "/admin/claim/export-claim",
+                      query: {
+                        returnPage: asPath,
+                      },
+                    }}
+                    passHref
+                    legacyBehavior
+                  >
+                    <button type="button" className="inline-flex items-center">
+                      <BsFillArrowUpCircleFill
+                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </Link>
                 )}
               </div>
             )}

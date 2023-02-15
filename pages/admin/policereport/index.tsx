@@ -8,6 +8,7 @@ import { BsFillArrowUpCircleFill } from "react-icons/bs";
 import ListInsuredPoliceReport from "@/policereport/insured/list-insured-police-report";
 import { useRouter } from "next/router";
 import SiteHeader from "@/components/layout/header";
+import Link from "next/link";
 
 const FeedInsuredPoliceReport = gql`
   query FeedInsuredPoliceReport(
@@ -83,8 +84,8 @@ const FeedInsuredPoliceReport = gql`
 `;
 
 const AdminInsuredPoliceReport = ({
-      data,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  data,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const { asPath } = useRouter();
 
@@ -114,6 +115,25 @@ const AdminInsuredPoliceReport = ({
                       aria-hidden="true"
                     />
                   </button>
+                )}
+                {session.user.memberships.role === "SUPERADMIN" && (
+                  <Link
+                    href={{
+                      pathname: "/admin/policereport/export-police-report",
+                      query: {
+                        returnPage: asPath,
+                      },
+                    }}
+                    passHref
+                    legacyBehavior
+                  >
+                    <button type="button" className="inline-flex items-center">
+                      <BsFillArrowUpCircleFill
+                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </Link>
                 )}
               </div>
             )}

@@ -30,6 +30,7 @@ const FeedCertificateInsurer = gql`
         id
         certificateNumber
         issuedDate
+        premiumTarif
         updatedAt
         policies {
           id
@@ -62,12 +63,7 @@ const InsurerCertificatePage = ({
       data,
     }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
-  // const [showAddModal, setShowAddModal] = useState(false);
-
-  // const handleAdd = () => {
-  //   setShowAddModal((prev) => !prev);
-  // };
-  const { pathname } = useRouter();
+  const { pathname, asPath } = useRouter();
   return (
     <>
       <SiteHeader
@@ -107,12 +103,23 @@ const InsurerCertificatePage = ({
                   </Link>
                 )}
                 {session.user.memberships.role === "INSURER" && (
-                  <button type="button" className="inline-flex items-center">
-                    <BsFillArrowUpCircleFill
-                      className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
-                      aria-hidden="true"
-                    />
-                  </button>
+                  <Link
+                    href={{
+                      pathname: "/insurer/certificate/export-certificate",
+                      query: {
+                        returnPage: asPath,
+                      },
+                    }}
+                    passHref
+                    legacyBehavior
+                  >
+                    <button type="button" className="inline-flex items-center">
+                      <BsFillArrowUpCircleFill
+                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </Link>
                 )}
               </div>
             )}

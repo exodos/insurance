@@ -16,8 +16,8 @@ export const AccidentRecord = objectType({
   name: "AccidentRecord",
   definition(t) {
     t.string("id");
-    t.field("typeOfAccident", { type: ACCIDENTTYPE });
-    t.string("accidentSubType");
+    t.nullable.field("bodilyInjury", { type: ACCIDENTSUBTYPE });
+    t.nullable.float("propertyInjury");
     t.date("createdAt");
     t.date("updatedAt");
     t.field("vehicles", {
@@ -30,14 +30,14 @@ export const AccidentRecord = objectType({
           .vehicles();
       },
     });
-    t.nullable.list.nullable.field("insuredPoliceReports", {
-      type: "InsuredPoliceReport",
+    t.field("claims", {
+      type: "Claim",
       async resolve(_parent, _args, ctx) {
         return await ctx.prisma.accidentRecord
           .findUnique({
             where: { id: _parent.id },
           })
-          .insuredPoliceReports();
+          .claims();
       },
     });
   },
@@ -52,17 +52,12 @@ export const AccidentRecordPagination = extendType({
         filter: stringArg(),
         skip: intArg(),
         take: intArg(),
-        orderBy: arg({ type: list(nonNull(AccidentRecordOrderByInput)) }), // 1
+        orderBy: arg({ type: list(nonNull(AccidentRecordOrderByInput)) }),
       },
       resolve: async (parent, args, ctx) => {
         const where = args.filter
           ? {
-              OR: [
-                { id: args.filter },
-                {
-                  accidentSubType: args.filter,
-                },
-              ],
+              OR: [{ id: args.filter }],
             }
           : {};
 
@@ -107,7 +102,16 @@ export const AccidentRecordOrderByInput = inputObjectType({
   },
 });
 
-export const ACCIDENTTYPE = enumType({
-  name: "ACCIDENTTYPE",
-  members: ["BODILYINJURY", "PROPERTYINJURY"],
+export const ACCIDENTSUBTYPE = enumType({
+  name: "ACCIDENTSUBTYPE",
+  members: ["SlightBodilyInjury", "SaviorBodilyInjury", "Death"],
+});
+
+export const accidentCreateInput = inputObjectType({
+  name: "accidentCreateInput",
+  definition(t) {
+    t.nullable.field("bodilyInjury", { type: ACCIDENTSUBTYPE });
+    t.nullable.float("propertyInjury");
+    // t.field("vehicles", { type: vehicleConnectInput });
+  },
 });

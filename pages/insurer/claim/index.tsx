@@ -7,6 +7,8 @@ import { authOptions } from "../../api/auth/[...nextauth]";
 import ListClaim from "@/claim/list-claim";
 import { useRouter } from "next/router";
 import SiteHeader from "@/components/layout/header";
+import { BsFillArrowUpCircleFill } from "react-icons/bs";
+import Link from "next/link";
 
 const FeedClaimInsurer = gql`
   query FeedClaimInsurer(
@@ -46,6 +48,7 @@ const FeedClaimInsurer = gql`
           id
           branchName
           mobileNumber
+          region
         }
         certificates {
           id
@@ -80,6 +83,29 @@ const InsurerClaimPage = ({
                 List Of Claims
               </p>
             </div>
+            {session?.user && (
+              <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
+                {session.user.memberships.role === "INSURER" && (
+                  <Link
+                    href={{
+                      pathname: "/insurer/claim/export-insurer-claim",
+                      query: {
+                        returnPage: asPath,
+                      },
+                    }}
+                    passHref
+                    legacyBehavior
+                  >
+                    <button type="button" className="inline-flex items-center">
+                      <BsFillArrowUpCircleFill
+                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </Link>
+                )}
+              </div>
+            )}
           </div>
         </div>
         <ListClaim claimData={data.feedClaimInsurer} href={asPath} />

@@ -10,6 +10,7 @@ import ListInsured from "@/insured/list-insured";
 import BranchAddInsuredModal from "@/insured/branch-create-insured";
 import SiteHeader from "@/components/layout/header";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 const FeedInsuredBranch = gql`
   query FeedInsuredBranch(
@@ -28,6 +29,7 @@ const FeedInsuredBranch = gql`
     ) {
       insured {
         id
+        regNumber
         firstName
         lastName
         occupation
@@ -52,13 +54,13 @@ const FeedInsuredBranch = gql`
 `;
 
 const BranchInsuredPage = ({
-      data,
-      branchId,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  data,
+  branchId,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
 
-  const { pathname } = useRouter();
+  const { pathname, asPath } = useRouter();
 
   const handleAdd = () => {
     setShowAddModal((prev) => !prev);
@@ -93,13 +95,24 @@ const BranchInsuredPage = ({
                     />
                   </button>
                 )}
-                {session.user.memberships.role === "INSURER" && (
-                  <button type="button" className="inline-flex items-center">
-                    <BsFillArrowUpCircleFill
-                      className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
-                      aria-hidden="true"
-                    />
-                  </button>
+                {session.user.memberships.role === "MEMBER" && (
+                  <Link
+                    href={{
+                      pathname: "/branch/insured/export-insured",
+                      query: {
+                        returnPage: asPath,
+                      },
+                    }}
+                    passHref
+                    legacyBehavior
+                  >
+                    <button type="button" className="inline-flex items-center">
+                      <BsFillArrowUpCircleFill
+                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </Link>
                 )}
               </div>
             )}

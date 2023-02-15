@@ -369,6 +369,32 @@ export const deleteUnInsuredPoliceReportMutation = extendType({
   },
 });
 
+export const exportUnInsuredPoliceReportQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.list.nonNull.field("exportUnInsuredPoliceReport", {
+      type: UnInsuredPoliceReport,
+      args: {
+        dateFrom: nonNull(stringArg()),
+        dateTo: nonNull(stringArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        return await ctx.prisma.unInsuredPoliceReport.findMany({
+          where: {
+            reportDate: {
+              lte: new Date(args.dateTo),
+              gte: new Date(args.dateFrom),
+            },
+          },
+          orderBy: {
+            reportDate: "desc",
+          },
+        });
+      },
+    });
+  },
+});
+
 export const FeedUnInsuredPoliceReport = objectType({
   name: "FeedUnInsuredPoliceReport",
   definition(t) {

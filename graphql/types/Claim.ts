@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import {
   arg,
+  enumType,
   extendType,
   floatArg,
   inputObjectType,
@@ -13,10 +14,10 @@ import {
 import { insuredConnectInput } from "./Insured";
 import { vehicleConnectInput } from "./Vehicle";
 import { certificateConnectInput } from "./Certificate";
-import { format } from "date-fns";
 import { InsuredPoliceReportConnectInput } from "./InsuredPoliceReport";
 import { Sort } from "./User";
 import { branchConnectInput } from "./Branch";
+import { accidentCreateInput } from "./AccidentRecord";
 
 export const Claim = objectType({
   name: "Claim",
@@ -24,10 +25,9 @@ export const Claim = objectType({
     t.string("id");
     t.string("claimNumber");
     t.float("damageEstimate");
+    t.field("claimStatus", { type: ClaimProgress });
     t.date("claimedAt");
     t.date("updatedAt");
-    // t.boolean("deleted");
-    // t.nullable.date("deletedTime");
     t.field("insuredPoliceReports", {
       type: "InsuredPoliceReport",
       async resolve(_parent, _args, ctx) {
@@ -76,6 +76,16 @@ export const Claim = objectType({
             where: { id: _parent.id },
           })
           .certificates();
+      },
+    });
+    t.list.field("accidentRecords", {
+      type: "AccidentRecord",
+      async resolve(_parent, _args, ctx) {
+        return await ctx.prisma.claim
+          .findUnique({
+            where: { id: _parent.id },
+          })
+          .accidentRecords();
       },
     });
   },
@@ -450,6 +460,161 @@ export const deleteClaimMutation = extendType({
   },
 });
 
+export const updateClaimStatusMutation = extendType({
+  type: "Mutation",
+  definition(t) {
+    t.nonNull.field("updateClaimStatus", {
+      type: Claim,
+      args: {
+        id: nonNull(stringArg()),
+        input: nonNull(ClaimStatusUpdateInput),
+      },
+      resolve: async (_parent, args, ctx) => {
+        const user = await ctx.prisma.user.findUnique({
+          where: {
+            email: ctx.session.user.email,
+          },
+          include: {
+            memberships: true,
+          },
+        });
+        if (
+          !user ||
+          (user.memberships.role !== "SUPERADMIN" &&
+            user.memberships.role !== "TRAFFICPOLICEADMIN" &&
+            user.memberships.role !== "TRAFFICPOLICEMEMBER")
+        ) {
+          throw new Error(`You do not have permission to perform the action`);
+        }
+
+        const resVehicle = await ctx.prisma.claim.findFirst({
+          where: {
+            id: args.id,
+          },
+          include: {
+            insuredPoliceReports: true,
+          },
+        });
+
+        const checkClaim = await ctx.prisma.claim.findUnique({
+          where: {
+            id: args.id,
+          },
+        });
+
+        if (checkClaim.claimStatus === "Completed") {
+          throw new Error(`Accident record are already added!!`);
+        }
+
+        return await ctx.prisma.claim.update({
+          where: {
+            id: args.id,
+          },
+          data: {
+            claimStatus: "Completed",
+            accidentRecords: {
+              create: {
+                bodilyInjury: args.input.accidentRecords.bodilyInjury,
+                propertyInjury: args.input.accidentRecords.propertyInjury,
+                vehicles: {
+                  connect: {
+                    plateNumber:
+                      resVehicle.insuredPoliceReports.responsibleVehicle,
+                  },
+                },
+              },
+            },
+          },
+        });
+      },
+    });
+  },
+});
+
+export const exportClaimQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.list.nonNull.field("exportClaim", {
+      type: Claim,
+      args: {
+        dateFrom: nonNull(stringArg()),
+        dateTo: nonNull(stringArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        return await ctx.prisma.claim.findMany({
+          where: {
+            updatedAt: {
+              lte: new Date(args.dateTo),
+              gte: new Date(args.dateFrom),
+            },
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
+        });
+      },
+    });
+  },
+});
+
+export const exportClaimInsurerQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.list.nonNull.field("exportClaimInsurer", {
+      type: Claim,
+      args: {
+        orgId: nonNull(stringArg()),
+        dateFrom: nonNull(stringArg()),
+        dateTo: nonNull(stringArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        return await ctx.prisma.claim.findMany({
+          where: {
+            branchs: {
+              orgId: args.orgId,
+            },
+            updatedAt: {
+              lte: new Date(args.dateTo),
+              gte: new Date(args.dateFrom),
+            },
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
+        });
+      },
+    });
+  },
+});
+
+export const exportClaimBranchQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.list.nonNull.field("exportClaimBranch", {
+      type: Claim,
+      args: {
+        branchId: nonNull(stringArg()),
+        dateFrom: nonNull(stringArg()),
+        dateTo: nonNull(stringArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        return await ctx.prisma.claim.findMany({
+          where: {
+            branchId: args.branchId,
+            updatedAt: {
+              lte: new Date(args.dateTo),
+              gte: new Date(args.dateFrom),
+            },
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
+        });
+      },
+    });
+  },
+});
+
 export const FeedClaim = objectType({
   name: "FeedClaim",
   definition(t) {
@@ -511,6 +676,15 @@ export const ClaimUpdateInput = inputObjectType({
   },
 });
 
+export const ClaimStatusUpdateInput = inputObjectType({
+  name: "ClaimStatusUpdateInput",
+  definition(t) {
+    t.field("accidentRecords", {
+      type: accidentCreateInput,
+    });
+  },
+});
+
 export const ClaimOrderByInput = inputObjectType({
   name: "ClaimOrderByInput",
   definition(t) {
@@ -524,4 +698,9 @@ export const claimDamageInput = inputObjectType({
   definition(t) {
     t.float("damageEstimate");
   },
+});
+
+export const ClaimProgress = enumType({
+  name: "ClaimProgress",
+  members: ["OnProgress", "Completed"],
 });

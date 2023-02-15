@@ -225,7 +225,7 @@ const DetailInsuredPoliceReportModal = ({ policeReport }) => {
                                   {
                                     policeReport
                                       ?.vehicle_PoliceReport_victimVehicle
-                                      ?.insureds?.insuredName
+                                      ?.insureds?.firstName
                                   }
                                 </dd>
                               </div>
@@ -309,7 +309,7 @@ const DetailInsuredPoliceReportModal = ({ policeReport }) => {
                                   {
                                     policeReport
                                       ?.vehicle_PoliceReport_responsibleVehicle
-                                      ?.insureds?.insuredName
+                                      ?.insureds?.firstName
                                   }
                                 </dd>
                               </div>
