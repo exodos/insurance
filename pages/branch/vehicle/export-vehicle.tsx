@@ -63,8 +63,8 @@ const ExportVehicleByBranch = gql`
 `;
 
 const ExportBranchVehicle = ({
-  branchId,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      branchId,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [formValues, setFormValues] = useState(null);
 
   let slicedValue = null;
@@ -109,7 +109,7 @@ const ExportBranchVehicle = ({
           <div className="sm:flex sm:items-center">
             <div className="sm:flex-auto">
               <h1 className="text-xl font-semibold text-gray-50">
-                Export Vehicles
+                Export All Vehicles
               </h1>
             </div>
           </div>

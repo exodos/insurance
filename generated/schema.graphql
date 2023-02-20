@@ -466,7 +466,25 @@ type FeedVehicleBranch {
   vehicle: [Vehicle!]!
 }
 
+type FeedVehicleBranchByStatus {
+  maxPage: Int
+  totalVehicle: Int!
+  vehicle: [Vehicle!]!
+}
+
+type FeedVehicleByStatus {
+  maxPage: Int
+  totalVehicle: Int!
+  vehicle: [Vehicle!]!
+}
+
 type FeedVehicleInsurer {
+  maxPage: Int
+  totalVehicle: Int!
+  vehicle: [Vehicle!]!
+}
+
+type FeedVehicleInsurerByStatus {
   maxPage: Int
   totalVehicle: Int!
   vehicle: [Vehicle!]!
@@ -679,6 +697,7 @@ type Mutation {
   updateUnInsuredPoliceReport(id: String!, input: UnInsuredPoliceReportUpdateInput!): UnInsuredPoliceReport!
   updateUser(input: userUpdateInput!, userId: String!): User!
   updateVehicle(id: String!, input: vehicleUpdateInput!): Vehicle!
+  updateVehicleStatus(id: String!, input: statusInput!): Vehicle!
   updateVictim(id: String!, input: victimCreateInput!): Victim!
 }
 
@@ -822,7 +841,10 @@ type Query {
   feedUserInsurer(filter: String, orderBy: [UserOrderByInput!], orgId: String!, skip: Int, take: Int): FeedUserInsurer!
   feedVehicle(filter: String, orderBy: [VehicleOrderByInput!], skip: Int, take: Int): FeedVehicle!
   feedVehicleBranch(branchId: String!, filter: String, orderBy: [VehicleOrderByInput!], skip: Int, take: Int): FeedVehicleBranch!
+  feedVehicleBranchByStatus(branchId: String!, filter: String, input: statusInput!, orderBy: [VehicleOrderByInput!], skip: Int, take: Int): FeedVehicleBranchByStatus!
+  feedVehicleByStatus(filter: String, input: statusInput!, orderBy: [VehicleOrderByInput!], skip: Int, take: Int): FeedVehicleByStatus!
   feedVehicleInsurer(filter: String, orderBy: [VehicleOrderByInput!], orgId: String!, skip: Int, take: Int): FeedVehicleInsurer!
+  feedVehicleInsurerByStatus(filter: String, input: statusInput!, orderBy: [VehicleOrderByInput!], orgId: String!, skip: Int, take: Int): FeedVehicleInsurerByStatus!
   feedVictim(filter: String, orderBy: [PolicyOrderByInput!], skip: Int, take: Int): FeedVictim!
   hitAndRunByIncidentNumber(incidentNumber: String!): HitAndRunPoliceReport!
   incidentNumberToClaim(incidentNumber: String!): InsuredPoliceReport!
@@ -1286,6 +1308,10 @@ input policyUpdateInput {
 
 input responsibleVehicleConnectInput {
   plateNumber: String
+}
+
+input statusInput {
+  status: STATUS
 }
 
 input tariffConnectInput {

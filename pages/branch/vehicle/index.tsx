@@ -122,44 +122,50 @@ const BranchVehiclePage = ({
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
                 {(session.user.memberships.role === "INSURER" ||
+                  session.user.memberships.role === "BRANCHADMIN" ||
                   session.user.memberships.role === "MEMBER") && (
-                  <Link
-                    href={{
-                      pathname: "/branch/vehicle/branch-add-vehicle",
-                      query: {
-                        returnPage: pathname,
-                      },
-                    }}
-                    passHref
-                    legacyBehavior
-                  >
-                    <button type="button" className="inline-flex items-center">
-                      <BsPlusCircleFill
-                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
-                        aria-hidden="true"
-                      />
-                    </button>
-                  </Link>
-                )}
-                {(session.user.memberships.role === "INSURER" ||
-                  session.user.memberships.role === "MEMBER") && (
-                  <Link
-                    href={{
-                      pathname: "/branch/vehicle/export-vehicle",
-                      query: {
-                        returnPage: asPath,
-                      },
-                    }}
-                    passHref
-                    legacyBehavior
-                  >
-                    <button type="button" className="inline-flex items-center">
-                      <BsFillArrowUpCircleFill
-                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
-                        aria-hidden="true"
-                      />
-                    </button>
-                  </Link>
+                  <>
+                    <Link
+                      href={{
+                        pathname: "/branch/vehicle/branch-add-vehicle",
+                        query: {
+                          returnPage: pathname,
+                        },
+                      }}
+                      passHref
+                      legacyBehavior
+                    >
+                      <button
+                        type="button"
+                        className="inline-flex items-center"
+                      >
+                        <BsPlusCircleFill
+                          className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                          aria-hidden="true"
+                        />
+                      </button>
+                    </Link>
+                    <Link
+                      href={{
+                        pathname: "/branch/vehicle/export-vehicle",
+                        query: {
+                          returnPage: asPath,
+                        },
+                      }}
+                      passHref
+                      legacyBehavior
+                    >
+                      <button
+                        type="button"
+                        className="inline-flex items-center"
+                      >
+                        <BsFillArrowUpCircleFill
+                          className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                          aria-hidden="true"
+                        />
+                      </button>
+                    </Link>
+                  </>
                 )}
               </div>
             )}
@@ -171,6 +177,7 @@ const BranchVehiclePage = ({
           codeList={data.plateCode}
           branchId={branchId}
           tariffData={data.feedUniqueTariff}
+          pageStatus={"All"}
         />
       </div>
       {/* {showAddModal ? (

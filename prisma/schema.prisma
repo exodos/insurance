@@ -167,7 +167,7 @@ model Vehicle {
   dutyPaidValue           Float
   vehicleStatus           VEHICLESTATUS         @default(NEW)
   isInsured               IsInsured             @default(NOTINSURED)
-  status                  STATUS?               @default(SUSPENDED)
+  status                  STATUS                @default(SUSPENDED)
   insureds                Insured               @relation(fields: [insuredId], references: [id])
   insuredId               String
   branchs                 Branch                @relation(fields: [branchId], references: [id])

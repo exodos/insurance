@@ -218,13 +218,20 @@ const ListClaim = ({ claimData, href }) => {
                           >
                             <span className="sr-only">Edit</span>
                           </th>
+                          </>
+                          )}
+                      {(session.user.memberships.role === "SUPERADMIN" ||
+                        session.user.memberships.role ===
+                          "INSURER" ||
+                        session.user.memberships.role ===
+                          "BRANCHADMIN" || session.user.memberships.role ===
+                          "MEMBER" ) && (
                           <th
                             scope="col"
                             className="relative py-3.5 pl-3 pr-4 sm:pr-6"
                           >
                             <span className="sr-only">Complete</span>
-                          </th>
-                        </>
+                          </th>                        
                       )}
                     </tr>
                   </thead>
@@ -267,7 +274,7 @@ const ListClaim = ({ claimData, href }) => {
                           </td>
                           {(session.user.memberships.role === "SUPERADMIN" ||
                             session.user.memberships.role ===
-                              "TRAFFICPOLICEMEMBER" ||
+                              "TRAFFICPOLICEADMIN" ||
                             session.user.memberships.role ===
                               "TRAFFICPOLICEMEMBER") && (
                             <>
@@ -325,6 +332,15 @@ const ListClaim = ({ claimData, href }) => {
                                   </ReactTooltip>
                                 </>
                               </td>
+                              </>
+                              )}
+
+                      {(session.user.memberships.role === "SUPERADMIN" ||
+                        session.user.memberships.role ===
+                          "INSURER" ||
+                        session.user.memberships.role ===
+                          "BRANCHADMIN" || session.user.memberships.role ===
+                          "MEMBER" ) && (
                               <td className="relative whitespace-nowrap py-4 pl-2 pr-3 text-right text-sm font-medium sm:pr-6">
                                 <>
                                   <button
@@ -348,7 +364,6 @@ const ListClaim = ({ claimData, href }) => {
                                   </ReactTooltip>
                                 </>
                               </td>
-                            </>
                           )}
                         </tr>
                       ))}

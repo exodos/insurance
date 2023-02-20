@@ -165,6 +165,7 @@ const AdminVehiclePage = ({
           codeList={data.plateCode}
           branch={data.feedBranchByOrgDesc.branchs}
           tariffData={data.feedUniqueTariff}
+          pageStatus={"Approved"}
         />
       </div>
     </>

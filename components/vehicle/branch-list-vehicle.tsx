@@ -4,13 +4,14 @@ import ReactPaginate from "react-paginate";
 import { AiFillEdit, AiFillDelete } from "react-icons/ai";
 import { BiShow } from "react-icons/bi";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import ReactTooltip from "react-tooltip";
-import { gql, useLazyQuery } from "@apollo/client";
+import { gql, useLazyQuery, useMutation } from "@apollo/client";
 import VehicleDetails from "./detail-vehicle";
 import DeleteVehicleModal from "./delete-vehicle";
-import EditBranchVehicleModal from "./branch-edit-vehicle";
 import EditVehicleModal from "./edit-vehicle";
+import { BsFillCheckCircleFill } from "react-icons/bs";
+import NotificationContext from "@/store/notification-context";
 
 const VehicleByPlateNumber = gql`
   query VehicleByPlateNumber($plateNumber: String!) {
@@ -59,12 +60,24 @@ const VehicleByPlateNumber = gql`
     }
   }
 `;
+const UpdateVehicleStatus = gql`
+  mutation UpdateVehicleStatus(
+    $updateVehicleStatusId: String!
+    $input: statusInput!
+  ) {
+    updateVehicleStatus(id: $updateVehicleStatusId, input: $input) {
+      id
+      status
+    }
+  }
+`;
 
 const ListBranchVehicle = ({
   vehicleData,
   regionCode,
   codeList,
   branchId,
+  pageStatus,
   tariffData,
 }) => {
   const { data: session, status } = useSession();
@@ -74,9 +87,19 @@ const ListBranchVehicle = ({
   const [detailList, setDetailtList] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteList, setDeleteList] = useState([]);
+  const notificationCtx = useContext(NotificationContext);
+
+  const [
+    updateVehicle,
+    {
+      data: updateVehicleData,
+      error: updateVehicleError,
+      loading: updateVehicleLoading,
+    },
+  ] = useMutation(UpdateVehicleStatus);
 
   const router = useRouter();
-  const { asPath } = useRouter();
+  const { asPath, pathname } = useRouter();
 
   const handlePaginate = (page: any) => {
     const path = router.pathname;
@@ -106,6 +129,41 @@ const ListBranchVehicle = ({
     setShowDeleteModal((prev) => !prev);
     setDeleteList(Delete);
   };
+  const handleApprove = async (vehicleId: any) => {
+    const input = {
+      status: "APPROVED",
+    };
+    await updateVehicle({
+      variables: {
+        updateVehicleStatusId: vehicleId,
+        input,
+      },
+      onError: (updateVehicleError) => {
+        notificationCtx.showNotification({
+          title: "Error!",
+          message: updateVehicleError.message || "Something Went Wrong",
+          status: "error",
+        });
+      },
+      onCompleted: (updateVehicleData) => {
+        notificationCtx.showNotification({
+          title: "Success!",
+          message: "Successfully Updated Vehicle Status",
+          status: "success",
+        });
+      },
+      update: (cache, { data }) => {
+        const cacheId = cache.identify(data.message);
+        cache.modify({
+          fields: {
+            messages: (existinFieldData, { toReference }) => {
+              return [...existinFieldData, toReference(cacheId)];
+            },
+          },
+        });
+      },
+    }).then(() => router.push(pathname));
+  };
 
   const handleDetails = async (plateNumber: any) => {
     const vehicleData = await vehicleByPlateData({
@@ -114,9 +172,8 @@ const ListBranchVehicle = ({
       },
     });
 
-    // console.log(vehicleData.data.vehicleByPlateNumber);
-
     if (vehicleData.data.vehicleByPlateNumber) {
+      // console.log(vehicleData.data.vehicleByPlateNumber);
       setShowDetailModal((prev) => !prev);
       // setDetailtList(vehicleByPlateNumberData?.vehicleByPlateNumber);
       setDetailtList(vehicleData.data.vehicleByPlateNumber);
@@ -257,6 +314,12 @@ const ListBranchVehicle = ({
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
+                        Status
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      >
                         Insured First Name
                       </th>
                       <th
@@ -289,16 +352,19 @@ const ListBranchVehicle = ({
                       >
                         Updated At
                       </th>
-                      {(session.user.memberships.role === "SUPERADMIN" ||
-                        session.user.memberships.role === "INSURER" ||
-                        session.user.memberships.role === "MEMBER") && (
-                        <>
+                      {(session.user.memberships.role === "BRANCHADMIN" ||
+                        session.user.memberships.role === "MEMBER") &&
+                        pageStatus !== "Suspended" && (
                           <th
                             scope="col"
                             className="relative py-3.5 pl-3 pr-4 sm:pr-6"
                           >
                             <span className="sr-only">Detail</span>
                           </th>
+                        )}
+                      {(session.user.memberships.role === "BRANCHADMIN" ||
+                        session.user.memberships.role === "MEMBER") && (
+                        <>
                           <th
                             scope="col"
                             className="relative py-3.5 pl-3 pr-4 sm:pr-6"
@@ -313,6 +379,15 @@ const ListBranchVehicle = ({
                           </th>
                         </>
                       )}
+                      {pageStatus === "Suspended" &&
+                        session.user.memberships.role === "BRANCHADMIN" && (
+                          <th
+                            scope="col"
+                            className="relative py-3.5 pl-3 pr-4 sm:pr-6"
+                          >
+                            <span className="sr-only">Approve</span>
+                          </th>
+                        )}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
@@ -380,6 +455,9 @@ const ListBranchVehicle = ({
                             {item.isInsured}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            {item.status}
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {item.insureds.firstName}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
@@ -397,20 +475,13 @@ const ListBranchVehicle = ({
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {format(new Date(item.updatedAt), "MMM-dd-yyyy")}
                           </td>
-                          {(session.user.memberships.role === "SUPERADMIN" ||
-                            session.user.memberships.role === "INSURER" ||
-                            session.user.memberships.role === "MEMBER") && (
-                            <>
+                          {(session.user.memberships.role === "BRANCHADMIN" ||
+                            session.user.memberships.role === "MEMBER") &&
+                            pageStatus !== "Suspended" && (
                               <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                 <>
                                   <button
                                     onClick={() => {
-                                      // vehicleByPlateData({
-                                      //   variables: {
-                                      //     plateNumber: item.plateNumber,
-                                      //   },
-                                      // });
-
                                       handleDetails(item.plateNumber);
                                     }}
                                     className="text-indigo-600 hover:text-indigo-900"
@@ -432,6 +503,10 @@ const ListBranchVehicle = ({
                                   </ReactTooltip>
                                 </>
                               </td>
+                            )}
+                          {(session.user.memberships.role === "BRANCHADMIN" ||
+                            session.user.memberships.role === "MEMBER") && (
+                            <>
                               <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                 <>
                                   <button
@@ -480,6 +555,34 @@ const ListBranchVehicle = ({
                               </td>
                             </>
                           )}
+                          {pageStatus === "Suspended" &&
+                            session.user.memberships.role === "BRANCHADMIN" && (
+                              <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                <>
+                                  <button
+                                    onClick={() => {
+                                      handleApprove(item.id);
+                                    }}
+                                    className="text-indigo-600 hover:text-indigo-900"
+                                    data-tip
+                                    data-type="success"
+                                    data-for="showApprove"
+                                  >
+                                    <BsFillCheckCircleFill
+                                      className="flex-shrink-0 h-5 w-5 text-lightGreen"
+                                      aria-hidden="true"
+                                    />
+                                  </button>
+                                  <ReactTooltip
+                                    id="showApprove"
+                                    place="top"
+                                    effect="solid"
+                                  >
+                                    Approve Vehicle
+                                  </ReactTooltip>
+                                </>
+                              </td>
+                            )}
                         </tr>
                       ))}
                   </tbody>

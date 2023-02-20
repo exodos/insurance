@@ -82,7 +82,7 @@ const BranchInsuredPage = ({
             </div>
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
-                {(session.user.memberships.role === "INSURER" ||
+                {(session?.user?.memberships?.role === "BRANCHADMIN" ||
                   session?.user?.memberships?.role === "MEMBER") && (
                   <button
                     type="button"
@@ -95,7 +95,7 @@ const BranchInsuredPage = ({
                     />
                   </button>
                 )}
-                {session.user.memberships.role === "MEMBER" && (
+                {(session?.user?.memberships?.role === "MEMBER" || session?.user?.memberships?.role === "BRANCHADMIN") && (
                   <Link
                     href={{
                       pathname: "/branch/insured/export-insured",
@@ -166,6 +166,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       ],
     },
   });
+
 
   return {
     props: {

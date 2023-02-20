@@ -404,7 +404,8 @@ export const createInsuredMutation = extendType({
           !user ||
           (user.memberships.role !== "SUPERADMIN" &&
             user.memberships.role !== "INSURER" &&
-            user.memberships.role !== "MEMBER")
+            user.memberships.role !== "MEMBER" &&
+            user.memberships.role !== "BRANCHADMIN")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
@@ -455,7 +456,8 @@ export const updateInsuredMutation = extendType({
           !user ||
           (user.memberships.role !== "SUPERADMIN" &&
             user.memberships.role !== "INSURER" &&
-            user.memberships.role !== "MEMBER")
+            user.memberships.role !== "MEMBER" &&
+            user.memberships.role !== "BRANCHADMIN")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
@@ -497,7 +499,8 @@ export const deleteInsuredMutation = extendType({
           !user ||
           (user.memberships.role !== "SUPERADMIN" &&
             user.memberships.role !== "INSURER" &&
-            user.memberships.role !== "MEMBER")
+            user.memberships.role !== "MEMBER" &&
+            user.memberships.role !== "BRANCHADMIN")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }

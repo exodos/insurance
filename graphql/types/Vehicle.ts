@@ -132,6 +132,164 @@ export const VehiclePagination = extendType({
   },
 });
 
+export const VehicleByStatusPagination = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.field("feedVehicleByStatus", {
+      type: FeedVehicleByStatus,
+      args: {
+        input: nonNull(statusInput),
+        filter: stringArg(),
+        skip: intArg(),
+        take: intArg(),
+        orderBy: arg({ type: list(nonNull(VehicleOrderByInput)) }),
+      },
+      async resolve(_parent, args, ctx) {
+        const where = args.filter
+          ? {
+              status: args.input.status,
+              OR: [
+                { plateNumber: args.filter },
+                { engineNumber: args.filter },
+                { chassisNumber: args.filter },
+              ],
+            }
+          : {
+              status: args.input.status,
+            };
+
+        const vehicle = await ctx.prisma.vehicle.findMany({
+          where,
+          skip: args?.skip as number | undefined,
+          take: args?.take as number | undefined,
+          orderBy: args?.orderBy as
+            | Prisma.Enumerable<Prisma.VehicleOrderByWithRelationInput>
+            | undefined,
+        });
+
+        const totalVehicle = await ctx.prisma.vehicle.count({
+          where,
+        });
+        const maxPage = Math.ceil(totalVehicle / 20);
+
+        return {
+          vehicle,
+          maxPage,
+          totalVehicle,
+        };
+      },
+    });
+  },
+});
+export const VehicleInsurerByStatusPagination = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.field("feedVehicleInsurerByStatus", {
+      type: FeedVehicleInsurerByStatus,
+      args: {
+        input: nonNull(statusInput),
+        orgId: nonNull(stringArg()),
+        filter: stringArg(),
+        skip: intArg(),
+        take: intArg(),
+        orderBy: arg({ type: list(nonNull(VehicleOrderByInput)) }),
+      },
+      async resolve(_parent, args, ctx) {
+        const where = args.filter
+          ? {
+              status: args.input.status,
+              branchs: {
+                orgId: args.orgId,
+              },
+              OR: [
+                { plateNumber: args.filter },
+                { engineNumber: args.filter },
+                { chassisNumber: args.filter },
+              ],
+            }
+          : {
+              branchs: {
+                orgId: args.orgId,
+              },
+              status: args.input.status,
+            };
+
+        const vehicle = await ctx.prisma.vehicle.findMany({
+          where,
+          skip: args?.skip as number | undefined,
+          take: args?.take as number | undefined,
+          orderBy: args?.orderBy as
+            | Prisma.Enumerable<Prisma.VehicleOrderByWithRelationInput>
+            | undefined,
+        });
+
+        const totalVehicle = await ctx.prisma.vehicle.count({
+          where,
+        });
+        const maxPage = Math.ceil(totalVehicle / 20);
+
+        return {
+          vehicle,
+          maxPage,
+          totalVehicle,
+        };
+      },
+    });
+  },
+});
+export const VehicleBranchByStatusPagination = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.field("feedVehicleBranchByStatus", {
+      type: FeedVehicleBranchByStatus,
+      args: {
+        input: nonNull(statusInput),
+        branchId: nonNull(stringArg()),
+        filter: stringArg(),
+        skip: intArg(),
+        take: intArg(),
+        orderBy: arg({ type: list(nonNull(VehicleOrderByInput)) }),
+      },
+      async resolve(_parent, args, ctx) {
+        const where = args.filter
+          ? {
+              status: args.input.status,
+              branchId: args.branchId,
+              OR: [
+                { plateNumber: args.filter },
+                { engineNumber: args.filter },
+                { chassisNumber: args.filter },
+              ],
+            }
+          : {
+              branchId: args.branchId,
+              status: args.input.status,
+            };
+
+        const vehicle = await ctx.prisma.vehicle.findMany({
+          where,
+          skip: args?.skip as number | undefined,
+          take: args?.take as number | undefined,
+          orderBy: args?.orderBy as
+            | Prisma.Enumerable<Prisma.VehicleOrderByWithRelationInput>
+            | undefined,
+        });
+
+        const totalVehicle = await ctx.prisma.vehicle.count({
+          where,
+        });
+        const maxPage = Math.ceil(totalVehicle / 20);
+
+        return {
+          vehicle,
+          maxPage,
+          totalVehicle,
+        };
+      },
+    });
+  },
+});
+
 export const VehicleBranchPagination = extendType({
   type: "Query",
   definition(t) {
@@ -431,7 +589,8 @@ export const createVehicleMutation = extendType({
           !user ||
           (user.memberships.role !== "SUPERADMIN" &&
             user.memberships.role !== "INSURER" &&
-            user.memberships.role !== "MEMBER")
+            user.memberships.role !== "MEMBER" &&
+            user.memberships.role !== "BRANCHADMIN")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
@@ -528,7 +687,8 @@ export const updateVehicleMutation = extendType({
           !user ||
           (user.memberships.role !== "SUPERADMIN" &&
             user.memberships.role !== "INSURER" &&
-            user.memberships.role !== "MEMBER")
+            user.memberships.role !== "MEMBER" &&
+            user.memberships.role !== "BRANCHADMIN")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
@@ -580,6 +740,43 @@ export const updateVehicleMutation = extendType({
     });
   },
 });
+export const updateVehicleStatusMutation = extendType({
+  type: "Mutation",
+  definition(t) {
+    t.nonNull.field("updateVehicleStatus", {
+      type: Vehicle,
+      args: {
+        id: nonNull(stringArg()),
+        input: nonNull(statusInput),
+      },
+      resolve: async (_parent, args, ctx) => {
+        const user = await ctx.prisma.user.findUnique({
+          where: {
+            email: ctx.session.user.email,
+          },
+          include: {
+            memberships: true,
+          },
+        });
+        if (
+          !user ||
+          (user.memberships.role !== "SUPERADMIN" &&
+            user.memberships.role !== "INSURER" &&
+            user.memberships.role !== "BRANCHADMIN")
+        ) {
+          throw new Error(`You do not have permission to perform action`);
+        }
+
+        return await ctx.prisma.vehicle.update({
+          where: { id: args.id },
+          data: {
+            status: args.input.status,
+          },
+        });
+      },
+    });
+  },
+});
 
 export const deleteVehicleMutation = extendType({
   type: "Mutation",
@@ -620,8 +817,34 @@ export const deleteVehicleMutation = extendType({
 export const FeedVehicle = objectType({
   name: "FeedVehicle",
   definition(t) {
-    t.nonNull.list.nonNull.field("vehicle", { type: Vehicle }); // 1
-    t.nonNull.int("totalVehicle"); // 2
+    t.nonNull.list.nonNull.field("vehicle", { type: Vehicle });
+    t.nonNull.int("totalVehicle");
+    t.int("maxPage");
+  },
+});
+
+export const FeedVehicleByStatus = objectType({
+  name: "FeedVehicleByStatus",
+  definition(t) {
+    t.nonNull.list.nonNull.field("vehicle", { type: Vehicle });
+    t.nonNull.int("totalVehicle");
+    t.int("maxPage");
+  },
+});
+export const FeedVehicleBranchByStatus = objectType({
+  name: "FeedVehicleBranchByStatus",
+  definition(t) {
+    t.nonNull.list.nonNull.field("vehicle", { type: Vehicle });
+    t.nonNull.int("totalVehicle");
+    t.int("maxPage");
+  },
+});
+
+export const FeedVehicleInsurerByStatus = objectType({
+  name: "FeedVehicleInsurerByStatus",
+  definition(t) {
+    t.nonNull.list.nonNull.field("vehicle", { type: Vehicle });
+    t.nonNull.int("totalVehicle");
     t.int("maxPage");
   },
 });
@@ -641,6 +864,13 @@ export const FeedVehicleBranch = objectType({
     t.nonNull.list.nonNull.field("vehicle", { type: Vehicle });
     t.nonNull.int("totalVehicle");
     t.int("maxPage");
+  },
+});
+
+export const statusInput = inputObjectType({
+  name: "statusInput",
+  definition(t) {
+    t.field("status", { type: STATUS });
   },
 });
 

@@ -171,6 +171,7 @@ const InsurerVehiclePage = ({
           codeList={data.plateCode}
           branch={data.feedBranchByOrg.branchs}
           tariffData={data.feedUniqueTariff}
+          pageStatus={"Approved"}
         />
       </div>
     </>

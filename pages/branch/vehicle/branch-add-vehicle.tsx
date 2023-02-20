@@ -13,65 +13,58 @@ import { changePhone } from "@/lib/config";
 import BranchAddVehicleModal from "@/components/vehicle/branch-add-vehicle";
 
 const InsuredBranchByMobileNumber = gql`
-  query InsuredBranchByMobileNumber(
-    $mobileNumber: String!
-    $branchId: String!
-    $input: orgDescInput!
-  ) {
-    insuredBranchByMobileNumber(
-      mobileNumber: $mobileNumber
-      branchId: $branchId
-    ) {
+query InsuredBranchByMobileNumber($mobileNumber: String!, $branchId: String!) {
+  insuredBranchByMobileNumber(mobileNumber: $mobileNumber, branchId: $branchId) {
+    id
+    regNumber
+    firstName
+    lastName
+    occupation
+    region
+    city
+    subCity
+    wereda
+    kebelle
+    houseNumber
+    mobileNumber
+    createdAt
+    updatedAt
+    branchs {
       id
-      firstName
-      lastName
-      occupation
-      region
-      city
-      subCity
-      wereda
-      kebelle
-      houseNumber
-      mobileNumber
-      createdAt
-      updatedAt
-      branchs {
-        id
-        branchName
-      }
-    }
-    feedUniqueTariff {
-      tariffVehicleType {
-        vehicleType
-      }
-      tariffVehicleSubType {
-        vehicleSubType
-      }
-      tariffVehicleDetail {
-        vehicleDetail
-      }
-      tariffVehicleUsage {
-        vehicleUsage
-      }
-      tariffVehicleCategory {
-        vehicleCategory
-      }
-    }
-    plateCode {
-      id
-      code
-    }
-    regionCode {
-      id
-      regionApp
-    }
-    feedBranchByOrgDesc(input: $input) {
-      branchs {
-        id
-        branchName
-      }
+      branchName
     }
   }
+  feedUniqueTariff {
+    tariffVehicleType {
+      id
+      vehicleType
+    }
+    tariffVehicleSubType {
+      id
+      vehicleSubType
+    }
+    tariffVehicleDetail {
+      id
+      vehicleDetail
+    }
+    tariffVehicleUsage {
+      id
+      vehicleUsage
+    }
+    tariffVehicleCategory {
+      id
+      vehicleCategory
+    }
+  }
+  plateCode {
+    id
+    code
+  }
+  regionCode {
+    id
+    regionApp
+  }
+}
 `;
 
 const AddVehicleByBranch = ({
@@ -139,7 +132,7 @@ const AddVehicleByBranch = ({
               insuredData({
                 variables: {
                   mobileNumber: changePhone(values.mobileNumber),
-                  orgId: orgId,
+                  branchId: branchId,
                 },
               });
             }}
@@ -411,7 +404,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       },
     };
   }
-  const branchId = session.user.memberships.branchId;
+  
 
   // const { query } = context;
   // const page = query.returnPage;
@@ -419,9 +412,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {
       session,
-      branchId,
+      branchId:session.user.memberships.branchId,
       orgId: session.user.memberships.branchs.orgId,
-      // page,
     },
   };
 };
