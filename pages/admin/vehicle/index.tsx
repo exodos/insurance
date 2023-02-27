@@ -5,9 +5,7 @@ import { initializeApollo } from "../../../lib/apollo";
 import { gql } from "@apollo/client";
 import { authOptions } from "../../api/auth/[...nextauth]";
 import { BsPlusCircleFill, BsFillArrowUpCircleFill } from "react-icons/bs";
-import { useState } from "react";
 import ListVehicle from "@/vehicle/list-vehicles";
-import AddVehicleModal from "@/vehicle/add-vehicle";
 import { useRouter } from "next/router";
 import SiteHeader from "@/components/layout/header";
 import Link from "next/link";
@@ -42,7 +40,6 @@ const FeedVehicle = gql`
         dutyFreeValue
         dutyPaidValue
         vehicleStatus
-        status
         isInsured
         createdAt
         updatedAt
@@ -165,7 +162,6 @@ const AdminVehiclePage = ({
           codeList={data.plateCode}
           branch={data.feedBranchByOrgDesc.branchs}
           tariffData={data.feedUniqueTariff}
-          pageStatus={"Approved"}
         />
       </div>
     </>

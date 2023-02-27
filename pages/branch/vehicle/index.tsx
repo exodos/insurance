@@ -46,7 +46,6 @@ const FeedVehicleBranch = gql`
         dutyFreeValue
         dutyPaidValue
         vehicleStatus
-        status
         isInsured
         createdAt
         updatedAt
@@ -98,9 +97,9 @@ const FeedVehicleBranch = gql`
 `;
 
 const BranchVehiclePage = ({
-  data,
-  branchId,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+      branchId,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
 
   const { pathname, asPath } = useRouter();
@@ -177,7 +176,6 @@ const BranchVehiclePage = ({
           codeList={data.plateCode}
           branchId={branchId}
           tariffData={data.feedUniqueTariff}
-          pageStatus={"All"}
         />
       </div>
       {/* {showAddModal ? (

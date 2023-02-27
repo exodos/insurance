@@ -20,3 +20,4 @@ export * from "./Branch";
 export * from "./TariffDetal";
 export * from "./AccidentRecord";
 export * from "./CertificateRecord";
+// export * from "./Insurance";

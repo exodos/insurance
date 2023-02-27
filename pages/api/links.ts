@@ -42,8 +42,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           ],
         },
         {
-          name: "Insurance",
-          icon: "FaItalic",
+          name: "Organizations",
+          icon: "FaPagelines",
           current: false,
           children: [
             { name: "Insurer", href: "/admin/organizations" },
@@ -52,18 +52,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         },
         {
           name: "Insured",
-          href: "/admin/insured",
           icon: "FaUserCheck",
           current: false,
-        },
-        {
-          name: "Vehicle",
-          icon: "FaCar",
-          current: false,
           children: [
-            { name: "All Vehicle", href: "/admin/vehicle" },
-            { name: "Approved", href: "/admin/vehicle/approved" },
-            { name: "Suspended", href: "/admin/vehicle/suspended" },
+            { name: "Owner", href: "/admin/insured" },
+            { name: "Vehicle", href: "/admin/vehicle" },
           ],
         },
         {
@@ -108,18 +101,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         },
         {
           name: "Insured",
-          href: "/insurer/insured",
           icon: "FaUserCheck",
           current: false,
-        },
-        {
-          name: "Vehicle",
-          icon: "FaCar",
-          current: false,
           children: [
-            { name: "All Vehicle", href: "/insurer/vehicle" },
-            { name: "Approved", href: "/insurer/vehicle/approved" },
-            { name: "Suspended", href: "/insurer/vehicle/suspended" },
+            { name: "Owner", href: "/insurer/insured" },
+            { name: "Vehicle", href: "/insurer/vehicle" },
           ],
         },
         {
@@ -129,53 +115,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           current: false,
         },
       ];
-    } else if (session?.user.memberships.role === "BRANCHADMIN") {
-      navigation = [
-        { name: "Home", href: "/branch", icon: "FaHome", current: true },
-        {
-          name: "Users",
-          href: "/branch/users",
-          icon: "FaUserFriends",
-          current: false,
-        },
-        {
-          name: "Claims",
-          href: "/branch/claim",
-          icon: "FaCommentDollar",
-          current: false,
-        },
-        {
-          name: "Police Report",
-          href: "/branch/policereport",
-          icon: "FaCarCrash",
-          current: false,
-        },
-        {
-          name: "Insured",
-          href: "/branch/insured",
-          icon: "FaUserCheck",
-          current: false,
-        },
-        {
-          name: "Vehicle",
-          icon: "FaCar",
-          current: false,
-          children: [
-            { name: "All Vehicle", href: "/branch/vehicle" },
-            { name: "Approved", href: "/branch/vehicle/approved" },
-            { name: "Suspended", href: "/branch/vehicle/suspended" },
-          ],
-        },
-        {
-          name: "Certificate",
-          href: "/branch/certificate",
-          icon: "FaCertificate",
-          current: false,
-        },
-      ];
     } else if (
       session?.user.memberships.role === "MEMBER" ||
-      session?.user.memberships.role === "USER"
+      session?.user.memberships.role === "USER" ||
+      session?.user.memberships.role === "BRANCHADMIN"
     ) {
       navigation = [
         { name: "Home", href: "/branch", icon: "FaHome", current: true },

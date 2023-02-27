@@ -32,8 +32,6 @@ const FeedUser = gql`
         city
         email
         mobileNumber
-        password
-        adminRestPassword
         createdAt
         updatedAt
         memberships {
@@ -48,6 +46,11 @@ const FeedUser = gql`
       totalUser
       maxPage
     }
+  }
+`;
+
+const FeedRoleBranch = gql`
+  query RoleList {
     roleList {
       id
       role
@@ -60,8 +63,9 @@ const FeedUser = gql`
 `;
 
 const AdminUserPage = ({
-      data,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  userData,
+  roleBranchData,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -122,12 +126,15 @@ const AdminUserPage = ({
             )}
           </div>
         </div>
-        <ListUser userData={data.feedUser} roleList={data.roleList} />
+        <ListUser
+          userData={userData.feedUser}
+          roleList={roleBranchData.roleList}
+        />
       </div>
       {showAddModal ? (
         <AddUserModal
-          branchData={data.listAllBranch}
-          roleList={data.roleList}
+          branchData={roleBranchData.listAllBranch}
+          roleList={roleBranchData.roleList}
           href={pathname}
         />
       ) : null}
@@ -167,7 +174,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   const apolloClient = initializeApollo();
 
-  const { data } = await apolloClient.query({
+  const { data: userData } = await apolloClient.query({
     query: FeedUser,
     variables: {
       filter: filter,
@@ -181,10 +188,15 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     },
   });
 
+  const { data: roleBranchData } = await apolloClient.query({
+    query: FeedRoleBranch,
+  });
+
   return {
     props: {
       session,
-      data,
+      userData,
+      roleBranchData,
     },
   };
 };

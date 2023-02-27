@@ -124,8 +124,8 @@ const NavBar = ({ navigation, children }) => {
                         className="h-16 w-auto"
                         src={"/logos/ethio-logo.svg"}
                         alt="TeleBirr Logo"
-                        width={900}
-                        height={600}
+                        width={400}
+                        height={200}
                         priority
                       />
                     </div>
@@ -223,8 +223,8 @@ const NavBar = ({ navigation, children }) => {
                                 className="inline-block h-16 w-auto rounded-full"
                                 src={"/logos/telebirr-logo.svg"}
                                 alt="TeleBirr Logo"
-                                width={900}
-                                height={600}
+                                width={400}
+                                height={200}
                                 priority
                               />
                             </div>
@@ -249,8 +249,8 @@ const NavBar = ({ navigation, children }) => {
                   className="h-16 w-auto"
                   src={"/logos/ethio-logo.svg"}
                   alt="TeleBirr Logo"
-                  width={900}
-                  height={600}
+                  width={400}
+                  height={200}
                   priority
                 />
               </div>
@@ -349,7 +349,7 @@ const NavBar = ({ navigation, children }) => {
                           className="inline-block h-20 w-auto rounded-full"
                           src={"/logos/telebirr-logo.svg"}
                           alt="TeleBirr Logo"
-                          width={200}
+                          width={400}
                           height={200}
                           priority
                         />
@@ -445,7 +445,6 @@ const NavBar = ({ navigation, children }) => {
                         <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                           <Menu.Item>
                             {({ active }) => (
-                              // <Link href={"/"} legacyBehavior passHref>
                               <MyLink href={"/"}>
                                 <a
                                   className={classNames(
@@ -461,6 +460,21 @@ const NavBar = ({ navigation, children }) => {
                           </Menu.Item>
                           <Menu.Item>
                             {({ active }) => (
+                              <MyLink href={"/auth/change-password"}>
+                                <a
+                                  className={classNames(
+                                    active ? "bg-gray-100" : "",
+                                    "block px-4 py-2 text-sm text-gray-700"
+                                  )}
+                                >
+                                  Change Password
+                                </a>
+                              </MyLink>
+                              // </Link>
+                            )}
+                          </Menu.Item>
+                          <Menu.Item>
+                            {({ active }) => (
                               <button
                                 onClick={(e) => {
                                   e.preventDefault();
@@ -468,7 +482,7 @@ const NavBar = ({ navigation, children }) => {
                                 }}
                                 className={classNames(
                                   active ? "bg-gray-100" : "",
-                                  "block px-4 py-2 text-sm text-gray-700"
+                                  "block px-5 py-2 text-sm text-gray-700"
                                 )}
                               >
                                 Logout

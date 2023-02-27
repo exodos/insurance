@@ -18,7 +18,6 @@ const FeedInsured = gql`
     $skip: Int
     $take: Int
     $orderBy: [InsuredOrderByInput!]
-    $input: orgDescInput!
   ) {
     feedInsured(filter: $filter, skip: $skip, take: $take, orderBy: $orderBy) {
       insured {
@@ -40,6 +39,11 @@ const FeedInsured = gql`
       totalInsured
       maxPage
     }
+  }
+`;
+
+const FeedBranchByOrgDesc = gql`
+  query FeedBranchByOrgDesc($input: orgDescInput!) {
     feedBranchByOrgDesc(input: $input) {
       branchs {
         id
@@ -50,8 +54,9 @@ const FeedInsured = gql`
 `;
 
 const AdminInsuredPage = ({
-      data,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  insuredData,
+  branchData,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -112,11 +117,11 @@ const AdminInsuredPage = ({
             )}
           </div>
         </div>
-        <ListInsured insuredData={data.feedInsured} />
+        <ListInsured insuredData={insuredData.feedInsured} />
       </div>
       {showAddModal ? (
         <AddInsuredModal
-          branchData={data.feedBranchByOrgDesc.branchs}
+          branchData={branchData.feedBranchByOrgDesc.branchs}
           href={pathname}
         />
       ) : null}
@@ -156,12 +161,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   const apolloClient = initializeApollo();
 
-  const { data } = await apolloClient.query({
+  const { data: insuredData } = await apolloClient.query({
     query: FeedInsured,
     variables: {
-      input: {
-        description: "INSURANCE",
-      },
       filter: filter,
       skip: skip,
       take: take,
@@ -173,10 +175,20 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     },
   });
 
+  const { data: branchData } = await apolloClient.query({
+    query: FeedBranchByOrgDesc,
+    variables: {
+      input: {
+        description: "INSURANCE",
+      },
+    },
+  });
+
   return {
     props: {
       session,
-      data,
+      insuredData,
+      branchData,
     },
   };
 };

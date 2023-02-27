@@ -258,9 +258,17 @@ export const policyConnectInput = inputObjectType({
 export const policyCreateInput = inputObjectType({
   name: "policyCreateInput",
   definition(t) {
-    t.string("policyNumber");
+    // t.string("policyNumber");
     t.date("policyStartDate");
-    // t.date("policyExpireDate");
+    t.string("policyIssuedConditions");
+    t.string("personsEntitledToUse");
+  },
+});
+
+export const policyInsuranceCreateInput = inputObjectType({
+  name: "policyInsuranceCreateInput",
+  definition(t) {
+    t.date("policyStartDate");
     t.string("policyIssuedConditions");
     t.string("personsEntitledToUse");
   },

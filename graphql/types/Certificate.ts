@@ -1,5 +1,6 @@
 import {
   arg,
+  enumType,
   extendType,
   inputObjectType,
   intArg,
@@ -8,31 +9,25 @@ import {
   objectType,
   stringArg,
 } from "nexus";
-import { addYears, endOfYear, startOfYear, subDays, subYears } from "date-fns";
+import { addYears, endOfYear, startOfYear, subYears } from "date-fns";
 import { Prisma } from "@prisma/client";
 import { policyCreateInput, policyUpdateInput } from "./Policy";
 import { format } from "date-fns";
 import { Sort } from "./User";
 import { branchConnectInput } from "./Branch";
+import { VehicleStatus, vehicleInsuranceCreateInput } from "./Vehicle";
+import { VehicleCategory } from "./Tariff";
+import { changePhone } from "@/lib/config";
 
 export const Certificate = objectType({
   name: "Certificate",
   definition(t) {
     t.string("id");
     t.string("certificateNumber");
+    t.field("status", { type: InsuranceStatus });
     t.float("premiumTarif");
     t.date("issuedDate");
     t.date("updatedAt");
-    t.field("insureds", {
-      type: "Insured",
-      async resolve(_parent, _args, ctx) {
-        return await ctx.prisma.certificate
-          .findUnique({
-            where: { id: _parent.id },
-          })
-          .insureds();
-      },
-    });
     t.field("vehicles", {
       type: "Vehicle",
       async resolve(_parent, _args, ctx) {
@@ -103,6 +98,7 @@ export const CertificatePagination = extendType({
               OR: [
                 { certificateNumber: args.filter },
                 { vehiclePlateNumber: args.filter },
+                { policyNumber: args.filter },
               ],
             }
           : {};
@@ -146,15 +142,14 @@ export const CertificateBranchPagination = extendType({
       async resolve(parent, args, ctx) {
         const where = args.filter
           ? {
-              // deleted: false,
               branchId: args.branchId,
               OR: [
                 { certificateNumber: args.filter },
                 { vehiclePlateNumber: args.filter },
+                { policyNumber: args.filter },
               ],
             }
           : {
-              // deleted: false,
               branchId: args.branchId,
             };
 
@@ -196,17 +191,16 @@ export const CertificateInsurerPagination = extendType({
       async resolve(parent, args, ctx) {
         const where = args.filter
           ? {
-              // deleted: false,
               branchs: {
                 orgId: args.orgId,
               },
               OR: [
                 { certificateNumber: args.filter },
                 { vehiclePlateNumber: args.filter },
+                { policyNumber: args.filter },
               ],
             }
           : {
-              // deleted: false,
               branchs: {
                 orgId: args.orgId,
               },
@@ -330,7 +324,6 @@ export const certificateByCertificateNumberQuery = extendType({
         return ctx.prisma.certificate.findFirst({
           where: {
             certificateNumber: args.certificateNumber,
-            // deleted: false,
           },
         });
       },
@@ -360,7 +353,8 @@ export const createCertificateMutation = extendType({
           !user ||
           (user.memberships.role !== "SUPERADMIN" &&
             user.memberships.role !== "INSURER" &&
-            user.memberships.role !== "MEMBER")
+            user.memberships.role !== "MEMBER" &&
+            user.memberships.role !== "BRANCHADMIN")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
@@ -613,22 +607,20 @@ export const createCertificateMutation = extendType({
           }
         }
 
+        const storeCertificateNumber = `CN-${format(new Date(), "yyMMiHms")}`,
+          storePolicyNumber = `PN-${format(new Date(), "yyMMiHms")}`;
+
         return await ctx.prisma.$transaction(async (tx: any) => {
           let certData = null,
             vehiUpdate = null;
           certData = await tx.certificate.create({
             data: {
               ...args.input,
-              certificateNumber: `CN-${format(new Date(), "yyMMiHms")}`,
+              certificateNumber: storeCertificateNumber,
               premiumTarif:
                 vehicleDetail.premiumTarif +
                 premiumTariffBodily +
                 premiumTariffProperty,
-              insureds: {
-                connect: {
-                  id: vehicleDetail.insureds.id,
-                },
-              },
               vehicles: {
                 connect: {
                   plateNumber: args.plateNumber,
@@ -636,7 +628,7 @@ export const createCertificateMutation = extendType({
               },
               policies: {
                 create: {
-                  policyNumber: args.input.policies.policyNumber,
+                  policyNumber: storePolicyNumber,
                   policyStartDate: args.input.policies.policyStartDate,
                   policyExpireDate: addYears(
                     new Date(args.input.policies.policyStartDate),
@@ -657,12 +649,7 @@ export const createCertificateMutation = extendType({
                 create: {
                   policies: {
                     connect: {
-                      policyNumber: args.input.policies.policyNumber,
-                    },
-                  },
-                  insureds: {
-                    connect: {
-                      id: vehicleDetail.insureds.id,
+                      policyNumber: storePolicyNumber,
                     },
                   },
                   vehicles: {
@@ -690,6 +677,367 @@ export const createCertificateMutation = extendType({
           });
 
           return vehiUpdate;
+        });
+      },
+    });
+  },
+});
+
+export const createInsuranceByBranchMutation = extendType({
+  type: "Mutation",
+  definition(t) {
+    t.nonNull.field("createInsuranceByBranch", {
+      type: Certificate,
+      args: {
+        input: nonNull(InsuranceCreateInput),
+      },
+      resolve: async (_parent, args, ctx) => {
+        const user = await ctx.prisma.user.findUnique({
+          where: {
+            email: ctx.session.user.email,
+          },
+          include: {
+            memberships: true,
+          },
+        });
+        if (
+          !user ||
+          (user.memberships.role !== "SUPERADMIN" &&
+            user.memberships.role !== "INSURER" &&
+            user.memberships.role !== "MEMBER" &&
+            user.memberships.role !== "BRANCHADMIN")
+        ) {
+          throw new Error(`You do not have permission to perform action`);
+        }
+        const tariffPremium = await ctx.prisma.tariff.findFirst({
+          where: {
+            vehicleType: args.input.vehicles.vehicleType,
+            vehicleSubType: args.input.vehicles.vehicleSubType,
+            vehicleDetail: args.input.vehicles.vehicleDetails,
+            vehicleUsage: args.input.vehicles.vehicleUsage,
+          },
+        });
+        if (!tariffPremium) {
+          throw new Error(
+            `We Could\'n find Premium Tariff with the provided data`
+          );
+        }
+
+        const endYear = new Date(args.input.policies.policyStartDate);
+        const startYear = subYears(
+          new Date(args.input.policies.policyStartDate),
+          1
+        );
+
+        const countSlightBodilyInjury =
+          await ctx.prisma.accidentRecord.aggregate({
+            where: {
+              plateNumber: args.input.vehicles.plateNumber,
+              bodilyInjury: "SlightBodilyInjury",
+              createdAt: {
+                gte: startYear,
+                lte: endYear,
+              },
+            },
+            _count: {
+              bodilyInjury: true,
+            },
+          });
+
+        const countSaviorBodilyInjury =
+          await ctx.prisma.accidentRecord.aggregate({
+            where: {
+              plateNumber: args.input.vehicles.plateNumber,
+              bodilyInjury: "SaviorBodilyInjury",
+              createdAt: {
+                gte: startYear,
+                lte: endYear,
+              },
+            },
+            _count: {
+              bodilyInjury: true,
+            },
+          });
+
+        const countDeath = await ctx.prisma.accidentRecord.aggregate({
+          where: {
+            plateNumber: args.input.vehicles.plateNumber,
+            bodilyInjury: "Death",
+            createdAt: {
+              gte: startYear,
+              lte: endYear,
+            },
+          },
+          _count: {
+            bodilyInjury: true,
+          },
+        });
+
+        const sumPropertyInjury = await ctx.prisma.accidentRecord.aggregate({
+          where: {
+            plateNumber: args.input.vehicles.plateNumber,
+            createdAt: {
+              gte: startYear,
+              lte: endYear,
+            },
+          },
+          _count: {
+            propertyInjury: true,
+          },
+          _sum: {
+            propertyInjury: true,
+          },
+        });
+
+        let premiumTariffBodily = 0,
+          premiumTariffProperty = 0,
+          vehiclePremiumTarif = 0;
+        if (args.input.vehicles.vehicleCategory === "PRIVATEUSE") {
+          vehiclePremiumTarif =
+            20 * args.input.vehicles.passengerNumber +
+            tariffPremium.premiumTarif;
+        } else {
+          vehiclePremiumTarif =
+            40 * args.input.vehicles.passengerNumber +
+            tariffPremium.premiumTarif;
+        }
+
+        if (countSlightBodilyInjury._count.bodilyInjury === 1) {
+          premiumTariffBodily += (vehiclePremiumTarif * 10) / 100;
+        } else if (countSlightBodilyInjury._count.bodilyInjury === 2) {
+          premiumTariffBodily += (vehiclePremiumTarif * 20) / 100;
+        } else if (countSlightBodilyInjury._count.bodilyInjury === 3) {
+          premiumTariffBodily += (vehiclePremiumTarif * 50) / 100;
+        } else if (countSlightBodilyInjury._count.bodilyInjury === 4) {
+          premiumTariffBodily += (vehiclePremiumTarif * 80) / 100;
+        } else if (countSlightBodilyInjury._count.bodilyInjury >= 5) {
+          premiumTariffBodily += (vehiclePremiumTarif * 100) / 100;
+        }
+
+        if (countSaviorBodilyInjury._count.bodilyInjury === 1) {
+          premiumTariffBodily += (vehiclePremiumTarif * 10) / 100;
+        } else if (countSaviorBodilyInjury._count.bodilyInjury === 2) {
+          premiumTariffBodily += (vehiclePremiumTarif * 20) / 100;
+        } else if (countSaviorBodilyInjury._count.bodilyInjury === 3) {
+          premiumTariffBodily += (vehiclePremiumTarif * 50) / 100;
+        } else if (countSaviorBodilyInjury._count.bodilyInjury === 4) {
+          premiumTariffBodily += (vehiclePremiumTarif * 80) / 100;
+        } else if (countSaviorBodilyInjury._count.bodilyInjury >= 5) {
+          premiumTariffBodily += (vehiclePremiumTarif * 100) / 100;
+        }
+
+        if (countDeath._count.bodilyInjury === 1) {
+          premiumTariffBodily += (vehiclePremiumTarif * 10) / 100;
+        } else if (countDeath._count.bodilyInjury === 2) {
+          premiumTariffBodily += (vehiclePremiumTarif * 20) / 100;
+        } else if (countDeath._count.bodilyInjury === 3) {
+          premiumTariffBodily += (vehiclePremiumTarif * 50) / 100;
+        } else if (countDeath._count.bodilyInjury === 4) {
+          premiumTariffBodily += (vehiclePremiumTarif * 80) / 100;
+        } else if (countDeath._count.bodilyInjury >= 5) {
+          premiumTariffBodily += (vehiclePremiumTarif * 100) / 100;
+        }
+
+        if (sumPropertyInjury._count.propertyInjury === 1) {
+          if (
+            sumPropertyInjury._sum.propertyInjury > 0 &&
+            sumPropertyInjury._sum.propertyInjury < 5000
+          ) {
+            premiumTariffProperty = (vehiclePremiumTarif * 10) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 5000 &&
+            sumPropertyInjury._sum.propertyInjury < 10000
+          ) {
+            premiumTariffProperty = (vehiclePremiumTarif * 20) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 10000 &&
+            sumPropertyInjury._sum.propertyInjury < 50000
+          ) {
+            premiumTariffProperty = (vehiclePremiumTarif * 50) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 50000 &&
+            sumPropertyInjury._sum.propertyInjury < 100000
+          ) {
+            premiumTariffProperty = (vehiclePremiumTarif * 60) / 100;
+          } else if (sumPropertyInjury._sum.propertyInjury >= 100000) {
+            premiumTariffProperty = (vehiclePremiumTarif * 70) / 100;
+          }
+        } else if (sumPropertyInjury._count.propertyInjury === 2) {
+          if (
+            sumPropertyInjury._sum.propertyInjury > 0 &&
+            sumPropertyInjury._sum.propertyInjury < 5000
+          ) {
+            premiumTariffProperty = (vehiclePremiumTarif * 20) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 5000 &&
+            sumPropertyInjury._sum.propertyInjury < 10000
+          ) {
+            premiumTariffProperty = (vehiclePremiumTarif * 30) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 10000 &&
+            sumPropertyInjury._sum.propertyInjury < 50000
+          ) {
+            premiumTariffProperty = (vehiclePremiumTarif * 75) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 50000 &&
+            sumPropertyInjury._sum.propertyInjury < 100000
+          ) {
+            premiumTariffProperty = (vehiclePremiumTarif * 80) / 100;
+          } else if (sumPropertyInjury._sum.propertyInjury >= 100000) {
+            premiumTariffProperty = (vehiclePremiumTarif * 90) / 100;
+          }
+        } else if (sumPropertyInjury._count.propertyInjury === 3) {
+          if (
+            sumPropertyInjury._sum.propertyInjury > 0 &&
+            sumPropertyInjury._sum.propertyInjury < 5000
+          ) {
+            premiumTariffProperty = (vehiclePremiumTarif * 30) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 5000 &&
+            sumPropertyInjury._sum.propertyInjury < 10000
+          ) {
+            premiumTariffProperty = (vehiclePremiumTarif * 75) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 10000 &&
+            sumPropertyInjury._sum.propertyInjury < 50000
+          ) {
+            premiumTariffProperty = (vehiclePremiumTarif * 100) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 50000 &&
+            sumPropertyInjury._sum.propertyInjury < 100000
+          ) {
+            premiumTariffProperty = (vehiclePremiumTarif * 110) / 100;
+          } else if (sumPropertyInjury._sum.propertyInjury >= 100000) {
+            premiumTariffProperty = (vehiclePremiumTarif * 120) / 100;
+          }
+        } else if (sumPropertyInjury._count.propertyInjury === 4) {
+          if (
+            sumPropertyInjury._sum.propertyInjury > 0 &&
+            sumPropertyInjury._sum.propertyInjury < 5000
+          ) {
+            premiumTariffProperty = (vehiclePremiumTarif * 50) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 5000 &&
+            sumPropertyInjury._sum.propertyInjury < 10000
+          ) {
+            premiumTariffProperty = (vehiclePremiumTarif * 100) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 10000 &&
+            sumPropertyInjury._sum.propertyInjury < 50000
+          ) {
+            premiumTariffProperty = (vehiclePremiumTarif * 120) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 50000 &&
+            sumPropertyInjury._sum.propertyInjury < 100000
+          ) {
+            premiumTariffProperty = (vehiclePremiumTarif * 130) / 100;
+          } else if (sumPropertyInjury._sum.propertyInjury >= 100000) {
+            premiumTariffProperty = (vehiclePremiumTarif * 135) / 100;
+          }
+        } else if (sumPropertyInjury._count.propertyInjury >= 5) {
+          if (
+            sumPropertyInjury._sum.propertyInjury > 0 &&
+            sumPropertyInjury._sum.propertyInjury < 5000
+          ) {
+            premiumTariffProperty = (vehiclePremiumTarif * 100) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 5000 &&
+            sumPropertyInjury._sum.propertyInjury < 10000
+          ) {
+            premiumTariffProperty = (vehiclePremiumTarif * 120) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 10000 &&
+            sumPropertyInjury._sum.propertyInjury < 50000
+          ) {
+            premiumTariffProperty = (vehiclePremiumTarif * 130) / 100;
+          } else if (
+            sumPropertyInjury._sum.propertyInjury >= 50000 &&
+            sumPropertyInjury._sum.propertyInjury < 100000
+          ) {
+            premiumTariffProperty = (vehiclePremiumTarif * 140) / 100;
+          } else if (sumPropertyInjury._sum.propertyInjury >= 100000) {
+            premiumTariffProperty = (vehiclePremiumTarif * 150) / 100;
+          }
+        }
+
+        const storeCertificateNumber = `CN-${format(new Date(), "yyMMiHms")}`,
+          storePolicyNumber = `PN-${format(new Date(), "yyMMiHms")}`;
+
+        return await ctx.prisma.certificate.create({
+          data: {
+            certificateNumber: storeCertificateNumber,
+            premiumTarif:
+              vehiclePremiumTarif + premiumTariffBodily + premiumTariffProperty,
+            branchs: {
+              connect: {
+                id: args.input.branchs.id,
+              },
+            },
+            policies: {
+              create: {
+                policyNumber: storePolicyNumber,
+                policyStartDate: args.input.policies.policyStartDate,
+                policyExpireDate: addYears(
+                  new Date(args.input.policies.policyStartDate),
+                  1
+                ),
+                policyIssuedConditions:
+                  args.input.policies.policyIssuedConditions,
+                personsEntitledToUse: args.input.policies.personsEntitledToUse,
+              },
+            },
+            vehicles: {
+              create: {
+                plateNumber: args.input.vehicles.plateNumber,
+                engineNumber: args.input.vehicles.engineNumber,
+                chassisNumber: args.input.vehicles.chassisNumber,
+                vehicleModel: args.input.vehicles.vehicleModel,
+                bodyType: args.input.vehicles.bodyType,
+                horsePower: args.input.vehicles.horsePower,
+                manufacturedYear: args.input.vehicles.manufacturedYear,
+                vehicleType: args.input.vehicles.vehicleType,
+                vehicleSubType: args.input.vehicles.vehicleSubType,
+                vehicleDetails: args.input.vehicles.vehicleDetails,
+                vehicleUsage: args.input.vehicles.vehicleUsage,
+                vehicleCategory: args.input.vehicles.vehicleCategory,
+                premiumTarif: vehiclePremiumTarif,
+                passengerNumber: args.input.vehicles.passengerNumber,
+                carryingCapacityInGoods:
+                  args.input.vehicles.carryingCapacityInGoods,
+                purchasedYear: args.input.vehicles.purchasedYear,
+                dutyFreeValue: args.input.vehicles.dutyFreeValue,
+                dutyPaidValue: args.input.vehicles.dutyPaidValue,
+                vehicleStatus: args.input.vehicles.vehicleStatus,
+                branchs: {
+                  connect: {
+                    id: args.input.branchs.id,
+                  },
+                },
+                insureds: {
+                  create: {
+                    regNumber: `REG-${format(new Date(), "yyMMiHms")}`,
+                    firstName: args.input.vehicles.insureds.firstName,
+                    lastName: args.input.vehicles.insureds.lastName,
+                    occupation: args.input.vehicles.insureds.occupation,
+                    region: args.input.vehicles.insureds.region,
+                    city: args.input.vehicles.insureds.city,
+                    subCity: args.input.vehicles.insureds.subCity,
+                    wereda: args.input.vehicles.insureds.wereda,
+                    kebelle: args.input.vehicles.insureds.kebelle,
+                    houseNumber: args.input.vehicles.insureds.houseNumber,
+                    mobileNumber: changePhone(
+                      args.input.vehicles.insureds.mobileNumber
+                    ),
+                    branchs: {
+                      connect: {
+                        id: args.input.branchs.id,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         });
       },
     });
@@ -986,20 +1334,17 @@ export const createCertificateBranchMutation = extendType({
 
         let certData = null;
         let vehicleData = null;
+        const storeCertificateNumber = `CN-${format(new Date(), "yyMMiHms")}`,
+          storePolicyNumber = `PN-${format(new Date(), "yyMMiHms")}`;
 
         [certData, vehicleData] = await ctx.prisma.$transaction([
           ctx.prisma.certificate.create({
             data: {
-              certificateNumber: `CN-${format(new Date(), "yyMMiHms")}`,
+              certificateNumber: storeCertificateNumber,
               premiumTarif:
                 vehicleDetail.premiumTarif +
                 premiumTariffBodily +
                 premiumTariffProperty,
-              insureds: {
-                connect: {
-                  id: vehicleDetail.insureds.id,
-                },
-              },
               vehicles: {
                 connect: {
                   plateNumber: args.plateNumber,
@@ -1007,7 +1352,7 @@ export const createCertificateBranchMutation = extendType({
               },
               policies: {
                 create: {
-                  policyNumber: args.input.policies.policyNumber,
+                  policyNumber: storePolicyNumber,
                   policyStartDate: args.input.policies.policyStartDate,
                   policyExpireDate: addYears(
                     new Date(args.input.policies.policyStartDate),
@@ -1028,12 +1373,7 @@ export const createCertificateBranchMutation = extendType({
                 create: {
                   policies: {
                     connect: {
-                      policyNumber: args.input.policies.policyNumber,
-                    },
-                  },
-                  insureds: {
-                    connect: {
-                      id: vehicleDetail.insureds.id,
+                      policyNumber: storePolicyNumber,
                     },
                   },
                   vehicles: {
@@ -1088,7 +1428,8 @@ export const updateCertificateMutation = extendType({
           !user ||
           (user.memberships.role !== "SUPERADMIN" &&
             user.memberships.role !== "INSURER" &&
-            user.memberships.role !== "MEMBER")
+            user.memberships.role !== "MEMBER" &&
+            user.memberships.role !== "BRANCHADMIN")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
@@ -1333,7 +1674,10 @@ export const updateCertificateMutation = extendType({
           ctx.prisma.certificate.update({
             where: { id: args.id },
             data: {
-              ...args.input,
+              premiumTarif:
+                vPlate.premiumTarif +
+                premiumTariffBodily +
+                premiumTariffProperty,
               policies: {
                 update: {
                   policyStartDate: new Date(
@@ -1349,17 +1693,11 @@ export const updateCertificateMutation = extendType({
                     args.input.policies.personsEntitledToUse,
                 },
               },
-
               certificateRecords: {
                 create: {
                   policies: {
                     connect: {
                       policyNumber: vPlate.policies.policyNumber,
-                    },
-                  },
-                  insureds: {
-                    connect: {
-                      id: vPlate.insuredId,
                     },
                   },
                   vehicles: {
@@ -1391,65 +1729,6 @@ export const updateCertificateMutation = extendType({
     });
   },
 });
-
-// export const deleteCertificateMutation = extendType({
-//   type: "Mutation",
-//   definition(t) {
-//     t.nonNull.field("deleteCertificate", {
-//       type: Certificate,
-//       args: {
-//         id: nonNull(stringArg()),
-//       },
-//       resolve: async (_parent, args, ctx) => {
-//         const user = await ctx.prisma.user.findUnique({
-//           where: {
-//             email: ctx.session.user.email,
-//           },
-//           include: {
-//             memberships: true,
-//           },
-//         });
-//         if (!user || user.memberships.role !== "SUPERADMIN") {
-//           throw new Error(`You do not have permission to perform action`);
-//         }
-//         const vPlate = await ctx.prisma.certificate.findFirst({
-//           where: {
-//             id: args.id,
-//           },
-//           include: {
-//             vehicles: true,
-//           },
-//         });
-
-//         let certDate = null;
-//         let vehicleData = null;
-//         [certDate, vehicleData] = await ctx.prisma.$transaction([
-//           ctx.prisma.certificate.update({
-//             where: {
-//               id: args.id,
-//             },
-//             data: {
-//               vehicles: {
-//                 disconnect: true,
-//               },
-//               deleted: true,
-//               deletedTime: new Date(),
-//             },
-//           }),
-//           ctx.prisma.vehicle.update({
-//             where: {
-//               id: vPlate.vehicles.id,
-//             },
-//             data: {
-//               isInsured: "NOTINSURED",
-//             },
-//           }),
-//         ]);
-//         return certDate;
-//       },
-//     });
-//   },
-// });
 
 export const deleteCertificateMutation = extendType({
   type: "Mutation",
@@ -1547,11 +1826,47 @@ export const CertificateOrderByInput = inputObjectType({
 export const CertificateCreateInput = inputObjectType({
   name: "CertificateCreateInput",
   definition(t) {
-    // t.float("premiumTarif");
     t.field("policies", { type: policyCreateInput });
     t.field("branchs", { type: branchConnectInput });
-    // t.field("tariffs", { type: tariffConnectInput });
-    // t.field("thirdPartyLog", { type: thirdPartyLogCreateInput });
+  },
+});
+
+export const InsuranceCreateInput = inputObjectType({
+  name: "InsuranceCreateInput",
+  definition(t) {
+    t.field("policies", { type: policyCreateInput });
+    t.field("vehicles", { type: vehicleInsuranceCreateInput });
+    t.field("branchs", { type: branchConnectInput });
+
+    // t.string("firstName");
+    // t.string("lastName");
+    // t.nullable.string("occupation");
+    // t.string("region");
+    // t.string("city");
+    // t.string("subCity");
+    // t.string("wereda");
+    // t.string("kebelle");
+    // t.string("houseNumber");
+    // t.string("mobileNumber");
+    // t.string("plateNumber");
+    // t.string("engineNumber");
+    // t.string("chassisNumber");
+    // t.string("vehicleModel");
+    // t.string("bodyType");
+    // t.string("horsePower");
+    // t.int("manufacturedYear");
+    // t.string("vehicleType");
+    // t.string("vehicleSubType");
+    // t.string("vehicleDetails");
+    // t.string("vehicleUsage");
+    // t.field("vehicleCategory", { type: VehicleCategory });
+    // t.int("passengerNumber");
+    // t.nullable.string("carryingCapacityInGoods");
+    // t.int("purchasedYear");
+    // t.float("dutyFreeValue");
+    // t.float("dutyPaidValue");
+    // t.field("vehicleStatus", { type: VehicleStatus });
+    // t.string("branchId");
   },
 });
 
@@ -1571,7 +1886,7 @@ export const certificateConnectInput = inputObjectType({
   },
 });
 
-// export const CertificateStatus = enumType({
-//   name: "CertificateStatus",
-//   members: ["CURRENT", "ARCHIEVED"],
-// });
+export const InsuranceStatus = enumType({
+  name: "InsuranceStatus",
+  members: ["APPROVED", "SUSPENDED"],
+});

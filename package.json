@@ -14,7 +14,7 @@
     "@headlessui/react": "^1.7.8",
     "@heroicons/react": "^2.0.14",
     "@next/font": "13.1.6",
-    "@prisma/client": "^4.10.0",
+    "@prisma/client": "^4.10.1",
     "@tailwindcss/forms": "^0.5.3",
     "@tailwindcss/line-clamp": "^0.4.2",
     "@types/bcryptjs": "^2.4.2",
@@ -37,6 +37,7 @@
     "date-fns": "^2.29.3",
     "eslint": "8.33.0",
     "eslint-config-next": "13.1.6",
+    "fast-xml-parser": "^4.1.2",
     "formik": "^2.2.9",
     "graphql": "^16.6.0",
     "graphql-middleware": "^6.1.33",
@@ -74,7 +75,7 @@
   "devDependencies": {
     "autoprefixer": "^10.4.13",
     "postcss": "^8.4.21",
-    "prisma": "^4.10.0",
+    "prisma": "^4.10.1",
     "tailwindcss": "^3.2.4"
   }
 }

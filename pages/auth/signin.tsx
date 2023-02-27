@@ -11,8 +11,8 @@ import { CtxOrReq } from "next-auth/client/_utils";
 import SignInError from "./signin-error";
 
 const SignIn = ({
-  csrfToken,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      csrfToken,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const router = useRouter();
   const [error, setError] = useState(null);
 
@@ -161,14 +161,14 @@ const SignIn = ({
                       <div className="flex items-center justify-between">
                         <div className="flex items-center"></div>
 
-                        <div className="text-sm">
+                        {/* <div className="text-sm">
                           <a
                             href="#"
                             className="font-semibold text-lightGreen hover:text-deepGreen"
                           >
                             Forgot your password?
                           </a>
-                        </div>
+                        </div> */}
                       </div>
 
                       <div className="pt-4">

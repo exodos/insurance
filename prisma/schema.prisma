@@ -54,6 +54,7 @@ model Branch {
   unInsuredPoliceReports UnInsuredPoliceReport[] @relation(name: "unInsuredBranch")
   policeReport           UnInsuredPoliceReport[] @relation(name: "unInsuredPoliceReporter")
   certificateRecords     CertificateRecord[]
+  // insurances             Insurance[]
 }
 
 model Organization {
@@ -88,29 +89,27 @@ model Membership {
 model Certificate {
   id                 String              @id @default(uuid())
   certificateNumber  String              @unique
+  status             InsuranceStatus     @default(SUSPENDED)
   issuedDate         DateTime            @default(now())
-  policies           Policy              @relation(fields: [policyId], references: [id])
-  policyId           String              @unique
-  insureds           Insured             @relation(fields: [insuredId], references: [id], onUpdate: Cascade)
-  insuredId          String
+  policies           Policy              @relation(fields: [policyNumber], references: [policyNumber])
+  policyNumber       String              @unique
   vehicles           Vehicle             @relation(fields: [vehiclePlateNumber], references: [plateNumber], onUpdate: Cascade, onDelete: Cascade)
   vehiclePlateNumber String              @unique
   branchs            Branch              @relation(fields: [branchId], references: [id])
   branchId           String
   premiumTarif       Float
   updatedAt          DateTime            @updatedAt
-  // deleted            Boolean         @default(false)
-  // deletedTime        DateTime?
   claims             Claim[]
   thirdPartyLogs     ThirdPartyLog[]
   certificateRecords CertificateRecord[]
+  payments           Payment?            @relation(fields: [refNumber], references: [refNumber])
+  refNumber          String?
 }
 
 model CertificateRecord {
   id           String        @id @default(uuid())
   certificates Certificate[]
   policies     Policy[]
-  insureds     Insured[]
   vehicles     Vehicle[]
   branchs      Branch[]
   createdAt    DateTime      @default(now())
@@ -120,27 +119,26 @@ model CertificateRecord {
 }
 
 model Insured {
-  id                 String              @id @default(uuid())
-  regNumber          String              @unique
-  firstName          String
-  lastName           String
-  occupation         String?
-  region             String
-  city               String
-  subCity            String
-  wereda             String
-  kebelle            String
-  houseNumber        String
-  mobileNumber       String
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  vehicles           Vehicle[]
-  certificates       Certificate[]
-  claims             Claim[]
-  branchs            Branch              @relation(fields: [branchId], references: [id])
-  branchId           String
-  thirdPartyLogs     ThirdPartyLog[]
-  certificateRecords CertificateRecord[]
+  id             String          @id @default(uuid())
+  regNumber      String          @unique
+  firstName      String
+  lastName       String
+  occupation     String?
+  region         String
+  city           String
+  subCity        String
+  wereda         String
+  kebelle        String
+  houseNumber    String
+  mobileNumber   String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  vehicles       Vehicle[]
+  claims         Claim[]
+  branchs        Branch          @relation(fields: [branchId], references: [id])
+  branchId       String
+  thirdPartyLogs ThirdPartyLog[]
+  payments       Payment[]
 
   @@unique([mobileNumber, branchId])
 }
@@ -167,7 +165,6 @@ model Vehicle {
   dutyPaidValue           Float
   vehicleStatus           VEHICLESTATUS         @default(NEW)
   isInsured               IsInsured             @default(NOTINSURED)
-  status                  STATUS                @default(SUSPENDED)
   insureds                Insured               @relation(fields: [insuredId], references: [id])
   insuredId               String
   branchs                 Branch                @relation(fields: [branchId], references: [id])
@@ -178,9 +175,10 @@ model Vehicle {
   claims                  Claim[]
   createdAt               DateTime              @default(now())
   updatedAt               DateTime              @updatedAt
-  thirdPartyLogs          ThirdPartyLog[]
   accidentRecords         AccidentRecord[]
   certificateRecords      CertificateRecord[]
+  // insurances              Insurance[]
+  thirdPartyLogs          ThirdPartyLog[]
 }
 
 model Policy {
@@ -194,6 +192,7 @@ model Policy {
   createdAt              DateTime            @default(now())
   updatedAt              DateTime            @updatedAt
   certificateRecords     CertificateRecord[]
+  // insurances             Insurance[]
 }
 
 enum MembershipRole {
@@ -467,6 +466,51 @@ model AccidentRecord {
   claims         Claim            @relation(fields: [claimNumber], references: [claimNumber])
   claimNumber    String
   // claims         Claim[]
+}
+
+// model Insurance {
+//   id        String          @id @default(uuid())
+//   refNumber String          @unique
+//   insureds     Insured         @relation(fields: [regNumber], references: [regNumber])
+//   regNumber    String
+//   vehicles     Vehicle         @relation(fields: [plateNumber], references: [plateNumber])
+//   plateNumber  String
+//   certificates Certificate     @relation(fields: [certNumber], references: [certificateNumber])
+//   certNumber   String
+//   policies     Policy          @relation(fields: [policyNumber], references: [policyNumber])
+//   policyNumber String
+//   branchs      Branch          @relation(fields: [branchId], references: [id])
+//   branchId     String
+//   status    InsuranceStatus @default(SUSPENDED)
+//   createdAt DateTime        @default(now())
+//   updatedAt DateTime        @updatedAt
+// }
+
+model Payment {
+  id               String              @id @default(uuid())
+  refNumber        String              @unique
+  insureds         Insured             @relation(fields: [regNumber], references: [regNumber])
+  regNumber        String
+  certificates     Certificate[]
+  paymentStatus    PaymentStatus       @default(NOTPAYED)
+  commissionStatus CommissioningStatus @default(NotCommissioned)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+}
+
+enum InsuranceStatus {
+  APPROVED
+  SUSPENDED
+}
+
+enum PaymentStatus {
+  PAYED
+  NOTPAYED
+}
+
+enum CommissioningStatus {
+  Commissioned
+  NotCommissioned
 }
 
 enum ACCIDENTSUBTYPE {

@@ -41,17 +41,6 @@ export const Insured = objectType({
           .vehicles();
       },
     });
-    t.nonNull.list.nonNull.field("certificates", {
-      type: "Certificate",
-      async resolve(_parent, _args, ctx) {
-        return await ctx.prisma.insured
-          .findUnique({
-            where: { id: _parent.id },
-          })
-          .certificates();
-      },
-    });
-
     t.field("branchs", {
       type: "Branch",
       async resolve(_parent, _args, ctx) {
@@ -555,6 +544,24 @@ export const insuredCreateInput = inputObjectType({
     t.string("houseNumber");
     t.string("mobileNumber");
     t.field("branchs", { type: branchConnectInput });
+
+    // t.field("thirdPartyLog", { type: thirdPartyLogCreateInput });
+  },
+});
+export const insuredInsuranceCreateInput = inputObjectType({
+  name: "insuredInsuranceCreateInput",
+  definition(t) {
+    t.string("firstName");
+    t.string("lastName");
+    t.nullable.string("occupation");
+    t.string("region");
+    t.string("city");
+    t.string("subCity");
+    t.string("wereda");
+    t.string("kebelle");
+    t.string("houseNumber");
+    t.string("mobileNumber");
+    // t.field("branchs", { type: branchConnectInput });
 
     // t.field("thirdPartyLog", { type: thirdPartyLogCreateInput });
   },

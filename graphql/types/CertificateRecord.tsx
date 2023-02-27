@@ -37,16 +37,6 @@ export const CertificateRecord = objectType({
           .policies();
       },
     });
-    t.nullable.list.field("insureds", {
-      type: "Insured",
-      async resolve(_parent, _args, ctx) {
-        return await ctx.prisma.certificateRecord
-          .findUnique({
-            where: { id: _parent.id },
-          })
-          .insureds();
-      },
-    });
     t.nullable.list.field("vehicles", {
       type: "Vehicle",
       async resolve(_parent, _args, ctx) {

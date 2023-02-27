@@ -36,7 +36,6 @@ const VehicleByPlateNumber = gql`
       dutyFreeValue
       dutyPaidValue
       vehicleStatus
-      status
       isInsured
       createdAt
       updatedAt
@@ -73,24 +72,11 @@ const VehicleByPlateNumber = gql`
   }
 `;
 
-const UpdateVehicleStatus = gql`
-  mutation UpdateVehicleStatus(
-    $updateVehicleStatusId: String!
-    $input: statusInput!
-  ) {
-    updateVehicleStatus(id: $updateVehicleStatusId, input: $input) {
-      id
-      status
-    }
-  }
-`;
-
 const ListVehicle = ({
   vehicleData,
   regionCode,
   codeList,
   branch,
-  pageStatus,
   tariffData,
 }) => {
   const { data: session, status } = useSession();
@@ -101,15 +87,6 @@ const ListVehicle = ({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteList, setDeleteList] = useState([]);
   const notificationCtx = useContext(NotificationContext);
-
-  const [
-    updateVehicle,
-    {
-      data: updateVehicleData,
-      error: updateVehicleError,
-      loading: updateVehicleLoading,
-    },
-  ] = useMutation(UpdateVehicleStatus);
 
   const router = useRouter();
   const { asPath, pathname } = useRouter();
@@ -141,42 +118,6 @@ const ListVehicle = ({
   const handleDelete = (Delete: any) => {
     setShowDeleteModal((prev) => !prev);
     setDeleteList(Delete);
-  };
-
-  const handleApprove = async (vehicleId: any) => {
-    const input = {
-      status: "APPROVED",
-    };
-    await updateVehicle({
-      variables: {
-        updateVehicleStatusId: vehicleId,
-        input,
-      },
-      onError: (updateVehicleError) => {
-        notificationCtx.showNotification({
-          title: "Error!",
-          message: updateVehicleError.message || "Something Went Wrong",
-          status: "error",
-        });
-      },
-      onCompleted: (updateVehicleData) => {
-        notificationCtx.showNotification({
-          title: "Success!",
-          message: "Successfully Updated Vehicle Status",
-          status: "success",
-        });
-      },
-      update: (cache, { data }) => {
-        const cacheId = cache.identify(data.message);
-        cache.modify({
-          fields: {
-            messages: (existinFieldData, { toReference }) => {
-              return [...existinFieldData, toReference(cacheId)];
-            },
-          },
-        });
-      },
-    }).then(() => router.push(pathname));
   };
 
   const handleDetails = async (plateNumber: any) => {
@@ -327,12 +268,6 @@ const ListVehicle = ({
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Status
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
                         Insured First Name
                       </th>
                       <th
@@ -368,15 +303,14 @@ const ListVehicle = ({
                       {(session.user.memberships.role === "SUPERADMIN" ||
                         session.user.memberships.role === "INSURER" ||
                         session.user.memberships.role === "BRANCHADMIN" ||
-                        session.user.memberships.role === "MEMBER") &&
-                        pageStatus !== "Suspended" && (
-                          <th
-                            scope="col"
-                            className="relative py-3.5 pl-3 pr-4 sm:pr-6"
-                          >
-                            <span className="sr-only">Detail</span>
-                          </th>
-                        )}
+                        session.user.memberships.role === "MEMBER") && (
+                        <th
+                          scope="col"
+                          className="relative py-3.5 pl-3 pr-4 sm:pr-6"
+                        >
+                          <span className="sr-only">Detail</span>
+                        </th>
+                      )}
                       {(session.user.memberships.role === "SUPERADMIN" ||
                         session.user.memberships.role === "INSURER" ||
                         session.user.memberships.role === "BRANCHADMIN" ||
@@ -396,17 +330,6 @@ const ListVehicle = ({
                           </th>
                         </>
                       )}
-                      {pageStatus === "Suspended" &&
-                        (session.user.memberships.role === "SUPERADMIN" ||
-                          session.user.memberships.role === "INSURER" ||
-                          session.user.memberships.role === "BRANCHADMIN") && (
-                          <th
-                            scope="col"
-                            className="relative py-3.5 pl-3 pr-4 sm:pr-6"
-                          >
-                            <span className="sr-only">Approve</span>
-                          </th>
-                        )}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
@@ -474,9 +397,6 @@ const ListVehicle = ({
                             {item.isInsured}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {item.status}
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {item.insureds.firstName}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
@@ -497,34 +417,33 @@ const ListVehicle = ({
 
                           {(session.user.memberships.role === "SUPERADMIN" ||
                             session.user.memberships.role === "INSURER" ||
-                            session.user.memberships.role === "MEMBER") &&
-                            pageStatus !== "Suspended" && (
-                              <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                <>
-                                  <button
-                                    onClick={() => {
-                                      handleDetails(item.plateNumber);
-                                    }}
-                                    className="text-indigo-600 hover:text-indigo-900"
-                                    data-tip
-                                    data-type="success"
-                                    data-for="showDetails"
-                                  >
-                                    <BiShow
-                                      className="flex-shrink-0 h-5 w-5 text-gray-400"
-                                      aria-hidden="true"
-                                    />
-                                  </button>
-                                  <ReactTooltip
-                                    id="showDetails"
-                                    place="top"
-                                    effect="solid"
-                                  >
-                                    Show Details
-                                  </ReactTooltip>
-                                </>
-                              </td>
-                            )}
+                            session.user.memberships.role === "MEMBER") && (
+                            <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                              <>
+                                <button
+                                  onClick={() => {
+                                    handleDetails(item.plateNumber);
+                                  }}
+                                  className="text-indigo-600 hover:text-indigo-900"
+                                  data-tip
+                                  data-type="success"
+                                  data-for="showDetails"
+                                >
+                                  <BiShow
+                                    className="flex-shrink-0 h-5 w-5 text-gray-400"
+                                    aria-hidden="true"
+                                  />
+                                </button>
+                                <ReactTooltip
+                                  id="showDetails"
+                                  place="top"
+                                  effect="solid"
+                                >
+                                  Show Details
+                                </ReactTooltip>
+                              </>
+                            </td>
+                          )}
                           {(session.user.memberships.role === "SUPERADMIN" ||
                             session.user.memberships.role === "INSURER" ||
                             session.user.memberships.role === "BRANCHADMIN" ||
@@ -578,37 +497,6 @@ const ListVehicle = ({
                               </td>
                             </>
                           )}
-                          {pageStatus === "Suspended" &&
-                            (session.user.memberships.role === "SUPERADMIN" ||
-                              session.user.memberships.role === "INSURER" ||
-                              session.user.memberships.role ===
-                                "BRANCHADMIN") && (
-                              <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                <>
-                                  <button
-                                    onClick={() => {
-                                      handleApprove(item.id);
-                                    }}
-                                    className="text-indigo-600 hover:text-indigo-900"
-                                    data-tip
-                                    data-type="success"
-                                    data-for="showApprove"
-                                  >
-                                    <BsFillCheckCircleFill
-                                      className="flex-shrink-0 h-5 w-5 text-lightGreen"
-                                      aria-hidden="true"
-                                    />
-                                  </button>
-                                  <ReactTooltip
-                                    id="showApprove"
-                                    place="top"
-                                    effect="solid"
-                                  >
-                                    Approve Vehicle
-                                  </ReactTooltip>
-                                </>
-                              </td>
-                            )}
                         </tr>
                       ))}
                   </tbody>

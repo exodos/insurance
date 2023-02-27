@@ -8,7 +8,19 @@ CREATE TYPE "OrgDesc" AS ENUM ('MINISTRY', 'INSURANCE', 'TRAFFICPOLICE');
 CREATE TYPE "CertificateStatus" AS ENUM ('CURRENT', 'ARCHIEVED');
 
 -- CreateEnum
-CREATE TYPE "ACCIDENTTYPE" AS ENUM ('BODILYINJURY', 'PROPERTYINJURY');
+CREATE TYPE "ClaimProgress" AS ENUM ('OnProgress', 'Completed');
+
+-- CreateEnum
+CREATE TYPE "InsuranceStatus" AS ENUM ('APPROVED', 'SUSPENDED');
+
+-- CreateEnum
+CREATE TYPE "PaymentStatus" AS ENUM ('PAYED', 'NOTPAYED');
+
+-- CreateEnum
+CREATE TYPE "CommissioningStatus" AS ENUM ('Commissioned', 'NotCommissioned');
+
+-- CreateEnum
+CREATE TYPE "ACCIDENTSUBTYPE" AS ENUM ('SlightBodilyInjury', 'SaviorBodilyInjury', 'Death');
 
 -- CreateEnum
 CREATE TYPE "VEHICLESTATUS" AS ENUM ('NEW', 'RENEWAL', 'ADDITIONAL');
@@ -92,20 +104,31 @@ CREATE TABLE "Membership" (
 CREATE TABLE "Certificate" (
     "id" TEXT NOT NULL,
     "certificateNumber" TEXT NOT NULL,
+    "status" "InsuranceStatus" NOT NULL DEFAULT 'SUSPENDED',
     "issuedDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "policyId" TEXT NOT NULL,
-    "insuredId" TEXT NOT NULL,
+    "policyNumber" TEXT NOT NULL,
     "vehiclePlateNumber" TEXT NOT NULL,
     "branchId" TEXT NOT NULL,
     "premiumTarif" DOUBLE PRECISION NOT NULL,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "refNumber" TEXT,
 
     CONSTRAINT "Certificate_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
+CREATE TABLE "CertificateRecord" (
+    "id" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "CertificateRecord_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Insured" (
     "id" TEXT NOT NULL,
+    "regNumber" TEXT NOT NULL,
     "firstName" TEXT NOT NULL,
     "lastName" TEXT NOT NULL,
     "occupation" TEXT,
@@ -139,14 +162,13 @@ CREATE TABLE "Vehicle" (
     "vehicleUsage" TEXT NOT NULL,
     "vehicleCategory" "VehicleCategory" NOT NULL,
     "premiumTarif" DOUBLE PRECISION NOT NULL,
-    "passengerNumber" TEXT NOT NULL,
+    "passengerNumber" INTEGER NOT NULL,
     "carryingCapacityInGoods" TEXT,
     "purchasedYear" INTEGER NOT NULL,
     "dutyFreeValue" DOUBLE PRECISION NOT NULL,
     "dutyPaidValue" DOUBLE PRECISION NOT NULL,
     "vehicleStatus" "VEHICLESTATUS" NOT NULL DEFAULT 'NEW',
     "isInsured" "IsInsured" NOT NULL DEFAULT 'NOTINSURED',
-    "status" "STATUS" DEFAULT 'SUSPENDED',
     "insuredId" TEXT NOT NULL,
     "branchId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -175,6 +197,7 @@ CREATE TABLE "Claim" (
     "claimNumber" TEXT NOT NULL,
     "damageEstimate" DOUBLE PRECISION NOT NULL,
     "claimedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "claimStatus" "ClaimProgress" NOT NULL DEFAULT 'OnProgress',
     "incidentNumber" TEXT NOT NULL,
     "claimantId" TEXT NOT NULL,
     "claimantPlateNumber" TEXT NOT NULL,
@@ -242,7 +265,6 @@ CREATE TABLE "InsuredPoliceReport" (
     "responsiblePhoneNumber" TEXT NOT NULL,
     "reportDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "trafficPoliceId" TEXT NOT NULL,
-    "accidentRecordId" TEXT,
 
     CONSTRAINT "InsuredPoliceReport_pkey" PRIMARY KEY ("id")
 );
@@ -377,17 +399,37 @@ CREATE TABLE "ThirdPartyLog" (
 -- CreateTable
 CREATE TABLE "AccidentRecord" (
     "id" TEXT NOT NULL,
-    "typeOfAccident" "ACCIDENTTYPE" NOT NULL,
-    "accidentSubType" TEXT NOT NULL,
+    "bodilyInjury" "ACCIDENTSUBTYPE",
+    "propertyInjury" DOUBLE PRECISION,
     "plateNumber" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "claimNumber" TEXT NOT NULL,
 
     CONSTRAINT "AccidentRecord_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
+CREATE TABLE "Payment" (
+    "id" TEXT NOT NULL,
+    "refNumber" TEXT NOT NULL,
+    "regNumber" TEXT NOT NULL,
+    "paymentStatus" "PaymentStatus" NOT NULL DEFAULT 'NOTPAYED',
+    "commissionStatus" "CommissioningStatus" NOT NULL DEFAULT 'NotCommissioned',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Payment_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "_BranchToThirdPartyLog" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "_BranchToCertificateRecord" (
     "A" TEXT NOT NULL,
     "B" TEXT NOT NULL
 );
@@ -406,6 +448,30 @@ CREATE TABLE "_MembershipToThirdPartyLog" (
 
 -- CreateTable
 CREATE TABLE "_CertificateToThirdPartyLog" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "_CertificateToCertificateRecord" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "_CertificateRecordToPolicy" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "_CertificateRecordToInsured" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "_CertificateRecordToVehicle" (
     "A" TEXT NOT NULL,
     "B" TEXT NOT NULL
 );
@@ -486,10 +552,13 @@ CREATE UNIQUE INDEX "Membership_userId_branchId_key" ON "Membership"("userId", "
 CREATE UNIQUE INDEX "Certificate_certificateNumber_key" ON "Certificate"("certificateNumber");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Certificate_policyId_key" ON "Certificate"("policyId");
+CREATE UNIQUE INDEX "Certificate_policyNumber_key" ON "Certificate"("policyNumber");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Certificate_vehiclePlateNumber_key" ON "Certificate"("vehiclePlateNumber");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Insured_regNumber_key" ON "Insured"("regNumber");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Insured_mobileNumber_branchId_key" ON "Insured"("mobileNumber", "branchId");
@@ -534,10 +603,19 @@ CREATE UNIQUE INDEX "UnInsuredPoliceReport_incidentNumber_key" ON "UnInsuredPoli
 CREATE UNIQUE INDEX "HitAndRunPoliceReport_incidentNumber_key" ON "HitAndRunPoliceReport"("incidentNumber");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Payment_refNumber_key" ON "Payment"("refNumber");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "_BranchToThirdPartyLog_AB_unique" ON "_BranchToThirdPartyLog"("A", "B");
 
 -- CreateIndex
 CREATE INDEX "_BranchToThirdPartyLog_B_index" ON "_BranchToThirdPartyLog"("B");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_BranchToCertificateRecord_AB_unique" ON "_BranchToCertificateRecord"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_BranchToCertificateRecord_B_index" ON "_BranchToCertificateRecord"("B");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "_OrganizationToThirdPartyLog_AB_unique" ON "_OrganizationToThirdPartyLog"("A", "B");
@@ -556,6 +634,30 @@ CREATE UNIQUE INDEX "_CertificateToThirdPartyLog_AB_unique" ON "_CertificateToTh
 
 -- CreateIndex
 CREATE INDEX "_CertificateToThirdPartyLog_B_index" ON "_CertificateToThirdPartyLog"("B");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_CertificateToCertificateRecord_AB_unique" ON "_CertificateToCertificateRecord"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_CertificateToCertificateRecord_B_index" ON "_CertificateToCertificateRecord"("B");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_CertificateRecordToPolicy_AB_unique" ON "_CertificateRecordToPolicy"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_CertificateRecordToPolicy_B_index" ON "_CertificateRecordToPolicy"("B");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_CertificateRecordToInsured_AB_unique" ON "_CertificateRecordToInsured"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_CertificateRecordToInsured_B_index" ON "_CertificateRecordToInsured"("B");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_CertificateRecordToVehicle_AB_unique" ON "_CertificateRecordToVehicle"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_CertificateRecordToVehicle_B_index" ON "_CertificateRecordToVehicle"("B");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "_InsuredToThirdPartyLog_AB_unique" ON "_InsuredToThirdPartyLog"("A", "B");
@@ -615,16 +717,16 @@ ALTER TABLE "Membership" ADD CONSTRAINT "Membership_userId_fkey" FOREIGN KEY ("u
 ALTER TABLE "Membership" ADD CONSTRAINT "Membership_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Certificate" ADD CONSTRAINT "Certificate_policyId_fkey" FOREIGN KEY ("policyId") REFERENCES "Policy"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Certificate" ADD CONSTRAINT "Certificate_insuredId_fkey" FOREIGN KEY ("insuredId") REFERENCES "Insured"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Certificate" ADD CONSTRAINT "Certificate_policyNumber_fkey" FOREIGN KEY ("policyNumber") REFERENCES "Policy"("policyNumber") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Certificate" ADD CONSTRAINT "Certificate_vehiclePlateNumber_fkey" FOREIGN KEY ("vehiclePlateNumber") REFERENCES "Vehicle"("plateNumber") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Certificate" ADD CONSTRAINT "Certificate_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Certificate" ADD CONSTRAINT "Certificate_refNumber_fkey" FOREIGN KEY ("refNumber") REFERENCES "Payment"("refNumber") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Insured" ADD CONSTRAINT "Insured_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -678,9 +780,6 @@ ALTER TABLE "InsuredPoliceReport" ADD CONSTRAINT "InsuredPoliceReport_responsibl
 ALTER TABLE "InsuredPoliceReport" ADD CONSTRAINT "InsuredPoliceReport_trafficPoliceId_fkey" FOREIGN KEY ("trafficPoliceId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "InsuredPoliceReport" ADD CONSTRAINT "InsuredPoliceReport_accidentRecordId_fkey" FOREIGN KEY ("accidentRecordId") REFERENCES "AccidentRecord"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "UnInsuredPoliceReport" ADD CONSTRAINT "UnInsuredPoliceReport_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -705,13 +804,25 @@ ALTER TABLE "Victim" ADD CONSTRAINT "Victim_unsuredPoliceReportId_fkey" FOREIGN 
 ALTER TABLE "ThirdPartyLog" ADD CONSTRAINT "ThirdPartyLog_claimUnInsuredId_fkey" FOREIGN KEY ("claimUnInsuredId") REFERENCES "ClaimUnInsured"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "AccidentRecord" ADD CONSTRAINT "AccidentRecord_plateNumber_fkey" FOREIGN KEY ("plateNumber") REFERENCES "Vehicle"("chassisNumber") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "AccidentRecord" ADD CONSTRAINT "AccidentRecord_plateNumber_fkey" FOREIGN KEY ("plateNumber") REFERENCES "Vehicle"("plateNumber") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AccidentRecord" ADD CONSTRAINT "AccidentRecord_claimNumber_fkey" FOREIGN KEY ("claimNumber") REFERENCES "Claim"("claimNumber") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Payment" ADD CONSTRAINT "Payment_regNumber_fkey" FOREIGN KEY ("regNumber") REFERENCES "Insured"("regNumber") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_BranchToThirdPartyLog" ADD CONSTRAINT "_BranchToThirdPartyLog_A_fkey" FOREIGN KEY ("A") REFERENCES "Branch"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_BranchToThirdPartyLog" ADD CONSTRAINT "_BranchToThirdPartyLog_B_fkey" FOREIGN KEY ("B") REFERENCES "ThirdPartyLog"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_BranchToCertificateRecord" ADD CONSTRAINT "_BranchToCertificateRecord_A_fkey" FOREIGN KEY ("A") REFERENCES "Branch"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_BranchToCertificateRecord" ADD CONSTRAINT "_BranchToCertificateRecord_B_fkey" FOREIGN KEY ("B") REFERENCES "CertificateRecord"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_OrganizationToThirdPartyLog" ADD CONSTRAINT "_OrganizationToThirdPartyLog_A_fkey" FOREIGN KEY ("A") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -730,6 +841,30 @@ ALTER TABLE "_CertificateToThirdPartyLog" ADD CONSTRAINT "_CertificateToThirdPar
 
 -- AddForeignKey
 ALTER TABLE "_CertificateToThirdPartyLog" ADD CONSTRAINT "_CertificateToThirdPartyLog_B_fkey" FOREIGN KEY ("B") REFERENCES "ThirdPartyLog"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_CertificateToCertificateRecord" ADD CONSTRAINT "_CertificateToCertificateRecord_A_fkey" FOREIGN KEY ("A") REFERENCES "Certificate"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_CertificateToCertificateRecord" ADD CONSTRAINT "_CertificateToCertificateRecord_B_fkey" FOREIGN KEY ("B") REFERENCES "CertificateRecord"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_CertificateRecordToPolicy" ADD CONSTRAINT "_CertificateRecordToPolicy_A_fkey" FOREIGN KEY ("A") REFERENCES "CertificateRecord"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_CertificateRecordToPolicy" ADD CONSTRAINT "_CertificateRecordToPolicy_B_fkey" FOREIGN KEY ("B") REFERENCES "Policy"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_CertificateRecordToInsured" ADD CONSTRAINT "_CertificateRecordToInsured_A_fkey" FOREIGN KEY ("A") REFERENCES "CertificateRecord"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_CertificateRecordToInsured" ADD CONSTRAINT "_CertificateRecordToInsured_B_fkey" FOREIGN KEY ("B") REFERENCES "Insured"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_CertificateRecordToVehicle" ADD CONSTRAINT "_CertificateRecordToVehicle_A_fkey" FOREIGN KEY ("A") REFERENCES "CertificateRecord"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_CertificateRecordToVehicle" ADD CONSTRAINT "_CertificateRecordToVehicle_B_fkey" FOREIGN KEY ("B") REFERENCES "Vehicle"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_InsuredToThirdPartyLog" ADD CONSTRAINT "_InsuredToThirdPartyLog_A_fkey" FOREIGN KEY ("A") REFERENCES "Insured"("id") ON DELETE CASCADE ON UPDATE CASCADE;

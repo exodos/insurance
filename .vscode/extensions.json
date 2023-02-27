@@ -1,6 +1,9 @@
 {
-    "recommendations": [
-        "seyyedkhandon.firacode",
-        "esbenp.prettier-vscode"
-    ]
+  "recommendations": [
+    "seyyedkhandon.firacode",
+    "esbenp.prettier-vscode",
+    "prisma.prisma",
+    "willluke.nextjs",
+    "humao.rest-client"
+  ]
 }

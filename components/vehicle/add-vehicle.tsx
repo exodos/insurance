@@ -31,7 +31,6 @@ const CreateVehicle = gql`
       dutyFreeValue
       dutyPaidValue
       vehicleStatus
-      status
       isInsured
       createdAt
       updatedAt
@@ -74,9 +73,10 @@ const AddVehicleModal = ({
     uniqueTariff.tariffVehicleCategory
   );
 
-  console.log(href);
+  // console.log(href);
 
   const [createVehicle, { data, error, loading }] = useMutation(CreateVehicle);
+
   if (error) {
     console.log(error);
   }
@@ -109,7 +109,6 @@ const AddVehicleModal = ({
     dutyFreeValue: "",
     dutyPaidValue: "",
     vehicleStatus: "",
-    // mobileNumber: "",
     branchName: "",
   };
   const validate = Yup.object().shape({
@@ -130,17 +129,10 @@ const AddVehicleModal = ({
     vehicleUsage: Yup.string().required("Vehicle Usage Is Required"),
     vehicleCategory: Yup.string().required("Vehicle Category Is Required"),
     passengerNumber: Yup.number().required("Passenger Number Is Required"),
-    // carryingCapacityInGoods: Yup.string().required(
-    //   "Carrying Capacity (In Goods) Is Required"
-    // ),
     purchasedYear: Yup.number().required("Purchased Year Is Required"),
     dutyFreeValue: Yup.number().required("Duty Free Value Is Required"),
     dutyPaidValue: Yup.number().required("Duty Paid Value Is Required"),
     vehicleStatus: Yup.string().required("Vehicle Status Is Required"),
-
-    // mobileNumber: Yup.string()
-    //   .matches(phoneRegExp, "Phone Number Is Not Valid")
-    //   .required("Phone Number Is Required"),
     branchName: Yup.string().required("Branch Name Is Required"),
   });
   const [formValues, setFormValues] = useState(null);
@@ -155,17 +147,17 @@ const AddVehicleModal = ({
       vehicleModel: values.vehicleModel,
       bodyType: values.bodyType,
       horsePower: values.horsePower,
-      manufacturedYear: values.manufacturedYear,
+      manufacturedYear: Number(values.manufacturedYear),
       vehicleType: values.vehicleType,
       vehicleSubType: values.vehicleSubType,
       vehicleDetails: values.vehicleDetails,
       vehicleUsage: values.vehicleUsage,
       vehicleCategory: values.vehicleCategory,
-      passengerNumber: values.passengerNumber,
+      passengerNumber: Number(values.passengerNumber),
       carryingCapacityInGoods: values.carryingCapacityInGoods,
-      purchasedYear: values.purchasedYear,
-      dutyFreeValue: values.dutyFreeValue,
-      dutyPaidValue: values.dutyPaidValue,
+      purchasedYear: Number(values.purchasedYear),
+      dutyFreeValue: Number(values.dutyFreeValue),
+      dutyPaidValue: Number(values.dutyPaidValue),
       vehicleStatus: values.vehicleStatus,
       insureds: {
         id: insuredId,
@@ -174,6 +166,8 @@ const AddVehicleModal = ({
         id: values.branchName,
       },
     };
+
+    // console.log(input);
 
     await createVehicle({
       variables: {

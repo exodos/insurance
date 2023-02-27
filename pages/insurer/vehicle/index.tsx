@@ -47,7 +47,6 @@ const FeedVehicleInsurer = gql`
         dutyFreeValue
         dutyPaidValue
         vehicleStatus
-        status
         isInsured
         createdAt
         updatedAt
@@ -102,8 +101,8 @@ const FeedVehicleInsurer = gql`
 `;
 
 const InsurerVehiclePage = ({
-      data,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+          data,
+        }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const { pathname, asPath } = useRouter();
   return (
@@ -171,7 +170,6 @@ const InsurerVehiclePage = ({
           codeList={data.plateCode}
           branch={data.feedBranchByOrg.branchs}
           tariffData={data.feedUniqueTariff}
-          pageStatus={"Approved"}
         />
       </div>
     </>

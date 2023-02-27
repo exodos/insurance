@@ -378,7 +378,6 @@ const AddVehicle = ({
         <AddVehicleModal
           regionCode={insuredByMobileNumberData.regionCode}
           codeList={insuredByMobileNumberData.plateCode}
-          // branch={insuredByMobileNumberData.insuredByMobileNumber.branchs.id}
           branch={insuredByMobileNumberData.feedBranchByOrgDesc.branchs}
           uniqueTariff={insuredByMobileNumberData.feedUniqueTariff}
           href={path}
