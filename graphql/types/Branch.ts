@@ -43,7 +43,7 @@ export const Branch = objectType({
           .memberships();
       },
     });
-    t.nonNull.list.nonNull.field("vehicles", {
+    t.nullable.list.nullable.field("vehicles", {
       type: "Vehicle",
       async resolve(_parent, _args, ctx) {
         return await ctx.prisma.branch

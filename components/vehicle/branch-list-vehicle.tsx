@@ -290,29 +290,29 @@ const ListBranchVehicle = ({
                       >
                         Updated At
                       </th>
-                      {(session.user.memberships.role === "BRANCHADMIN" ||
-                        session.user.memberships.role === "MEMBER") && (
-                          <>
-                            <th
-                              scope="col"
-                              className="relative py-3.5 pl-3 pr-4 sm:pr-6"
-                            >
-                              <span className="sr-only">Detail</span>
-                            </th>
-                            <th
-                              scope="col"
-                              className="relative py-3.5 pl-3 pr-4 sm:pr-6"
-                            >
-                              <span className="sr-only">Edit</span>
-                            </th>
-                            <th
-                              scope="col"
-                              className="relative py-3 pl-3 pr-4 sm:pr-6"
-                            >
-                              <span className="sr-only">Delete</span>
-                            </th>
-                          </>
-                        )}
+                      {(session?.user?.memberships?.role === "BRANCHADMIN" ||
+                        session?.user?.memberships?.role === "MEMBER") && (
+                        <>
+                          <th
+                            scope="col"
+                            className="relative py-3.5 pl-3 pr-4 sm:pr-6"
+                          >
+                            <span className="sr-only">Detail</span>
+                          </th>
+                          <th
+                            scope="col"
+                            className="relative py-3.5 pl-3 pr-4 sm:pr-6"
+                          >
+                            <span className="sr-only">Edit</span>
+                          </th>
+                          <th
+                            scope="col"
+                            className="relative py-3 pl-3 pr-4 sm:pr-6"
+                          >
+                            <span className="sr-only">Delete</span>
+                          </th>
+                        </>
+                      )}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
@@ -397,82 +397,83 @@ const ListBranchVehicle = ({
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {format(new Date(item.updatedAt), "MMM-dd-yyyy")}
                           </td>
-                          {(session.user.memberships.role === "BRANCHADMIN" ||
-                            session.user.memberships.role === "MEMBER") && (
-                              <>
-                                <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                  <>
-                                    <button
-                                      onClick={() => {
-                                        handleDetails(item.plateNumber);
-                                      }}
-                                      className="text-indigo-600 hover:text-indigo-900"
-                                      data-tip
-                                      data-type="success"
-                                      data-for="showDetails"
-                                    >
-                                      <BiShow
-                                        className="flex-shrink-0 h-5 w-5 text-gray-400"
-                                        aria-hidden="true"
-                                      />
-                                    </button>
-                                    <ReactTooltip
-                                      id="showDetails"
-                                      place="top"
-                                      effect="solid"
-                                    >
-                                      Show Details
-                                    </ReactTooltip>
-                                  </>
-                                </td>
-                                <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                  <>
-                                    <button
-                                      onClick={() => handleEdit(item)}
-                                      className="text-indigo-600 hover:text-indigo-900"
-                                      data-tip
-                                      data-type="warning"
-                                      data-for="editVehicle"
-                                    >
-                                      <AiFillEdit
-                                        className="flex-shrink-0 h-5 w-5 text-gray-400"
-                                        aria-hidden="true"
-                                      />
-                                    </button>
-                                    <ReactTooltip
-                                      id="editVehicle"
-                                      place="top"
-                                      effect="solid"
-                                    >
-                                      Edit Vehicle
-                                    </ReactTooltip>
-                                  </>
-                                </td>
-                                <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                  <>
-                                    <button
-                                      onClick={() => handleDelete(item)}
-                                      className="text-indigo-600 hover:text-indigo-900"
-                                      data-tip
-                                      data-type="error"
-                                      data-for="deleteVehicle"
-                                    >
-                                      <AiFillDelete
-                                        className="flex-shrink-0 h-5 w-5 text-gray-400"
-                                        aria-hidden="true"
-                                      />
-                                    </button>
-                                    <ReactTooltip
-                                      id="deleteVehicle"
-                                      place="top"
-                                      effect="solid"
-                                    >
-                                      Delete Vehicle
-                                    </ReactTooltip>
-                                  </>
-                                </td>
-                              </>
-                            )}
+                          {(session?.user?.memberships?.role ===
+                            "BRANCHADMIN" ||
+                            session?.user?.memberships?.role === "MEMBER") && (
+                            <>
+                              <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                <>
+                                  <button
+                                    onClick={() => {
+                                      handleDetails(item.plateNumber);
+                                    }}
+                                    className="text-indigo-600 hover:text-indigo-900"
+                                    data-tip
+                                    data-type="success"
+                                    data-for="showDetails"
+                                  >
+                                    <BiShow
+                                      className="flex-shrink-0 h-5 w-5 text-gray-400"
+                                      aria-hidden="true"
+                                    />
+                                  </button>
+                                  <ReactTooltip
+                                    id="showDetails"
+                                    place="top"
+                                    effect="solid"
+                                  >
+                                    Show Details
+                                  </ReactTooltip>
+                                </>
+                              </td>
+                              <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                <>
+                                  <button
+                                    onClick={() => handleEdit(item)}
+                                    className="text-indigo-600 hover:text-indigo-900"
+                                    data-tip
+                                    data-type="warning"
+                                    data-for="editVehicle"
+                                  >
+                                    <AiFillEdit
+                                      className="flex-shrink-0 h-5 w-5 text-gray-400"
+                                      aria-hidden="true"
+                                    />
+                                  </button>
+                                  <ReactTooltip
+                                    id="editVehicle"
+                                    place="top"
+                                    effect="solid"
+                                  >
+                                    Edit Vehicle
+                                  </ReactTooltip>
+                                </>
+                              </td>
+                              <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                <>
+                                  <button
+                                    onClick={() => handleDelete(item)}
+                                    className="text-indigo-600 hover:text-indigo-900"
+                                    data-tip
+                                    data-type="error"
+                                    data-for="deleteVehicle"
+                                  >
+                                    <AiFillDelete
+                                      className="flex-shrink-0 h-5 w-5 text-gray-400"
+                                      aria-hidden="true"
+                                    />
+                                  </button>
+                                  <ReactTooltip
+                                    id="deleteVehicle"
+                                    place="top"
+                                    effect="solid"
+                                  >
+                                    Delete Vehicle
+                                  </ReactTooltip>
+                                </>
+                              </td>
+                            </>
+                          )}
                         </tr>
                       ))}
                   </tbody>

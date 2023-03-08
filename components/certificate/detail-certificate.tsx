@@ -205,8 +205,9 @@ const CertificateDetail = ({ certificate }) => {
                                     NAME OF INSURED
                                   </dt>
                                   <dd className="text-sm text-gray-900">
-                                    {certificate?.insureds?.firstName} &nbsp;{" "}
-                                    {certificate?.insureds?.lastName}
+                                    {certificate?.vehicles?.insureds?.firstName}{" "}
+                                    &nbsp;{" "}
+                                    {certificate?.vehicles?.insureds?.lastName}
                                   </dd>
                                 </div>
                                 <div className="grid-cols-1 sm:grid-cols-1 sm:mt-0">
@@ -214,7 +215,7 @@ const CertificateDetail = ({ certificate }) => {
                                     REGION
                                   </dt>
                                   <dd className="text-sm text-gray-900">
-                                    {certificate?.insureds?.region}
+                                    {certificate?.vehicles?.insureds?.region}
                                   </dd>
                                 </div>
                                 <div className="grid-cols-1 sm:grid-cols-1 sm:mt-0">
@@ -222,7 +223,7 @@ const CertificateDetail = ({ certificate }) => {
                                     CITY
                                   </dt>
                                   <dd className="text-sm text-gray-900">
-                                    {certificate?.insureds?.city}
+                                    {certificate?.vehicles?.insureds?.city}
                                   </dd>
                                 </div>
                                 <div className="grid-cols-1 sm:grid-cols-1 sm:mt-0">
@@ -230,7 +231,7 @@ const CertificateDetail = ({ certificate }) => {
                                     SUBCITY
                                   </dt>
                                   <dd className="text-sm text-gray-900">
-                                    {certificate?.insureds?.subCity}
+                                    {certificate?.vehicles?.insureds?.subCity}
                                   </dd>
                                 </div>
                                 <div className="grid-cols-1 sm:grid-cols-1 sm:mt-0">
@@ -238,7 +239,7 @@ const CertificateDetail = ({ certificate }) => {
                                     WEREDA
                                   </dt>
                                   <dd className="text-sm text-gray-900">
-                                    {certificate?.insureds?.wereda}
+                                    {certificate?.vehicles?.insureds?.wereda}
                                   </dd>
                                 </div>
                                 <div className="grid-cols-1 sm:grid-cols-1 sm:mt-0">
@@ -246,7 +247,7 @@ const CertificateDetail = ({ certificate }) => {
                                     KEBELE
                                   </dt>
                                   <dd className="text-sm text-gray-900">
-                                    {certificate?.insureds?.kebelle}
+                                    {certificate?.vehicles?.insureds?.kebelle}
                                   </dd>
                                 </div>
                                 <div className="grid-cols-1 sm:grid-cols-1 sm:mt-0">
@@ -254,7 +255,10 @@ const CertificateDetail = ({ certificate }) => {
                                     HOUSE NUMBER
                                   </dt>
                                   <dd className="text-sm text-gray-900">
-                                    {certificate?.insureds?.houseNumber}
+                                    {
+                                      certificate?.vehicles?.insureds
+                                        ?.houseNumber
+                                    }
                                   </dd>
                                 </div>
                                 <div className="grid-cols-1 sm:grid-cols-1 sm:mt-0">
@@ -262,7 +266,10 @@ const CertificateDetail = ({ certificate }) => {
                                     PHONE NUMBER
                                   </dt>
                                   <dd className="text-sm text-gray-900">
-                                    {certificate?.insureds?.mobileNumber}
+                                    {
+                                      certificate?.vehicles?.insureds
+                                        ?.mobileNumber
+                                    }
                                   </dd>
                                 </div>
                               </div>

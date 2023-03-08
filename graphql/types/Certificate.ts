@@ -15,9 +15,14 @@ import { policyCreateInput, policyUpdateInput } from "./Policy";
 import { format } from "date-fns";
 import { Sort } from "./User";
 import { branchConnectInput } from "./Branch";
-import { VehicleStatus, vehicleInsuranceCreateInput } from "./Vehicle";
+import {
+  VehicleStatus,
+  vehicleInsuranceCreateInput,
+  vehicleInsuranceImportInput,
+} from "./Vehicle";
 import { VehicleCategory } from "./Tariff";
 import { changePhone } from "@/lib/config";
+import { insuredConnectInput } from "./Insured";
 
 export const Certificate = objectType({
   name: "Certificate",
@@ -667,7 +672,7 @@ export const createCertificateMutation = extendType({
             },
           });
 
-          vehiUpdate = tx.vehicle.update({
+          vehiUpdate = await tx.vehicle.update({
             where: {
               plateNumber: args.plateNumber,
             },
@@ -1037,6 +1042,25 @@ export const createInsuranceByBranchMutation = extendType({
                 },
               },
             },
+            certificateRecords: {
+              create: {
+                policies: {
+                  connect: {
+                    policyNumber: storePolicyNumber,
+                  },
+                },
+                vehicles: {
+                  connect: {
+                    plateNumber: args.input.vehicles.plateNumber,
+                  },
+                },
+                branchs: {
+                  connect: {
+                    id: args.input.branchs.id,
+                  },
+                },
+              },
+            },
           },
         });
       },
@@ -1399,6 +1423,105 @@ export const createCertificateBranchMutation = extendType({
             },
           }),
         ]);
+
+        return certData;
+      },
+    });
+  },
+});
+export const createCertificateFromImportMutation = extendType({
+  type: "Mutation",
+  definition(t) {
+    t.nonNull.field("createCertificateFromImport", {
+      type: Certificate,
+      args: {
+        input: nonNull(certificateInsuranceImportInput),
+      },
+      resolve: async (_parent, args, ctx) => {
+        const user = await ctx.prisma.user.findUnique({
+          where: {
+            email: ctx.session.user.email,
+          },
+          include: {
+            memberships: true,
+          },
+        });
+        if (
+          !user ||
+          (user.memberships.role !== "SUPERADMIN" &&
+            user.memberships.role !== "INSURER" &&
+            user.memberships.role !== "MEMBER")
+        ) {
+          throw new Error(`You do not have permission to perform action`);
+        }
+
+        let certData = null;
+        const storeCertificateNumber = `CN-${format(new Date(), "yyMMiHms")}`,
+          storePolicyNumber = `PN-${format(new Date(), "yyMMiHms")}`;
+
+        args.input.vehicles.map(
+          async (v) =>
+            (certData = await ctx.prisma.certificate.create({
+              data: {
+                certificateNumber: `CN-${format(new Date(), "yyMMiHms")}`,
+                premiumTarif: v.premiumTarif,
+                branchs: {
+                  connect: {
+                    id: args.input.branchs.id,
+                  },
+                },
+                policies: {
+                  create: {
+                    policyNumber: `PN-${format(new Date(), "yyMMiHms")}`,
+                    policyStartDate: new Date(
+                      args.input.policies.policyStartDate
+                    ),
+                    policyExpireDate: addYears(
+                      new Date(args.input.policies.policyStartDate),
+                      1
+                    ),
+                    policyIssuedConditions:
+                      args.input.policies.policyIssuedConditions,
+                    personsEntitledToUse:
+                      args.input.policies.personsEntitledToUse,
+                  },
+                },
+                vehicles: {
+                  create: {
+                    plateNumber: v.plateNumber,
+                    engineNumber: v.engineNumber,
+                    chassisNumber: v.chassisNumber,
+                    vehicleModel: v.vehicleModel,
+                    bodyType: v.bodyType,
+                    horsePower: v.horsePower,
+                    manufacturedYear: v.manufacturedYear,
+                    vehicleType: v.vehicleType,
+                    vehicleSubType: v.vehicleSubType,
+                    vehicleDetails: v.vehicleDetails,
+                    vehicleUsage: v.vehicleUsage,
+                    vehicleCategory: v.vehicleCategory,
+                    premiumTarif: v.premiumTarif,
+                    passengerNumber: v.passengerNumber,
+                    carryingCapacityInGoods: v.carryingCapacityInGoods,
+                    purchasedYear: v.purchasedYear,
+                    dutyFreeValue: v.dutyFreeValue,
+                    dutyPaidValue: v.dutyPaidValue,
+                    vehicleStatus: v.vehicleStatus,
+                    insureds: {
+                      connect: {
+                        id: args.input.insureds.id,
+                      },
+                    },
+                    branchs: {
+                      connect: {
+                        id: args.input.branchs.id,
+                      },
+                    },
+                  },
+                },
+              },
+            }))
+        );
 
         return certData;
       },
@@ -1831,42 +1954,52 @@ export const CertificateCreateInput = inputObjectType({
   },
 });
 
+export const certificateInsuranceImportInput = inputObjectType({
+  name: "certificateInsuranceImportInput",
+  definition(t) {
+    t.field("insureds", { type: insuredConnectInput });
+    t.field("policies", { type: policyCreateInput });
+    t.nullable.list.nullable.field("vehicles", {
+      type: vehicleInsuranceImportInput,
+    });
+    t.field("branchs", { type: branchConnectInput });
+  },
+});
+
 export const InsuranceCreateInput = inputObjectType({
   name: "InsuranceCreateInput",
   definition(t) {
     t.field("policies", { type: policyCreateInput });
     t.field("vehicles", { type: vehicleInsuranceCreateInput });
     t.field("branchs", { type: branchConnectInput });
+  },
+});
 
-    // t.string("firstName");
-    // t.string("lastName");
-    // t.nullable.string("occupation");
-    // t.string("region");
-    // t.string("city");
-    // t.string("subCity");
-    // t.string("wereda");
-    // t.string("kebelle");
-    // t.string("houseNumber");
-    // t.string("mobileNumber");
-    // t.string("plateNumber");
-    // t.string("engineNumber");
-    // t.string("chassisNumber");
-    // t.string("vehicleModel");
-    // t.string("bodyType");
-    // t.string("horsePower");
-    // t.int("manufacturedYear");
-    // t.string("vehicleType");
-    // t.string("vehicleSubType");
-    // t.string("vehicleDetails");
-    // t.string("vehicleUsage");
-    // t.field("vehicleCategory", { type: VehicleCategory });
-    // t.int("passengerNumber");
-    // t.nullable.string("carryingCapacityInGoods");
-    // t.int("purchasedYear");
-    // t.float("dutyFreeValue");
-    // t.float("dutyPaidValue");
-    // t.field("vehicleStatus", { type: VehicleStatus });
-    // t.string("branchId");
+export const InsuranceImportCreateInput = inputObjectType({
+  name: "InsuranceImportCreateInput",
+  definition(t) {
+    t.string("firstName");
+    t.string("lastName");
+    t.nullable.string("occupation");
+    t.string("region");
+    t.string("city");
+    t.string("subCity");
+    t.string("wereda");
+    t.string("kebelle");
+    t.string("houseNumber");
+    t.string("mobileNumber");
+    t.date("policyStartDate");
+    t.string("policyIssuedConditions");
+    t.string("personsEntitledToUse");
+    t.field("vehicles", { type: vehicleInsuranceCreateInput });
+    t.field("branchs", { type: branchConnectInput });
+  },
+});
+
+export const certificateImportCreateInput = inputObjectType({
+  name: "certificateImportCreateInput",
+  definition(t) {
+    t.field("policies", { type: policyCreateInput });
   },
 });
 

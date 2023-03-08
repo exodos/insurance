@@ -1,3 +1,4 @@
+import { addYears, format } from "date-fns";
 import { Prisma } from "@prisma/client";
 import {
   arg,
@@ -14,10 +15,13 @@ import {
   insuredConnectInput,
   insuredCreateInput,
   insuredInsuranceCreateInput,
+  insuredInsuranceImportConnectInput,
 } from "./Insured";
 import { Sort } from "./User";
 import { branchConnectInput } from "./Branch";
 import { VehicleCategory } from "./Tariff";
+import { policyCreateInput } from "./Policy";
+import { changePhone } from "@/lib/config";
 
 export const Vehicle = objectType({
   name: "Vehicle",
@@ -533,18 +537,18 @@ export const createVehicleMutation = extendType({
             vehicleModel: args.input.vehicleModel,
             bodyType: args.input.bodyType,
             horsePower: args.input.horsePower,
-            manufacturedYear: args.input.manufacturedYear,
+            manufacturedYear: Number(args.input.manufacturedYear),
             vehicleType: args.input.vehicleType,
             vehicleSubType: args.input.vehicleSubType,
             vehicleDetails: args.input.vehicleDetails,
             vehicleUsage: args.input.vehicleUsage,
             vehicleCategory: args.input.vehicleCategory,
-            premiumTarif: calPremiumTarif,
+            premiumTarif: Number(calPremiumTarif),
             passengerNumber: args.input.passengerNumber,
             carryingCapacityInGoods: args.input.carryingCapacityInGoods,
-            purchasedYear: args.input.purchasedYear,
-            dutyFreeValue: args.input.dutyFreeValue,
-            dutyPaidValue: args.input.dutyPaidValue,
+            purchasedYear: Number(args.input.purchasedYear),
+            dutyFreeValue: Number(args.input.dutyFreeValue),
+            dutyPaidValue: Number(args.input.dutyPaidValue),
             vehicleStatus: args.input.vehicleStatus,
             insureds: {
               connect: {
@@ -639,14 +643,13 @@ export const updateVehicleMutation = extendType({
   },
 });
 
-// export const updateVehicleStatusMutation = extendType({
+// export const createInsuranceFromImportMutation = extendType({
 //   type: "Mutation",
 //   definition(t) {
-//     t.nonNull.field("updateVehicleStatus", {
+//     t.nonNull.field("createInsuranceFromImport", {
 //       type: Vehicle,
 //       args: {
-//         id: nonNull(stringArg()),
-//         input: nonNull(statusInput),
+//         input: nonNull(insuranceImportCreateInput),
 //       },
 //       resolve: async (_parent, args, ctx) => {
 //         const user = await ctx.prisma.user.findUnique({
@@ -661,17 +664,78 @@ export const updateVehicleMutation = extendType({
 //           !user ||
 //           (user.memberships.role !== "SUPERADMIN" &&
 //             user.memberships.role !== "INSURER" &&
+//             user.memberships.role !== "MEMBER" &&
 //             user.memberships.role !== "BRANCHADMIN")
 //         ) {
 //           throw new Error(`You do not have permission to perform action`);
 //         }
 
-//         return await ctx.prisma.vehicle.update({
-//           where: { id: args.id },
-//           data: {
-//             status: args.input.status,
-//           },
-//         });
+//         let vehicleData = null;
+
+//         args.input.vehicles.map(
+//           async (v) =>
+//             (vehicleData = await ctx.prisma.vehicle.create({
+//               data: {
+//                 plateNumber: v.plateNumber,
+//                 engineNumber: v.engineNumber,
+//                 chassisNumber: v.chassisNumber,
+//                 vehicleModel: v.vehicleModel,
+//                 bodyType: v.bodyType,
+//                 horsePower: v.horsePower,
+//                 manufacturedYear: v.manufacturedYear,
+//                 vehicleType: v.vehicleType,
+//                 vehicleSubType: v.vehicleSubType,
+//                 vehicleDetails: v.vehicleDetails,
+//                 vehicleUsage: v.vehicleUsage,
+//                 vehicleCategory: v.vehicleCategory,
+//                 premiumTarif: v.premiumTarif,
+//                 passengerNumber: Number(v.passengerNumber),
+//                 carryingCapacityInGoods: v.carryingCapacityInGoods,
+//                 purchasedYear: Number(v.purchasedYear),
+//                 dutyFreeValue: Number(v.dutyFreeValue),
+//                 dutyPaidValue: Number(v.dutyPaidValue),
+//                 vehicleStatus: v.vehicleStatus,
+//                 insureds: {
+//                   connect: {
+//                     id: args.input.insureds.id,
+//                   },
+//                 },
+//                 branchs: {
+//                   connect: {
+//                     id: args.input.branchs.id,
+//                   },
+//                 },
+//                 certificates: {
+//                   create: {
+//                     certificateNumber: `CN-${format(new Date(), "yyMMiHms")}`,
+//                     premiumTarif: v.premiumTarif,
+//                     branchs: {
+//                       connect: {
+//                         id: args.input.branchs.id,
+//                       },
+//                     },
+//                     policies: {
+//                       create: {
+//                         policyNumber: `PN-${format(new Date(), "yyMMiHms")}`,
+//                         policyStartDate: new Date(
+//                           args.input.policies.policyStartDate
+//                         ),
+//                         policyExpireDate: addYears(
+//                           new Date(args.input.policies.policyStartDate),
+//                           1
+//                         ),
+//                         policyIssuedConditions:
+//                           args.input.policies.policyIssuedConditions,
+//                         personsEntitledToUse:
+//                           args.input.policies.personsEntitledToUse,
+//                       },
+//                     },
+//                   },
+//                 },
+//               },
+//             }))
+//         );
+//         return vehicleData;
 //       },
 //     });
 //   },
@@ -816,6 +880,7 @@ export const vehicleInsuranceCreateInput = inputObjectType({
     t.string("vehicleDetails");
     t.string("vehicleUsage");
     t.field("vehicleCategory", { type: VehicleCategory });
+    t.float("premiumTarif");
     t.int("passengerNumber");
     t.nullable.string("carryingCapacityInGoods");
     t.int("purchasedYear");
@@ -825,6 +890,52 @@ export const vehicleInsuranceCreateInput = inputObjectType({
     t.field("insureds", { type: insuredInsuranceCreateInput });
   },
 });
+
+export const vehicleInsuranceImportInput = inputObjectType({
+  name: "vehicleInsuranceImportInput",
+  definition(t) {
+    t.string("plateNumber");
+    t.string("engineNumber");
+    t.string("chassisNumber");
+    t.string("vehicleModel");
+    t.string("bodyType");
+    t.string("horsePower");
+    t.int("manufacturedYear");
+    t.string("vehicleType");
+    t.string("vehicleSubType");
+    t.string("vehicleDetails");
+    t.string("vehicleUsage");
+    t.field("vehicleCategory", { type: VehicleCategory });
+    t.float("premiumTarif");
+    t.int("passengerNumber");
+    t.nullable.string("carryingCapacityInGoods");
+    t.int("purchasedYear");
+    t.float("dutyFreeValue");
+    t.float("dutyPaidValue");
+    t.field("vehicleStatus", { type: VehicleStatus });
+  },
+});
+
+export const VehicleImport = objectType({
+  name: "VehicleImport",
+  definition(t) {
+    t.nonNull.list.nonNull.field("vehicle", { type: Vehicle });
+  },
+});
+
+// export const insuranceImportCreateInput = inputObjectType({
+//   name: "insuranceImportCreateInput",
+//   definition(t) {
+//     t.field("insureds", { type: insuredConnectInput });
+//     t.field("policies", { type: policyCreateInput });
+//     t.list.field("vehicles", { type: vehicleInsuranceImportInput });
+//     t.field("branchs", { type: branchConnectInput });
+//     // t.field("certificates", { type: CertificateInsuranceImportInput });
+
+//     // t.field("branchs", { type: branchConnectInput });
+//   },
+// });
+
 export const vehicleUpdateInput = inputObjectType({
   name: "vehicleUpdateInput",
   definition(t) {
@@ -894,5 +1005,43 @@ export const VehicleOrderByInput = inputObjectType({
   definition(t) {
     t.field("createdAt", { type: Sort });
     t.field("updatedAt", { type: Sort });
+  },
+});
+
+export const InsuranceImportCreateInput = inputObjectType({
+  name: "InsuranceImportCreateInput",
+  definition(t) {
+    t.string("firstName");
+    t.string("lastName");
+    t.nullable.string("occupation");
+    t.string("region");
+    t.string("city");
+    t.string("subCity");
+    t.string("wereda");
+    t.string("kebelle");
+    t.string("houseNumber");
+    t.string("mobileNumber");
+    t.date("policyStartDate");
+    t.string("policyIssuedConditions");
+    t.string("personsEntitledToUse");
+    t.string("plateNumber");
+    t.string("engineNumber");
+    t.string("chassisNumber");
+    t.string("vehicleModel");
+    t.string("bodyType");
+    t.string("horsePower");
+    t.int("manufacturedYear");
+    t.string("vehicleType");
+    t.string("vehicleSubType");
+    t.string("vehicleDetails");
+    t.string("vehicleUsage");
+    t.field("vehicleCategory", { type: VehicleCategory });
+    t.int("passengerNumber");
+    t.nullable.string("carryingCapacityInGoods");
+    t.int("purchasedYear");
+    t.float("dutyFreeValue");
+    t.float("dutyPaidValue");
+    t.field("vehicleStatus", { type: VehicleStatus });
+    t.field("branchs", { type: branchConnectInput });
   },
 });

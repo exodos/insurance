@@ -465,12 +465,6 @@ CREATE TABLE "_CertificateRecordToPolicy" (
 );
 
 -- CreateTable
-CREATE TABLE "_CertificateRecordToInsured" (
-    "A" TEXT NOT NULL,
-    "B" TEXT NOT NULL
-);
-
--- CreateTable
 CREATE TABLE "_CertificateRecordToVehicle" (
     "A" TEXT NOT NULL,
     "B" TEXT NOT NULL
@@ -646,12 +640,6 @@ CREATE UNIQUE INDEX "_CertificateRecordToPolicy_AB_unique" ON "_CertificateRecor
 
 -- CreateIndex
 CREATE INDEX "_CertificateRecordToPolicy_B_index" ON "_CertificateRecordToPolicy"("B");
-
--- CreateIndex
-CREATE UNIQUE INDEX "_CertificateRecordToInsured_AB_unique" ON "_CertificateRecordToInsured"("A", "B");
-
--- CreateIndex
-CREATE INDEX "_CertificateRecordToInsured_B_index" ON "_CertificateRecordToInsured"("B");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "_CertificateRecordToVehicle_AB_unique" ON "_CertificateRecordToVehicle"("A", "B");
@@ -853,12 +841,6 @@ ALTER TABLE "_CertificateRecordToPolicy" ADD CONSTRAINT "_CertificateRecordToPol
 
 -- AddForeignKey
 ALTER TABLE "_CertificateRecordToPolicy" ADD CONSTRAINT "_CertificateRecordToPolicy_B_fkey" FOREIGN KEY ("B") REFERENCES "Policy"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "_CertificateRecordToInsured" ADD CONSTRAINT "_CertificateRecordToInsured_A_fkey" FOREIGN KEY ("A") REFERENCES "CertificateRecord"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "_CertificateRecordToInsured" ADD CONSTRAINT "_CertificateRecordToInsured_B_fkey" FOREIGN KEY ("B") REFERENCES "Insured"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_CertificateRecordToVehicle" ADD CONSTRAINT "_CertificateRecordToVehicle_A_fkey" FOREIGN KEY ("A") REFERENCES "CertificateRecord"("id") ON DELETE CASCADE ON UPDATE CASCADE;

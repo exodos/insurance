@@ -62,8 +62,8 @@ const FeedCertificateBranch = gql`
 `;
 
 const BranchCertificate = ({
-      data,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  data,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const { pathname, asPath } = useRouter();
 
@@ -84,9 +84,11 @@ const BranchCertificate = ({
                 List Of All Certificates
               </p>
             </div>
+
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
-              {(session.user.memberships.role === "MEMBER" || session.user.memberships.role === "BRANCHADMIN") && (
+                {(session.user.memberships.role === "BRANCHADMIN" ||
+                  session.user.memberships.role === "MEMBER") && (
                   <Link
                     href={{
                       pathname: "/branch/certificate/branch-add-certificate",
@@ -105,7 +107,8 @@ const BranchCertificate = ({
                     </button>
                   </Link>
                 )}
-                {(session.user.memberships.role === "MEMBER" || session.user.memberships.role === "BRANCHADMIN") && (
+                {(session.user.memberships.role === "BRANCHADMIN" ||
+                  session.user.memberships.role === "MEMBER") && (
                   <Link
                     href={{
                       pathname: "/branch/certificate/export-certificate",

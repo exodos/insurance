@@ -18,17 +18,6 @@ const CertificateByCertificateNumber = gql`
       issuedDate
       id
       premiumTarif
-      insureds {
-        firstName
-        lastName
-        region
-        city
-        subCity
-        wereda
-        kebelle
-        houseNumber
-        mobileNumber
-      }
       vehicles {
         id
         plateNumber
@@ -41,6 +30,17 @@ const CertificateByCertificateNumber = gql`
         isInsured
         createdAt
         updatedAt
+        insureds {
+          firstName
+          lastName
+          region
+          city
+          subCity
+          wereda
+          kebelle
+          houseNumber
+          mobileNumber
+        }
       }
       policies {
         policyNumber
@@ -187,7 +187,8 @@ const ListCertificate = ({ certificateData }) => {
                       </th>
                       {(session.user.memberships.role === "SUPERADMIN" ||
                         session.user.memberships.role === "INSURER" ||
-                        session.user.memberships.role === "MEMBER") && (
+                        session.user.memberships.role === "MEMBER" ||
+                        session.user.memberships.role === "BRANCHADMIN") && (
                         <>
                           <th
                             scope="col"
@@ -257,7 +258,9 @@ const ListCertificate = ({ certificateData }) => {
 
                           {(session.user.memberships.role === "SUPERADMIN" ||
                             session.user.memberships.role === "INSURER" ||
-                            session.user.memberships.role === "MEMBER") && (
+                            session.user.memberships.role === "MEMBER" ||
+                            session.user.memberships.role ===
+                              "BRANCHADMIN") && (
                             <>
                               <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                 <>

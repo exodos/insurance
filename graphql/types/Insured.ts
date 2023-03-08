@@ -12,7 +12,9 @@ import {
 } from "nexus";
 import { Sort } from "./User";
 import { branchConnectInput } from "./Branch";
-import { format } from "date-fns";
+import { addYears, format } from "date-fns";
+import { vehicleInsuranceImportInput } from "./Vehicle";
+import { policyCreateInput } from "./Policy";
 
 export const Insured = objectType({
   name: "Insured",
@@ -467,6 +469,102 @@ export const updateInsuredMutation = extendType({
   },
 });
 
+export const updateInsuranceFromImportMutation = extendType({
+  type: "Mutation",
+  definition(t) {
+    t.nonNull.field("updateInsuranceFromImport", {
+      type: Insured,
+      args: {
+        id: nonNull(stringArg()),
+        input: nonNull(insuranceImportUpdateInput),
+      },
+      resolve: async (_parent, args, ctx) => {
+        const user = await ctx.prisma.user.findUnique({
+          where: {
+            email: ctx.session.user.email,
+          },
+          include: {
+            memberships: true,
+          },
+        });
+        if (
+          !user ||
+          (user.memberships.role !== "SUPERADMIN" &&
+            user.memberships.role !== "INSURER" &&
+            user.memberships.role !== "MEMBER" &&
+            user.memberships.role !== "BRANCHADMIN")
+        ) {
+          throw new Error(`You do not have permission to perform action`);
+        }
+
+        return await ctx.prisma.insured.update({
+          where: { id: args.id },
+          data: {
+            vehicles: {
+              create: args.input.vehicles.map((v) => ({
+                plateNumber: v.plateNumber,
+                engineNumber: v.engineNumber,
+                chassisNumber: v.chassisNumber,
+                vehicleModel: v.vehicleModel,
+                bodyType: v.bodyType,
+                horsePower: v.horsePower,
+                manufacturedYear: v.manufacturedYear,
+                vehicleType: v.vehicleType,
+                vehicleSubType: v.vehicleSubType,
+                vehicleDetails: v.vehicleDetails,
+                vehicleUsage: v.vehicleUsage,
+                vehicleCategory: v.vehicleCategory,
+                premiumTarif: v.premiumTarif,
+                passengerNumber: Number(v.passengerNumber),
+                carryingCapacityInGoods: v.carryingCapacityInGoods,
+                purchasedYear: Number(v.purchasedYear),
+                dutyFreeValue: Number(v.dutyFreeValue),
+                dutyPaidValue: Number(v.dutyPaidValue),
+                vehicleStatus: v.vehicleStatus,
+                branchs: {
+                  connect: {
+                    id: args.input.branchs.id,
+                  },
+                },
+                certificates: {
+                  create: {
+                    certificateNumber: `CN-${format(new Date(), "yyMMiHms")}-${
+                      v.plateNumber
+                    }`,
+                    premiumTarif: v.premiumTarif,
+                    branchs: {
+                      connect: {
+                        id: args.input.branchs.id,
+                      },
+                    },
+                    policies: {
+                      create: {
+                        policyNumber: `PN-${format(new Date(), "yyMMiHms")}-${
+                          v.plateNumber
+                        }`,
+                        policyStartDate: new Date(
+                          args.input.policies.policyStartDate
+                        ),
+                        policyExpireDate: addYears(
+                          new Date(args.input.policies.policyStartDate),
+                          1
+                        ),
+                        policyIssuedConditions:
+                          args.input.policies.policyIssuedConditions,
+                        personsEntitledToUse:
+                          args.input.policies.personsEntitledToUse,
+                      },
+                    },
+                  },
+                },
+              })),
+            },
+          },
+        });
+      },
+    });
+  },
+});
 export const deleteInsuredMutation = extendType({
   type: "Mutation",
   definition(t) {
@@ -548,6 +646,29 @@ export const insuredCreateInput = inputObjectType({
     // t.field("thirdPartyLog", { type: thirdPartyLogCreateInput });
   },
 });
+
+export const insuredInsuranceImportInput = inputObjectType({
+  name: "insuredInsuranceImportInput",
+  definition(t) {
+    t.string("firstName");
+    t.string("lastName");
+    t.nullable.string("occupation");
+    t.string("region");
+    t.string("city");
+    t.string("subCity");
+    t.string("wereda");
+    t.string("kebelle");
+    t.string("houseNumber");
+    t.string("mobileNumber");
+
+    // t.list.field("vehicles", { type: vehicleInsuranceImportInput });
+    // t.nullable.field("certificates", { type: CertificateInsuranceImportInput });
+    // t.field("branchs", { type: branchConnectInput });
+
+    // t.field("thirdPartyLog", { type: thirdPartyLogCreateInput });
+  },
+});
+
 export const insuredInsuranceCreateInput = inputObjectType({
   name: "insuredInsuranceCreateInput",
   definition(t) {
@@ -580,9 +701,17 @@ export const insuredUpdateInput = inputObjectType({
     t.string("kebelle");
     t.string("houseNumber");
     t.string("mobileNumber");
-    // t.field("branchs", { type: branchConnectInput });
+  },
+});
 
-    // t.field("thirdPartyLog", { type: thirdPartyLogEditInput });
+export const insuranceImportUpdateInput = inputObjectType({
+  name: "insuranceImportUpdateInput",
+  definition(t) {
+    t.field("policies", { type: policyCreateInput });
+    t.nullable.list.nullable.field("vehicles", {
+      type: vehicleInsuranceImportInput,
+    });
+    t.field("branchs", { type: branchConnectInput });
   },
 });
 
@@ -590,6 +719,13 @@ export const insuredConnectInput = inputObjectType({
   name: "insuredConnectInput",
   definition(t) {
     t.string("id");
+  },
+});
+
+export const insuredInsuranceImportConnectInput = inputObjectType({
+  name: "insuredInsuranceImportConnectInput",
+  definition(t) {
+    t.string("regNumber");
   },
 });
 

@@ -31,16 +31,9 @@ const CreateVehicle = gql`
       dutyFreeValue
       dutyPaidValue
       vehicleStatus
-      status
       isInsured
       createdAt
       updatedAt
-      insureds {
-        id
-      }
-      branchs {
-        id
-      }
     }
   }
 `;
@@ -76,9 +69,11 @@ const BranchAddVehicleModal = ({
   console.log(href);
 
   const [createVehicle, { data, error, loading }] = useMutation(CreateVehicle);
+
   if (error) {
     console.log(error);
   }
+
   const vehicleStatusOptions = [
     { value: "NEW", label: "NEW" },
     { value: "RENEWAL", label: "RENEWAL" },
@@ -133,11 +128,6 @@ const BranchAddVehicleModal = ({
     dutyFreeValue: Yup.number().required("Duty Free Value Is Required"),
     dutyPaidValue: Yup.number().required("Duty Paid Value Is Required"),
     vehicleStatus: Yup.string().required("Vehicle Status Is Required"),
-
-    // mobileNumber: Yup.string()
-    //   .matches(phoneRegExp, "Phone Number Is Not Valid")
-    //   .required("Phone Number Is Required"),
-    // branchName: Yup.string().required("Branch Name Is Required"),
   });
   const [formValues, setFormValues] = useState(null);
 
@@ -170,6 +160,8 @@ const BranchAddVehicleModal = ({
         id: branchId,
       },
     };
+
+    // console.log(input);
 
     await createVehicle({
       variables: {
@@ -225,7 +217,7 @@ const BranchAddVehicleModal = ({
                     initialValues={formValues || initialValues}
                     validationSchema={validate}
                     onSubmit={onSubmit}
-                    enableReinitialize={true}
+                    // enableReinitialize={true}
                   >
                     <Form className="flex h-full flex-col overflow-y-scroll bg-white shadow-xl">
                       <div className="flex-1">

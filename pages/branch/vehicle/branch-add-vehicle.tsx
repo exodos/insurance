@@ -11,66 +11,74 @@ import ReactTooltip from "react-tooltip";
 import { useRouter } from "next/router";
 import { changePhone } from "@/lib/config";
 import BranchAddVehicleModal from "@/components/vehicle/branch-add-vehicle";
+import { CgImport } from "react-icons/cg";
+import Link from "next/link";
 
 const InsuredBranchByMobileNumber = gql`
-query InsuredBranchByMobileNumber($mobileNumber: String!, $branchId: String!) {
-  insuredBranchByMobileNumber(mobileNumber: $mobileNumber, branchId: $branchId) {
-    id
-    regNumber
-    firstName
-    lastName
-    occupation
-    region
-    city
-    subCity
-    wereda
-    kebelle
-    houseNumber
-    mobileNumber
-    createdAt
-    updatedAt
-    branchs {
+  query InsuredBranchByMobileNumber(
+    $mobileNumber: String!
+    $branchId: String!
+  ) {
+    insuredBranchByMobileNumber(
+      mobileNumber: $mobileNumber
+      branchId: $branchId
+    ) {
       id
-      branchName
+      regNumber
+      firstName
+      lastName
+      occupation
+      region
+      city
+      subCity
+      wereda
+      kebelle
+      houseNumber
+      mobileNumber
+      createdAt
+      updatedAt
+      branchs {
+        id
+        branchName
+      }
+    }
+    feedUniqueTariff {
+      tariffVehicleType {
+        id
+        vehicleType
+      }
+      tariffVehicleSubType {
+        id
+        vehicleSubType
+      }
+      tariffVehicleDetail {
+        id
+        vehicleDetail
+      }
+      tariffVehicleUsage {
+        id
+        vehicleUsage
+      }
+      tariffVehicleCategory {
+        id
+        vehicleCategory
+      }
+    }
+    plateCode {
+      id
+      code
+    }
+    regionCode {
+      id
+      regionApp
     }
   }
-  feedUniqueTariff {
-    tariffVehicleType {
-      id
-      vehicleType
-    }
-    tariffVehicleSubType {
-      id
-      vehicleSubType
-    }
-    tariffVehicleDetail {
-      id
-      vehicleDetail
-    }
-    tariffVehicleUsage {
-      id
-      vehicleUsage
-    }
-    tariffVehicleCategory {
-      id
-      vehicleCategory
-    }
-  }
-  plateCode {
-    id
-    code
-  }
-  regionCode {
-    id
-    regionApp
-  }
-}
 `;
 
 const AddVehicleByBranch = ({
-      branchId,
-      orgId,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  branchId,
+  orgId,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [formValues, setFormValues] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createList, setCreateList] = useState([]);
@@ -263,6 +271,12 @@ const AddVehicleByBranch = ({
                             >
                               <span className="sr-only">Create</span>
                             </th>
+                            <th
+                              scope="col"
+                              className="relative py-3 pl-3 pr-4 sm:pr-6"
+                            >
+                              <span className="sr-only">Import</span>
+                            </th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 bg-white">
@@ -360,6 +374,42 @@ const AddVehicleByBranch = ({
                                 </ReactTooltip>
                               </>
                             </td>
+                            <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                              <>
+                                <Link
+                                  href={{
+                                    pathname:
+                                      "/branch/certificate/import-insurance",
+                                    query: {
+                                      insured:
+                                        insuredBranchByMobileNumberData
+                                          ?.insuredBranchByMobileNumber?.id,
+                                    },
+                                  }}
+                                  passHref
+                                  legacyBehavior
+                                >
+                                  <button
+                                    className="inline-flex items-center"
+                                    data-tip
+                                    data-type="warning"
+                                    data-for="importVehicle"
+                                  >
+                                    <CgImport
+                                      className="flex-shrink-0 h-6 w-6 text-lightGreen"
+                                      aria-hidden="true"
+                                    />
+                                  </button>
+                                </Link>
+                                <ReactTooltip
+                                  id="importVehicle"
+                                  place="top"
+                                  effect="solid"
+                                >
+                                  Import Vehicle
+                                </ReactTooltip>
+                              </>
+                            </td>
                           </tr>
                         </tbody>
                       </table>
@@ -404,7 +454,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       },
     };
   }
-  
 
   // const { query } = context;
   // const page = query.returnPage;
@@ -412,7 +461,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {
       session,
-      branchId:session.user.memberships.branchId,
+      branchId: session.user.memberships.branchId,
       orgId: session.user.memberships.branchs.orgId,
     },
   };
