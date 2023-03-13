@@ -14,11 +14,11 @@ import * as Yup from "yup";
 import { isEmpty, isNull } from "lodash";
 import { BsArrowDownCircleFill } from "react-icons/bs";
 
-const ImportInsurance = ({
-      branchId,
-      insuredId,
-      pageURL,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+const ImportInsuranceInsured = ({
+  branchId,
+  insuredId,
+  pageURL,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [parsedData, setParsedData] = useState([]);
   const [tableRows, setTableRows] = useState([]);
   const [values, setValues] = useState([]);
@@ -26,15 +26,37 @@ const ImportInsurance = ({
   let slicedValue = null;
   const size = 10;
   const router = useRouter();
+  const phoneRegExp = /^(^\+251|^251|^0)?9\d{8}$/;
 
   const initialValues = {
-    policyStartDate: new Date(),
+    firstName: "",
+    lastName: "",
+    occupation: "",
+    region: "",
+    city: "",
+    subCity: "",
+    wereda: "",
+    kebelle: "",
+    houseNumber: "",
+    mobileNumber: "",
+    policyStartDate: "",
     policyIssuedConditions: "",
     personsEntitledToUse: "",
     vehicleFile: "",
   };
 
   const validate = Yup.object().shape({
+    firstName: Yup.string().required("First Name Is Required"),
+    lastName: Yup.string().required("First Name Is Required"),
+    region: Yup.string().required("Region Is Required"),
+    city: Yup.string().required("City Is Required"),
+    subCity: Yup.string().required("SubCity Name Is Required"),
+    wereda: Yup.string().required("Wereda Is Required"),
+    kebelle: Yup.string().required("Kebelle Is Required"),
+    houseNumber: Yup.string().required("HouseNumber Is Required"),
+    mobileNumber: Yup.string()
+      .matches(phoneRegExp, "Phone Number Is Not Valid")
+      .required("Phone Number Is Required"),
     policyStartDate: Yup.date().required("Policy Start Date Is Required"),
     policyIssuedConditions: Yup.string().required(
       "Policy Issued Conditions Is Required"
@@ -199,9 +221,193 @@ const ImportInsurance = ({
               validationSchema={validate}
               onSubmit={onSubmit}
             >
-              {({ handleSubmit }) => (
+              {({ handleSubmit, values, setValues }) => (
                 <Form className="space-y-6" onSubmit={handleSubmit}>
                   <div className="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6">
+                    <div className="md:grid md:grid-cols-5 md:gap-6">
+                      <div className="mt-5 md:mt-0 md:col-span-5">
+                        <div className="grid grid-cols-5 gap-4">
+                          <div className="col-span-3 sm:col-span-1">
+                            <label
+                              htmlFor="firstName"
+                              className="block text-sm font-medium text-gray-700 mb-2"
+                            >
+                              First Name
+                              <span className="text-eRed">*</span>
+                            </label>
+                            <Field
+                              type="text"
+                              name="firstName"
+                              placeholder="Enter First Name"
+                              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            />
+                            <div className="text-eRed text-sm italic mt-2">
+                              <ErrorMessage name="firstName" />
+                            </div>
+                          </div>
+                          <div className="col-span-3 sm:col-span-1">
+                            <label
+                              htmlFor="lastName"
+                              className="block text-sm font-medium text-gray-700 mb-2"
+                            >
+                              Last Name
+                              <span className="text-eRed">*</span>
+                            </label>
+                            <Field
+                              type="text"
+                              name="lastName"
+                              placeholder="Enter Last Name"
+                              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            />
+                            <div className="text-eRed text-sm italic mt-2">
+                              <ErrorMessage name="policyIssuedConditions" />
+                            </div>
+                          </div>
+                          <div className="col-span-4 sm:col-span-1">
+                            <label
+                              htmlFor="occupation"
+                              className="block text-sm font-medium text-gray-700 mb-2"
+                            >
+                              Occupation
+                            </label>
+                            <Field
+                              type="text"
+                              name="occupation"
+                              placeholder="Enter Occupation"
+                              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            />
+                          </div>
+                          <div className="col-span-3 sm:col-span-1">
+                            <label
+                              htmlFor="region"
+                              className="block text-sm font-medium text-gray-700 mb-2"
+                            >
+                              Region
+                              <span className="text-eRed">*</span>
+                            </label>
+                            <Field
+                              type="text"
+                              name="region"
+                              placeholder="Enter Region"
+                              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            />
+                            <div className="text-eRed text-sm italic mt-2">
+                              <ErrorMessage name="region" />
+                            </div>
+                          </div>
+                          <div className="col-span-3 sm:col-span-1">
+                            <label
+                              htmlFor="city"
+                              className="block text-sm font-medium text-gray-700 mb-2"
+                            >
+                              City
+                              <span className="text-eRed">*</span>
+                            </label>
+                            <Field
+                              type="text"
+                              name="city"
+                              placeholder="Enter City"
+                              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            />
+                            <div className="text-eRed text-sm italic mt-2">
+                              <ErrorMessage name="city" />
+                            </div>
+                          </div>
+                          <div className="col-span-3 sm:col-span-1">
+                            <label
+                              htmlFor="subCity"
+                              className="block text-sm font-medium text-gray-700 mb-2"
+                            >
+                              SubCity
+                              <span className="text-eRed">*</span>
+                            </label>
+                            <Field
+                              type="text"
+                              name="subCity"
+                              placeholder="Enter SubCity"
+                              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            />
+                            <div className="text-eRed text-sm italic mt-2">
+                              <ErrorMessage name="subCity" />
+                            </div>
+                          </div>
+                          <div className="col-span-3 sm:col-span-1">
+                            <label
+                              htmlFor="wereda"
+                              className="block text-sm font-medium text-gray-700 mb-2"
+                            >
+                              Wereda
+                              <span className="text-eRed">*</span>
+                            </label>
+                            <Field
+                              type="text"
+                              name="wereda"
+                              placeholder="Enter Wereda"
+                              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            />
+                            <div className="text-eRed text-sm italic mt-2">
+                              <ErrorMessage name="wereda" />
+                            </div>
+                          </div>
+                          <div className="col-span-3 sm:col-span-1">
+                            <label
+                              htmlFor="kebelle"
+                              className="block text-sm font-medium text-gray-700 mb-2"
+                            >
+                              Kebelle
+                              <span className="text-eRed">*</span>
+                            </label>
+                            <Field
+                              type="text"
+                              name="kebelle"
+                              placeholder="Enter Kebelle"
+                              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            />
+                            <div className="text-eRed text-sm italic mt-2">
+                              <ErrorMessage name="kebelle" />
+                            </div>
+                          </div>
+                          <div className="col-span-3 sm:col-span-1">
+                            <label
+                              htmlFor="houseNumber"
+                              className="block text-sm font-medium text-gray-700 mb-2"
+                            >
+                              House Number
+                              <span className="text-eRed">*</span>
+                            </label>
+                            <Field
+                              type="text"
+                              name="houseNumber"
+                              placeholder="Enter House Number"
+                              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            />
+                            <div className="text-eRed text-sm italic mt-2">
+                              <ErrorMessage name="houseNumber" />
+                            </div>
+                          </div>
+                          <div className="col-span-3 sm:col-span-1">
+                            <label
+                              htmlFor="mobileNumber"
+                              className="block text-sm font-medium text-gray-700 mb-2"
+                            >
+                              Mobile Number
+                              <span className="text-eRed">*</span>
+                            </label>
+                            <Field
+                              type="text"
+                              name="mobileNumber"
+                              placeholder="Enter Mobile Number"
+                              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            />
+                            <div className="text-eRed text-sm italic mt-2">
+                              <ErrorMessage name="mobileNumber" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-white shadow px-4 py-1 sm:rounded-lg sm:p-4">
                     <div className="md:grid md:grid-cols-3 md:gap-6">
                       <div className="mt-5 md:mt-0 md:col-span-3">
                         <div className="grid grid-cols-3 gap-4">
@@ -389,4 +595,4 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   };
 };
 
-export default ImportInsurance;
+export default ImportInsuranceInsured;

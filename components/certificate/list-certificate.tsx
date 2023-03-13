@@ -300,7 +300,7 @@ const ListCertificate = ({ certificateData }) => {
                                     onClick={() => handleEdit(item)}
                                     className="text-indigo-600 hover:text-indigo-900"
                                     data-tip
-                                    data-type="warning"
+                                    data-type="success"
                                     data-for="editInsured"
                                   >
                                     <AiFillEdit
@@ -323,7 +323,7 @@ const ListCertificate = ({ certificateData }) => {
                                     onClick={() => handleDelete(item)}
                                     className="text-indigo-600 hover:text-indigo-900"
                                     data-tip
-                                    data-type="error"
+                                    data-type="success"
                                     data-for="deleteInsured"
                                   >
                                     <AiFillDelete

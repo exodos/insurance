@@ -13,6 +13,8 @@ import AddVehicleModal from "@/components/vehicle/add-vehicle";
 import { useRouter } from "next/router";
 import { changePhone } from "@/lib/config";
 import { useSession } from "next-auth/react";
+import { CgImport } from "react-icons/cg";
+import Link from "next/link";
 // import CreateClaim from "@/claim-comp/create-claim";
 
 const InsuredInsurerByMobileNumber = gql`
@@ -67,8 +69,8 @@ const InsuredInsurerByMobileNumber = gql`
 `;
 
 const AddVehicleByInsurer = ({
-  props,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      props,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const [formValues, setFormValues] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -262,6 +264,12 @@ const AddVehicleByInsurer = ({
                             >
                               <span className="sr-only">Create</span>
                             </th>
+                            <th
+                              scope="col"
+                              className="relative py-3 pl-3 pr-4 sm:pr-6"
+                            >
+                              <span className="sr-only">Import</span>
+                            </th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 bg-white">
@@ -356,6 +364,42 @@ const AddVehicleByInsurer = ({
                                   effect="solid"
                                 >
                                   Add Vehicle
+                                </ReactTooltip>
+                              </>
+                            </td>
+                            <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                              <>
+                                <Link
+                                  href={{
+                                    pathname:
+                                      "/branch/certificate/import-insurance",
+                                    query: {
+                                      insured:
+                                        insuredInsurerByMobileNumberData
+                                          ?.insuredInsurerByMobileNumber?.id,
+                                    },
+                                  }}
+                                  passHref
+                                  legacyBehavior
+                                >
+                                  <button
+                                    className="inline-flex items-center"
+                                    data-tip
+                                    data-type="warning"
+                                    data-for="importVehicle"
+                                  >
+                                    <CgImport
+                                      className="flex-shrink-0 h-6 w-6 text-lightGreen"
+                                      aria-hidden="true"
+                                    />
+                                  </button>
+                                </Link>
+                                <ReactTooltip
+                                  id="importVehicle"
+                                  place="top"
+                                  effect="solid"
+                                >
+                                  Import Vehicle
                                 </ReactTooltip>
                               </>
                             </td>

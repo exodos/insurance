@@ -44,8 +44,6 @@ function Step() {
     default:
       break;
   }
-
-  // return stepContent;
 }
 
 export default Step;

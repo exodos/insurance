@@ -58,6 +58,7 @@ type Certificate {
   claims: [Claim]
   id: String
   issuedDate: DateTime
+  payments: [Payment]
   policies: Policy
   premiumTarif: Float
   status: InsuranceStatus
@@ -74,6 +75,7 @@ input CertificateOrderByInput {
   issuedDate: Sort
   policyExpireDate: Sort
   policyStartDate: Sort
+  updatedAt: Sort
 }
 
 type CertificateRecord {
@@ -200,6 +202,11 @@ type CodeList {
   createdAt: DateTime
   id: Int
   updatedAt: DateTime
+}
+
+enum CommissioningStatus {
+  Commissioned
+  NotCommissioned
 }
 
 """
@@ -381,6 +388,12 @@ type FeedOrganization {
   totalOrganization: Int!
 }
 
+type FeedPayment {
+  maxPage: Int
+  payments: [Payment!]!
+  totalPayments: Int!
+}
+
 type FeedPolicy {
   maxPage: Int
   policy: [Policy!]!
@@ -469,6 +482,14 @@ type FeedVehicleBranchByStatus {
   maxPage: Int
   totalVehicle: Int!
   vehicle: [Vehicle!]!
+}
+
+type FeedVehicleByInsured {
+  vehicles: [Vehicle!]!
+}
+
+type FeedVehicleByInsuredReg {
+  vehicles: [Vehicle!]!
 }
 
 type FeedVehicleByStatus {
@@ -563,7 +584,8 @@ input InsuranceImportCreateInput {
 
 enum InsuranceStatus {
   APPROVED
-  SUSPENDED
+  PendingApproval
+  PendingPayment
 }
 
 type Insured {
@@ -699,12 +721,13 @@ type Mutation {
   createBranch(input: branchCreateInput!): Branch!
   createCertificate(input: CertificateCreateInput!, plateNumber: String!): Certificate!
   createCertificateBranch(input: CertificateCreateInput!, plateNumber: String!): Certificate!
-  createCertificateFromImport(input: certificateInsuranceImportInput!): Certificate!
   createHitAndRunPoliceReport(input: hitAndRunCreateInput!): HitAndRunPoliceReport!
   createInsuranceByBranch(input: InsuranceCreateInput!): Certificate!
   createInsured(input: InsuredCreateInput!): Insured!
   createInsuredPoliceReport(input: insuredPoliceReportCreateInput!): InsuredPoliceReport!
+  createOrUpdateCertificate(input: CertificateCreateInput!, plateNumber: String!): Certificate!
   createOrganization(input: organizationCreateInput!): Organization!
+  createPayment(input: PaymentCreateInput!): Payment!
   createPolicy(input: PolicyCreateInput!): Policy!
   createTariff(input: TariffCreateInput!): Tariff!
   createUnInsuredPoliceReport(input: UnInsuredPoliceReportCreateInput!): UnInsuredPoliceReport!
@@ -719,6 +742,7 @@ type Mutation {
   deleteInsured(id: String!): Insured!
   deleteInsuredPoliceReport(id: String!): InsuredPoliceReport!
   deleteOrganization(orgId: String!): Organization!
+  deletePayment(refNumber: String!): Payment!
   deletePolicy(id: String!): Policy!
   deleteTariff(id: Int!): Tariff!
   deleteUnInsuredPoliceReport(id: String!): UnInsuredPoliceReport!
@@ -733,10 +757,10 @@ type Mutation {
   updateClaimStatus(id: String!, input: ClaimStatusUpdateInput!): Claim!
   updateDamageEstimate(claimNumber: String!, damageEstimate: Float!): Claim!
   updateHitAndRunPoliceReport(id: String!, input: hitAndRunUpdateInput!): HitAndRunPoliceReport!
-  updateInsuranceFromImport(id: String!, input: insuranceImportUpdateInput!): Insured!
   updateInsured(id: String!, input: insuredUpdateInput!): Insured!
   updateInsuredPoliceReport(id: String!, input: InsuredPoliceReportUpdateInput!): InsuredPoliceReport!
   updateOrganization(id: String!, input: organizationUpdateInput!): Organization!
+  updatePayment(input: PaymentUpdateInput!, refNumber: String!): Payment!
   updatePolicy(id: String!, input: PolicyUpdateInput!): Policy!
   updatePremiumTariff(id: Int!, premiumTariff: Float!): Tariff!
   updateTariff(id: Int!, input: TariffUpdateInput!): Tariff!
@@ -768,6 +792,41 @@ type Organization {
 input OrganizationOrderByInput {
   createdAt: Sort
   updatedAt: Sort
+}
+
+type Payment {
+  certificates: Certificate
+  commissionStatus: CommissioningStatus
+  createdAt: DateTime
+  deletedAt: DateTime
+  deletedStatus: Boolean
+  id: String
+  paymentStatus: PaymentStatus
+  premiumTarif: Float
+  refNumber: String
+  updatedAt: DateTime
+  vehicles: Vehicle
+}
+
+input PaymentCreateInput {
+  certificates: certificateConnectInput
+  premiumTarif: Float
+  vehicles: vehicleConnectInput
+}
+
+input PaymentOrderByInput {
+  createdAt: Sort
+  updatedAt: Sort
+}
+
+enum PaymentStatus {
+  Payed
+  Pending
+}
+
+input PaymentUpdateInput {
+  commissionStatus: CommissioningStatus
+  paymentStatus: PaymentStatus
 }
 
 type Policy {
@@ -872,6 +931,7 @@ type Query {
   feedInsuredPoliceReportPolice(filter: String, orderBy: [InsuredPoliceReportOrderByInput!], orgId: String!, skip: Int, take: Int): FeedInsuredPoliceReportPolice!
   feedMembership(filter: String, orderBy: [UserOrderByInput!], skip: Int, take: Int): FeedMembership!
   feedOrganization(filter: String, orderBy: [OrganizationOrderByInput!], skip: Int, take: Int): FeedOrganization!
+  feedPayment(filter: String, orderBy: [PaymentOrderByInput!], skip: Int, take: Int): FeedPayment!
   feedPlateCodeList: FeedCodeList!
   feedPolicy(filter: String, orderBy: [PolicyOrderByInput!], skip: Int, take: Int): FeedPolicy!
   feedRegionList: FeedRegionList!
@@ -888,8 +948,11 @@ type Query {
   feedVehicle(filter: String, orderBy: [VehicleOrderByInput!], skip: Int, take: Int): FeedVehicle!
   feedVehicleBranch(branchId: String!, filter: String, orderBy: [VehicleOrderByInput!], skip: Int, take: Int): FeedVehicleBranch!
   feedVehicleBranchByStatus(branchId: String!, filter: String, input: statusInput!, orderBy: [VehicleOrderByInput!], skip: Int, take: Int): FeedVehicleBranchByStatus!
+  feedVehicleByInsured(mobileNumber: String!): FeedVehicleByInsured!
+  feedVehicleByInsuredReg(regNumber: String!): FeedVehicleByInsuredReg!
   feedVehicleInsurer(filter: String, orderBy: [VehicleOrderByInput!], orgId: String!, skip: Int, take: Int): FeedVehicleInsurer!
   feedVictim(filter: String, orderBy: [PolicyOrderByInput!], skip: Int, take: Int): FeedVictim!
+  getVehicleByPlateNumber(plateNumber: String!): Vehicle
   hitAndRunByIncidentNumber(incidentNumber: String!): HitAndRunPoliceReport!
   incidentNumberToClaim(incidentNumber: String!): InsuredPoliceReport!
   insuredBranchByMobileNumber(branchId: String!, mobileNumber: String!): Insured
@@ -900,6 +963,8 @@ type Query {
   listAllBranch: [Branch]
   listAllOrganization: [Organization]
   organizationByName(orgName: String!): Organization!
+  paymentByID(id: String!): Payment!
+  paymentByRef(refNumber: String!): Payment!
   plateCode: [CodeList!]!
   policeRoleList: [Membership!]!
   policyByID(id: String!): Policy!
@@ -1139,6 +1204,7 @@ type Vehicle {
   isInsured: IsInsured
   manufacturedYear: Int
   passengerNumber: Int
+  payments: [Payment]
   plateNumber: String
   premiumTarif: Float
   purchasedYear: Int
@@ -1225,13 +1291,6 @@ input certificateImportCreateInput {
   policies: policyCreateInput
 }
 
-input certificateInsuranceImportInput {
-  branchs: branchConnectInput
-  insureds: insuredConnectInput
-  policies: policyCreateInput
-  vehicles: [vehicleInsuranceImportInput]
-}
-
 input claimDamageInput {
   damageEstimate: Float
 }
@@ -1257,12 +1316,6 @@ input hitAndRunUpdateInput {
   incidentDate: DateTime
   incidentPlace: String
   incidentTime: String
-}
-
-input insuranceImportUpdateInput {
-  branchs: branchConnectInput
-  policies: policyCreateInput
-  vehicles: [vehicleInsuranceImportInput]
 }
 
 input insuredConnectInput {
@@ -1326,6 +1379,10 @@ input insuredPoliceReportCreateInput {
   victimSubCity: String
   victimWereda: String
   victims: [victimCreateInput]
+}
+
+input insuredRegConnectInput {
+  regNumber: String
 }
 
 input insuredUpdateInput {
@@ -1504,28 +1561,6 @@ input vehicleInsuranceCreateInput {
   engineNumber: String
   horsePower: String
   insureds: insuredInsuranceCreateInput
-  manufacturedYear: Int
-  passengerNumber: Int
-  plateNumber: String
-  premiumTarif: Float
-  purchasedYear: Int
-  vehicleCategory: VehicleCategory
-  vehicleDetails: String
-  vehicleModel: String
-  vehicleStatus: VehicleStatus
-  vehicleSubType: String
-  vehicleType: String
-  vehicleUsage: String
-}
-
-input vehicleInsuranceImportInput {
-  bodyType: String
-  carryingCapacityInGoods: String
-  chassisNumber: String
-  dutyFreeValue: Float
-  dutyPaidValue: Float
-  engineNumber: String
-  horsePower: String
   manufacturedYear: Int
   passengerNumber: Int
   plateNumber: String

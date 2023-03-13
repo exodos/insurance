@@ -1,4 +1,3 @@
-import { addYears, format } from "date-fns";
 import { Prisma } from "@prisma/client";
 import {
   arg,
@@ -11,16 +10,10 @@ import {
   objectType,
   stringArg,
 } from "nexus";
-import {
-  insuredConnectInput,
-  insuredCreateInput,
-  insuredInsuranceCreateInput,
-  insuredInsuranceImportConnectInput,
-} from "./Insured";
+import { insuredConnectInput, insuredInsuranceCreateInput } from "./Insured";
 import { Sort } from "./User";
 import { branchConnectInput } from "./Branch";
 import { VehicleCategory } from "./Tariff";
-import { policyCreateInput } from "./Policy";
 import { changePhone } from "@/lib/config";
 
 export const Vehicle = objectType({
@@ -88,6 +81,16 @@ export const Vehicle = objectType({
             where: { id: _parent.id },
           })
           .claims();
+      },
+    });
+    t.nullable.list.nullable.field("payments", {
+      type: "Payment",
+      async resolve(_parent, _args, ctx) {
+        return await ctx.prisma.vehicle
+          .findUnique({
+            where: { id: _parent.id },
+          })
+          .payments();
       },
     });
   },
@@ -252,7 +255,7 @@ export const VehicleInsurerPagination = extendType({
         filter: stringArg(),
         skip: intArg(),
         take: intArg(),
-        orderBy: arg({ type: list(nonNull(VehicleOrderByInput)) }), // 1
+        orderBy: arg({ type: list(nonNull(VehicleOrderByInput)) }),
       },
       async resolve(_parent, args, ctx) {
         const where = args.filter
@@ -334,6 +337,24 @@ export const vehicleByPlateNumberQuery = extendType({
   },
 });
 
+export const getVehicleByPlateNumberQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.field("getVehicleByPlateNumber", {
+      type: Vehicle,
+      args: { plateNumber: nonNull(stringArg()) },
+      resolve(_parent, args, ctx) {
+        return ctx.prisma.vehicle.findFirst({
+          where: {
+            plateNumber: args.plateNumber,
+            isInsured: "NOTINSURED",
+          },
+        });
+      },
+    });
+  },
+});
+
 export const vehicleBranchByPlateNumberQuery = extendType({
   type: "Query",
   definition(t) {
@@ -343,15 +364,14 @@ export const vehicleBranchByPlateNumberQuery = extendType({
         plateNumber: nonNull(stringArg()),
         branchId: nonNull(stringArg()),
       },
-      resolve(_parent, args, ctx) {
-        return ctx.prisma.vehicle.findFirst({
+      resolve: async (_parent, args, ctx) => {
+        return await ctx.prisma.vehicle.findFirst({
           where: {
             plateNumber: {
               equals: args.plateNumber,
               mode: "insensitive",
             },
             branchId: args.branchId,
-            // status: "APPROVED",
           },
         });
       },
@@ -381,6 +401,64 @@ export const vehicleInsurerByPlateNumberQuery = extendType({
             // status: "APPROVED",
           },
         });
+      },
+    });
+  },
+});
+
+export const vehicleByInsuredMobileNumberQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.field("feedVehicleByInsured", {
+      type: FeedVehicleByInsured,
+      args: {
+        mobileNumber: nonNull(stringArg()),
+      },
+      async resolve(_parent, args, ctx) {
+        const vehicles = await ctx.prisma.vehicle.findMany({
+          where: {
+            insureds: {
+              mobileNumber: changePhone(args.mobileNumber),
+            },
+            isInsured: "NOTINSURED",
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
+        });
+        return {
+          vehicles,
+        };
+      },
+    });
+  },
+});
+
+export const vehicleByInsuredRegNumberQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.field("feedVehicleByInsuredReg", {
+      type: FeedVehicleByInsuredReg,
+      args: {
+        regNumber: nonNull(stringArg()),
+      },
+      async resolve(_parent, args, ctx) {
+        const vehicles = await ctx.prisma.vehicle.findMany({
+          where: {
+            insureds: {
+              regNumber: args.regNumber,
+            },
+            isInsured: "NOTINSURED",
+          },
+          // take: 20,
+          orderBy: {
+            updatedAt: "desc",
+          },
+        });
+
+        return {
+          vehicles,
+        };
       },
     });
   },
@@ -643,104 +721,6 @@ export const updateVehicleMutation = extendType({
   },
 });
 
-// export const createInsuranceFromImportMutation = extendType({
-//   type: "Mutation",
-//   definition(t) {
-//     t.nonNull.field("createInsuranceFromImport", {
-//       type: Vehicle,
-//       args: {
-//         input: nonNull(insuranceImportCreateInput),
-//       },
-//       resolve: async (_parent, args, ctx) => {
-//         const user = await ctx.prisma.user.findUnique({
-//           where: {
-//             email: ctx.session.user.email,
-//           },
-//           include: {
-//             memberships: true,
-//           },
-//         });
-//         if (
-//           !user ||
-//           (user.memberships.role !== "SUPERADMIN" &&
-//             user.memberships.role !== "INSURER" &&
-//             user.memberships.role !== "MEMBER" &&
-//             user.memberships.role !== "BRANCHADMIN")
-//         ) {
-//           throw new Error(`You do not have permission to perform action`);
-//         }
-
-//         let vehicleData = null;
-
-//         args.input.vehicles.map(
-//           async (v) =>
-//             (vehicleData = await ctx.prisma.vehicle.create({
-//               data: {
-//                 plateNumber: v.plateNumber,
-//                 engineNumber: v.engineNumber,
-//                 chassisNumber: v.chassisNumber,
-//                 vehicleModel: v.vehicleModel,
-//                 bodyType: v.bodyType,
-//                 horsePower: v.horsePower,
-//                 manufacturedYear: v.manufacturedYear,
-//                 vehicleType: v.vehicleType,
-//                 vehicleSubType: v.vehicleSubType,
-//                 vehicleDetails: v.vehicleDetails,
-//                 vehicleUsage: v.vehicleUsage,
-//                 vehicleCategory: v.vehicleCategory,
-//                 premiumTarif: v.premiumTarif,
-//                 passengerNumber: Number(v.passengerNumber),
-//                 carryingCapacityInGoods: v.carryingCapacityInGoods,
-//                 purchasedYear: Number(v.purchasedYear),
-//                 dutyFreeValue: Number(v.dutyFreeValue),
-//                 dutyPaidValue: Number(v.dutyPaidValue),
-//                 vehicleStatus: v.vehicleStatus,
-//                 insureds: {
-//                   connect: {
-//                     id: args.input.insureds.id,
-//                   },
-//                 },
-//                 branchs: {
-//                   connect: {
-//                     id: args.input.branchs.id,
-//                   },
-//                 },
-//                 certificates: {
-//                   create: {
-//                     certificateNumber: `CN-${format(new Date(), "yyMMiHms")}`,
-//                     premiumTarif: v.premiumTarif,
-//                     branchs: {
-//                       connect: {
-//                         id: args.input.branchs.id,
-//                       },
-//                     },
-//                     policies: {
-//                       create: {
-//                         policyNumber: `PN-${format(new Date(), "yyMMiHms")}`,
-//                         policyStartDate: new Date(
-//                           args.input.policies.policyStartDate
-//                         ),
-//                         policyExpireDate: addYears(
-//                           new Date(args.input.policies.policyStartDate),
-//                           1
-//                         ),
-//                         policyIssuedConditions:
-//                           args.input.policies.policyIssuedConditions,
-//                         personsEntitledToUse:
-//                           args.input.policies.personsEntitledToUse,
-//                       },
-//                     },
-//                   },
-//                 },
-//               },
-//             }))
-//         );
-//         return vehicleData;
-//       },
-//     });
-//   },
-// });
-
 export const deleteVehicleMutation = extendType({
   type: "Mutation",
   definition(t) {
@@ -762,7 +742,8 @@ export const deleteVehicleMutation = extendType({
           !user ||
           (user.memberships.role !== "SUPERADMIN" &&
             user.memberships.role !== "INSURER" &&
-            user.memberships.role !== "MEMBER")
+            user.memberships.role !== "MEMBER" &&
+            user.memberships.role !== "BRANCHADMIN")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
@@ -812,11 +793,25 @@ export const FeedVehicleInsurerByStatus = objectType({
   },
 });
 
+export const FeedVehicleByInsured = objectType({
+  name: "FeedVehicleByInsured",
+  definition(t) {
+    t.nonNull.list.nonNull.field("vehicles", { type: Vehicle });
+  },
+});
+
+export const FeedVehicleByInsuredReg = objectType({
+  name: "FeedVehicleByInsuredReg",
+  definition(t) {
+    t.nonNull.list.nonNull.field("vehicles", { type: Vehicle });
+  },
+});
+
 export const FeedVehicleInsurer = objectType({
   name: "FeedVehicleInsurer",
   definition(t) {
-    t.nonNull.list.nonNull.field("vehicle", { type: Vehicle }); // 1
-    t.nonNull.int("totalVehicle"); // 2
+    t.nonNull.list.nonNull.field("vehicle", { type: Vehicle });
+    t.nonNull.int("totalVehicle");
     t.int("maxPage");
   },
 });
@@ -891,50 +886,12 @@ export const vehicleInsuranceCreateInput = inputObjectType({
   },
 });
 
-export const vehicleInsuranceImportInput = inputObjectType({
-  name: "vehicleInsuranceImportInput",
-  definition(t) {
-    t.string("plateNumber");
-    t.string("engineNumber");
-    t.string("chassisNumber");
-    t.string("vehicleModel");
-    t.string("bodyType");
-    t.string("horsePower");
-    t.int("manufacturedYear");
-    t.string("vehicleType");
-    t.string("vehicleSubType");
-    t.string("vehicleDetails");
-    t.string("vehicleUsage");
-    t.field("vehicleCategory", { type: VehicleCategory });
-    t.float("premiumTarif");
-    t.int("passengerNumber");
-    t.nullable.string("carryingCapacityInGoods");
-    t.int("purchasedYear");
-    t.float("dutyFreeValue");
-    t.float("dutyPaidValue");
-    t.field("vehicleStatus", { type: VehicleStatus });
-  },
-});
-
 export const VehicleImport = objectType({
   name: "VehicleImport",
   definition(t) {
     t.nonNull.list.nonNull.field("vehicle", { type: Vehicle });
   },
 });
-
-// export const insuranceImportCreateInput = inputObjectType({
-//   name: "insuranceImportCreateInput",
-//   definition(t) {
-//     t.field("insureds", { type: insuredConnectInput });
-//     t.field("policies", { type: policyCreateInput });
-//     t.list.field("vehicles", { type: vehicleInsuranceImportInput });
-//     t.field("branchs", { type: branchConnectInput });
-//     // t.field("certificates", { type: CertificateInsuranceImportInput });
-
-//     // t.field("branchs", { type: branchConnectInput });
-//   },
-// });
 
 export const vehicleUpdateInput = inputObjectType({
   name: "vehicleUpdateInput",

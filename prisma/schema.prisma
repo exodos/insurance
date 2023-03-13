@@ -89,7 +89,7 @@ model Membership {
 model Certificate {
   id                 String              @id @default(uuid())
   certificateNumber  String              @unique
-  status             InsuranceStatus     @default(SUSPENDED)
+  status             InsuranceStatus     @default(PendingApproval)
   issuedDate         DateTime            @default(now())
   policies           Policy              @relation(fields: [policyNumber], references: [policyNumber])
   policyNumber       String              @unique
@@ -102,8 +102,7 @@ model Certificate {
   claims             Claim[]
   thirdPartyLogs     ThirdPartyLog[]
   certificateRecords CertificateRecord[]
-  payments           Payment?            @relation(fields: [refNumber], references: [refNumber])
-  refNumber          String?
+  payments           Payment[]
 }
 
 model CertificateRecord {
@@ -138,7 +137,7 @@ model Insured {
   branchs        Branch          @relation(fields: [branchId], references: [id])
   branchId       String
   thirdPartyLogs ThirdPartyLog[]
-  payments       Payment[]
+  // payments       Payment[]
 
   @@unique([mobileNumber, branchId])
 }
@@ -177,7 +176,7 @@ model Vehicle {
   updatedAt               DateTime              @updatedAt
   accidentRecords         AccidentRecord[]
   certificateRecords      CertificateRecord[]
-  // insurances              Insurance[]
+  payments                Payment[]
   thirdPartyLogs          ThirdPartyLog[]
 }
 
@@ -468,44 +467,33 @@ model AccidentRecord {
   // claims         Claim[]
 }
 
-// model Insurance {
-//   id        String          @id @default(uuid())
-//   refNumber String          @unique
-//   insureds     Insured         @relation(fields: [regNumber], references: [regNumber])
-//   regNumber    String
-//   vehicles     Vehicle         @relation(fields: [plateNumber], references: [plateNumber])
-//   plateNumber  String
-//   certificates Certificate     @relation(fields: [certNumber], references: [certificateNumber])
-//   certNumber   String
-//   policies     Policy          @relation(fields: [policyNumber], references: [policyNumber])
-//   policyNumber String
-//   branchs      Branch          @relation(fields: [branchId], references: [id])
-//   branchId     String
-//   status    InsuranceStatus @default(SUSPENDED)
-//   createdAt DateTime        @default(now())
-//   updatedAt DateTime        @updatedAt
-// }
-
 model Payment {
-  id               String              @id @default(uuid())
-  refNumber        String              @unique
-  insureds         Insured             @relation(fields: [regNumber], references: [regNumber])
-  regNumber        String
-  certificates     Certificate[]
-  paymentStatus    PaymentStatus       @default(NOTPAYED)
-  commissionStatus CommissioningStatus @default(NotCommissioned)
-  createdAt        DateTime            @default(now())
-  updatedAt        DateTime            @updatedAt
+  id                String              @id @default(uuid())
+  refNumber         String              @unique
+  premiumTarif      Float
+  paymentStatus     PaymentStatus       @default(Pending)
+  commissionStatus  CommissioningStatus @default(NotCommissioned)
+  // insureds          Insured             @relation(fields: [regNumber], references: [regNumber])
+  // regNumber         String
+  vehicles          Vehicle             @relation(fields: [plateNumber], references: [plateNumber])
+  plateNumber       String
+  certificates      Certificate         @relation(fields: [certificateNumber], references: [certificateNumber])
+  certificateNumber String
+  deletedStatus     Boolean             @default(false)
+  deletedAt         DateTime?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
 }
 
 enum InsuranceStatus {
   APPROVED
-  SUSPENDED
+  PendingPayment
+  PendingApproval
 }
 
 enum PaymentStatus {
-  PAYED
-  NOTPAYED
+  Payed
+  Pending
 }
 
 enum CommissioningStatus {
@@ -538,7 +526,7 @@ enum IsInsured {
 enum STATUS {
   APPROVED
   SUSPENDED
-  TRANSFERABLE
+  // TRANSFERABLE
 }
 
 enum InjuryType {
@@ -558,3 +546,21 @@ enum VehicleCategory {
   PRIVATEUSE
   BUSINESSUSE
 }
+
+// model Insurance {
+//   id        String          @id @default(uuid())
+//   refNumber String          @unique
+//   insureds     Insured         @relation(fields: [regNumber], references: [regNumber])
+//   regNumber    String
+//   vehicles     Vehicle         @relation(fields: [plateNumber], references: [plateNumber])
+//   plateNumber  String
+//   certificates Certificate     @relation(fields: [certNumber], references: [certificateNumber])
+//   certNumber   String
+//   policies     Policy          @relation(fields: [policyNumber], references: [policyNumber])
+//   policyNumber String
+//   branchs      Branch          @relation(fields: [branchId], references: [id])
+//   branchId     String
+//   status    InsuranceStatus @default(SUSPENDED)
+//   createdAt DateTime        @default(now())
+//   updatedAt DateTime        @updatedAt
+// }

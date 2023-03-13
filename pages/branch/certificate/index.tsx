@@ -1,15 +1,20 @@
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { getServerSession } from "next-auth";
 import { useSession } from "next-auth/react";
-import Head from "next/head";
+import ReactTooltip from "react-tooltip";
 import { initializeApollo } from "../../../lib/apollo";
 import { gql } from "@apollo/client";
 import { authOptions } from "../../api/auth/[...nextauth]";
-import { BsPlusCircleFill, BsFillArrowUpCircleFill } from "react-icons/bs";
+import {
+  BsPlusCircleFill,
+  BsFillArrowUpCircleFill,
+  BsFillArrowDownCircleFill,
+} from "react-icons/bs";
 import ListCertificate from "@/certificate/list-certificate";
 import { useRouter } from "next/router";
 import SiteHeader from "@/components/layout/header";
 import Link from "next/link";
+import { MdCreate } from "react-icons/md";
 
 const FeedCertificateBranch = gql`
   query FeedCertificateBranch(
@@ -84,48 +89,127 @@ const BranchCertificate = ({
                 List Of All Certificates
               </p>
             </div>
-
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
                 {(session.user.memberships.role === "BRANCHADMIN" ||
                   session.user.memberships.role === "MEMBER") && (
-                  <Link
-                    href={{
-                      pathname: "/branch/certificate/branch-add-certificate",
-                      query: {
-                        returnPage: pathname,
-                      },
-                    }}
-                    passHref
-                    legacyBehavior
-                  >
-                    <button type="button" className="inline-flex items-center">
-                      <BsPlusCircleFill
-                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
-                        aria-hidden="true"
-                      />
-                    </button>
-                  </Link>
-                )}
-                {(session.user.memberships.role === "BRANCHADMIN" ||
-                  session.user.memberships.role === "MEMBER") && (
-                  <Link
-                    href={{
-                      pathname: "/branch/certificate/export-certificate",
-                      query: {
-                        returnPage: asPath,
-                      },
-                    }}
-                    passHref
-                    legacyBehavior
-                  >
-                    <button type="button" className="inline-flex items-center">
-                      <BsFillArrowUpCircleFill
-                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
-                        aria-hidden="true"
-                      />
-                    </button>
-                  </Link>
+                  <>
+                    <Link
+                      href={"/branch/certificate/proposal-create-insurance"}
+                    >
+                      <>
+                        <button
+                          type="button"
+                          className="inline-flex items-center"
+                          data-tip
+                          data-type="light"
+                          data-for="createInsurance"
+                        >
+                          <MdCreate
+                            className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                            aria-hidden="true"
+                          />
+                        </button>
+                        <ReactTooltip
+                          id="createInsurance"
+                          place="top"
+                          effect="solid"
+                        >
+                          Create Insurance
+                        </ReactTooltip>
+                      </>
+                    </Link>
+                    <Link
+                      href={{
+                        pathname: "/branch/certificate/add-certificate",
+                        query: {
+                          returnPage: pathname,
+                        },
+                      }}
+                    >
+                      <>
+                        <button
+                          type="button"
+                          className="inline-flex items-center"
+                          data-tip
+                          data-type="light"
+                          data-for="addInsurance"
+                        >
+                          <BsPlusCircleFill
+                            className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                            aria-hidden="true"
+                          />
+                        </button>
+                        <ReactTooltip
+                          id="addInsurance"
+                          place="top"
+                          effect="solid"
+                        >
+                          Add Insurance
+                        </ReactTooltip>
+                      </>
+                    </Link>
+                    <Link
+                      href={{
+                        pathname: "/branch/certificate/export-certificate",
+                        query: {
+                          returnPage: asPath,
+                        },
+                      }}
+                    >
+                      <>
+                        <button
+                          type="button"
+                          className="inline-flex items-center"
+                          data-tip
+                          data-type="light"
+                          data-for="importInsurance"
+                        >
+                          <BsFillArrowDownCircleFill
+                            className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                            aria-hidden="true"
+                          />
+                        </button>
+                        <ReactTooltip
+                          id="importInsurance"
+                          place="top"
+                          effect="solid"
+                        >
+                          Import Insurance
+                        </ReactTooltip>
+                      </>
+                    </Link>
+                    <Link
+                      href={{
+                        pathname: "/branch/certificate/export-certificate",
+                        query: {
+                          returnPage: asPath,
+                        },
+                      }}
+                    >
+                      <>
+                        <button
+                          type="button"
+                          className="inline-flex items-center"
+                          data-tip
+                          data-type="light"
+                          data-for="exportToExcel"
+                        >
+                          <BsFillArrowUpCircleFill
+                            className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                            aria-hidden="true"
+                          />
+                        </button>
+                        <ReactTooltip
+                          id="exportToExcel"
+                          place="top"
+                          effect="solid"
+                        >
+                          Export To Excel
+                        </ReactTooltip>
+                      </>
+                    </Link>
+                  </>
                 )}
               </div>
             )}
@@ -171,7 +255,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       take: take,
       orderBy: [
         {
-          issuedDate: "desc",
+          updatedAt: "desc",
         },
       ],
     },

@@ -1,6 +1,7 @@
 export * from "./Organization";
 export * from "./User";
 export * from "./Insured";
+export * from "./Payment";
 export * from "./Vehicle";
 export * from "./Certificate";
 export * from "./Policy";

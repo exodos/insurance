@@ -6,12 +6,9 @@ import { gql, useLazyQuery } from "@apollo/client";
 import { FormEvent, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { format } from "date-fns";
 import { IoIosAddCircle } from "react-icons/io";
 import ReactTooltip from "react-tooltip";
-import AddVehicleModal from "@/components/vehicle/add-vehicle";
 import { useRouter } from "next/router";
-import { changePhone } from "@/lib/config";
 import { initializeApollo } from "@/lib/apollo";
 import AddCertificateModal from "@/components/certificate/add-certificate";
 
@@ -38,7 +35,6 @@ const VehicleBranchByPlateNumber = gql`
       dutyFreeValue
       dutyPaidValue
       vehicleStatus
-      status
       isInsured
       createdAt
       updatedAt
@@ -437,6 +433,7 @@ const BranchAddCertificate = ({
 
       {showCreateModal ? (
         <AddCertificateModal
+          branchId={branchId}
           vehicle={vehicleBranchByPlateNumberData?.vehicleBranchByPlateNumber}
           href={path}
         />

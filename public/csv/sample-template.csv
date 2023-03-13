@@ -1,0 +1,6 @@
+plateNumber,engineNumber,chassisNumber,vehicleModel,bodyType,horsePower,manufacturedYear,vehicleType,vehicleSubType,vehicleDetails,vehicleUsage,vehicleCategory,passengerNumber,carryingCapacityInGoods,purchasedYear,dutyFreeValue,dutyPaidValue,vehicleStatus
+2ETB70707,2ETB70707,2ETB70707,Toyota,Corola,300,2001,Private vehicles,Private vehicles,> 1600 ≤ 2000 CC,Private Use (Code 2 vehicles),PRIVATEUSE,10,300,2020,5000,5000,RENEWAL
+2TGF89898,2TGF89898,2TGF89898,Toyota,Corola,300,2001,Private vehicles,Private vehicles,> 2000 ≤ 3000 CC,"Private Business Use (Code 3,4,5, AO, CD and UN excluding Code 1,2 and Code 3 Minibus)",BUSINESSUSE,6,300,2020,5000,5000,RENEWAL
+3SMB45699,3SMB45699,3SMB45699,Toyota,Corola,300,2001,Mini Bus,Minibuses (Code 3),Mini Bus,Own Use ,PRIVATEUSE,7,300,2020,5000,5000,RENEWAL
+3AAA27282,3AAA27282,3AAA27282,Toyota,Corola,300,2001,Mini Bus,Minibuses (Code 3),Mini Bus,Public Service (With Fare),BUSINESSUSE,10,300,2020,5000,5000,RENEWAL
+3AMC28292,3AMC28292,3AMC28292,Toyota,Corola,300,2001,Buses,Buses,Medium Buses (persons > 30 ≤ 44),Commercial Private,BUSINESSUSE,15,300,2020,5000,5000,RENEWAL

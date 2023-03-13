@@ -8,12 +8,12 @@ import { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 
-const CreateCertificate = gql`
-  mutation CreateCertificate(
+const CreateOrUpdateCertificate = gql`
+  mutation CreateOrUpdateCertificate(
     $plateNumber: String!
     $input: CertificateCreateInput!
   ) {
-    createCertificate(plateNumber: $plateNumber, input: $input) {
+    createOrUpdateCertificate(plateNumber: $plateNumber, input: $input) {
       id
       certificateNumber
       status
@@ -24,12 +24,13 @@ const CreateCertificate = gql`
   }
 `;
 
-const AddCertificateModal = ({ branchId, vehicle, href }) => {
+const AddOrUpdateCertificateModal = ({ branchId, vehicle, href }) => {
   const notificationCtx = useContext(NotificationContext);
   const [open, setOpen] = useState<boolean>(true);
 
-  const [createCertificate, { data, error, loading }] =
-    useMutation(CreateCertificate);
+  const [createOrUpdateCertificate, { data, error, loading }] = useMutation(
+    CreateOrUpdateCertificate
+  );
   if (error) {
     console.log(error);
   }
@@ -67,7 +68,7 @@ const AddCertificateModal = ({ branchId, vehicle, href }) => {
 
     // console.log(input);
 
-    await createCertificate({
+    await createOrUpdateCertificate({
       variables: {
         plateNumber: vehicle.plateNumber,
         input,
@@ -248,4 +249,4 @@ const AddCertificateModal = ({ branchId, vehicle, href }) => {
   );
 };
 
-export default AddCertificateModal;
+export default AddOrUpdateCertificateModal;
