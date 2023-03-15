@@ -103,6 +103,7 @@ model Certificate {
   thirdPartyLogs     ThirdPartyLog[]
   certificateRecords CertificateRecord[]
   payments           Payment[]
+  // claimPayments      ClaimPayment[]
 }
 
 model CertificateRecord {
@@ -130,14 +131,17 @@ model Insured {
   kebelle        String
   houseNumber    String
   mobileNumber   String
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
   vehicles       Vehicle[]
   claims         Claim[]
   branchs        Branch          @relation(fields: [branchId], references: [id])
   branchId       String
+  // payments       Payment?        @relation(fields: [refNumber], references: [refNumber])
+  // refNumber      String?
+  payments       Payment[]
+  // claimPayments  ClaimPayment[]
   thirdPartyLogs ThirdPartyLog[]
-  // payments       Payment[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 
   @@unique([mobileNumber, branchId])
 }
@@ -176,7 +180,8 @@ model Vehicle {
   updatedAt               DateTime              @updatedAt
   accidentRecords         AccidentRecord[]
   certificateRecords      CertificateRecord[]
-  payments                Payment[]
+  // payments                Payment[]
+  // claimPayments           ClaimPayment[]
   thirdPartyLogs          ThirdPartyLog[]
 }
 
@@ -468,22 +473,35 @@ model AccidentRecord {
 }
 
 model Payment {
-  id                String              @id @default(uuid())
-  refNumber         String              @unique
-  premiumTarif      Float
-  paymentStatus     PaymentStatus       @default(Pending)
-  commissionStatus  CommissioningStatus @default(NotCommissioned)
-  // insureds          Insured             @relation(fields: [regNumber], references: [regNumber])
-  // regNumber         String
-  vehicles          Vehicle             @relation(fields: [plateNumber], references: [plateNumber])
-  plateNumber       String
-  certificates      Certificate         @relation(fields: [certificateNumber], references: [certificateNumber])
-  certificateNumber String
-  deletedStatus     Boolean             @default(false)
-  deletedAt         DateTime?
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
+  id               String              @id @default(uuid())
+  refNumber        String              @unique
+  premiumTarif     Float
+  paymentStatus    PaymentStatus       @default(PendingApproval)
+  commissionStatus CommissioningStatus @default(NotCommissioned)
+  insureds         Insured?            @relation(fields: [insuredId], references: [id])
+  insuredId        String?
+  // vehicles         Vehicle[]
+  certificates     Certificate[]
+  deletedStatus    Boolean             @default(false)
+  deletedAt        DateTime?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
 }
+
+// model ClaimPayment {
+//   id            String             @id @default(uuid())
+//   refNumber     String             @unique
+//   amount        Float
+//   paymentStatus ClaimPaymentStatus @default(Pending)
+//   insureds      Insured?           @relation(fields: [regNumber], references: [regNumber])
+//   regNumber     String?
+//   vehicles      Vehicle[]
+//   certificates  Certificate[]
+//   deletedStatus Boolean            @default(false)
+//   deletedAt     DateTime?
+//   createdAt     DateTime           @default(now())
+//   updatedAt     DateTime           @updatedAt
+// }
 
 enum InsuranceStatus {
   APPROVED
@@ -492,6 +510,12 @@ enum InsuranceStatus {
 }
 
 enum PaymentStatus {
+  Payed
+  PendingPayment
+  PendingApproval
+}
+
+enum ClaimPaymentStatus {
   Payed
   Pending
 }
@@ -521,6 +545,7 @@ enum PaymentFor {
 enum IsInsured {
   INSURED
   NOTINSURED
+  PENDING
 }
 
 enum STATUS {

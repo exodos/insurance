@@ -7,7 +7,6 @@ import * as Yup from "yup";
 import { IoIosAddCircle } from "react-icons/io";
 import ReactTooltip from "react-tooltip";
 import { changePhone, checkPolicy } from "@/lib/config";
-import AddCertificateModal from "../certificate/add-certificate";
 import AddOrUpdateCertificateModal from "../certificate/add-update-certificate";
 
 const FeedVehicleByInsured = gql`
@@ -124,18 +123,18 @@ const VehicleByMobileNumber = ({ branchId, path }) => {
               </div>
             </Form>
           </Formik>
-          <div className="px-10 ml-10">
+          <div className="max-w-[80%] mx-auto px-10 ml-10">
             {feedVehicleByInsuredError && (
               <p className="mt-2 max-w-2xl text-lg font-medium text-eRed">
                 {feedVehicleByInsuredError.message}
               </p>
             )}
           </div>
-          <div className="px-10 ml-10">
+          <div className="max-w-[80%] mx-auto px-4">
             {feedVehicleByInsuredData?.feedVehicleByInsured?.vehicles?.length <=
               0 && (
-              <p className="mt-2 max-w-2xl text-lg font-medium text-eRed">
-                No Vehicle Found!!{" "}
+              <p className="mt-2 max-w-2xl text-base font-medium text-eRed">
+                No Data Found With The Provided Mobile Number !!
               </p>
             )}
           </div>
@@ -391,7 +390,7 @@ const VehicleByMobileNumber = ({ branchId, path }) => {
       {showCreateModal ? (
         <AddOrUpdateCertificateModal
           vehicle={createList}
-          href={path}
+          href={"/branch/certificate"}
           branchId={branchId}
         />
       ) : null}

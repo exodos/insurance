@@ -18,6 +18,7 @@ const ProposalCreatevehicle = () => {
     vehicleDetailOptions,
     vehicleUsageOptions,
     vehicleCategoryOptions,
+    returnPath,
   } = useContext(VehicleInfoContext);
 
   const renderError = (message) => (

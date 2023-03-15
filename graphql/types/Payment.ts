@@ -27,17 +27,27 @@ export const Payment = objectType({
     t.nullable.date("deletedAt");
     t.date("createdAt");
     t.date("updatedAt");
-    t.field("vehicles", {
-      type: "Vehicle",
+    t.field("insureds", {
+      type: "Insured",
       async resolve(_parent, _args, ctx) {
         return await ctx.prisma.payment
           .findUnique({
             where: { id: _parent.id },
           })
-          .vehicles();
+          .insureds();
       },
     });
-    t.field("certificates", {
+    // t.nullable.list.nullable.field("vehicles", {
+    //   type: "Vehicle",
+    //   async resolve(_parent, _args, ctx) {
+    //     return await ctx.prisma.payment
+    //       .findUnique({
+    //         where: { id: _parent.id },
+    //       })
+    //       .vehicles();
+    //   },
+    // });
+    t.nullable.list.nullable.field("certificates", {
       type: "Certificate",
       async resolve(_parent, _args, ctx) {
         return await ctx.prisma.payment
@@ -61,7 +71,7 @@ export const Paymentagination = extendType({
         take: intArg(),
         orderBy: arg({ type: list(nonNull(PaymentOrderByInput)) }),
       },
-      async resolve(parent, args, ctx) {
+      resolve: async (_parent, args, ctx) => {
         const where = args.filter
           ? {
               refNumber: args.filter,
@@ -149,15 +159,28 @@ export const createPaymentMutation = extendType({
         if (!user || user.memberships.role !== "SUPERADMIN") {
           throw new Error(`You do not have permission to perform action`);
         }
+        const vehicleData = await ctx.prisma.vehicle.findFirst({
+          where: {
+            plateNumber: args.input.vehicles.plateNumber,
+          },
+          include: {
+            insureds: true,
+          },
+        });
         return await ctx.prisma.payment.create({
           data: {
             refNumber: `RefN-${format(new Date(), "yyMMiHms")}`,
             premiumTarif: args.input.premiumTarif,
-            vehicles: {
+            insureds: {
               connect: {
-                plateNumber: args.input.vehicles.plateNumber,
+                regNumber: vehicleData.insureds.regNumber,
               },
             },
+            // vehicles: {
+            //   connect: {
+            //     plateNumber: args.input.vehicles.plateNumber,
+            //   },
+            // },
             certificates: {
               connect: {
                 certificateNumber: args.input.certificates.certificateNumber,
@@ -258,9 +281,6 @@ export const PaymentCreateInput = inputObjectType({
     t.float("premiumTarif");
     t.field("vehicles", { type: vehicleConnectInput });
     t.field("certificates", { type: certificateConnectInput });
-
-    // t.field("paymentStatus", { type: PaymentStatus });
-    // t.field("commissionStatus", { type: CommissioningStatus });
   },
 });
 
@@ -274,7 +294,7 @@ export const PaymentUpdateInput = inputObjectType({
 
 export const PaymentStatus = enumType({
   name: "PaymentStatus",
-  members: ["Payed", "Pending"],
+  members: ["Payed", "PendingPayment", "PendingApproval"],
 });
 
 export const CommissioningStatus = enumType({

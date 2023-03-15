@@ -180,7 +180,6 @@ const BranchApprovedVehiclePage = ({
           codeList={data.plateCode}
           branchId={branchId}
           tariffData={data.feedUniqueTariff}
-          pageStatus={"Approved"}
         />
       </div>
     </>

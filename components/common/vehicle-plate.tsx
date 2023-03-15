@@ -193,11 +193,11 @@ const VehicleByPlateNumber = ({ code, region, branchId, path }) => {
               </p>
             )}
           </div>
-          <div className="px-10 py-5 ml-10 pt-2">
+          <div className="max-w-[80%] mx-auto px-4">
             {vehicleBranchByPlateNumberData?.getVehicleByPlateNumber ===
               null && (
-              <p className="mt-10 max-w-2xl text-base font-medium text-eRed">
-                No Vehicle Found Or Vehicle insurance is still valid!!
+              <p className="mt-2 max-w-2xl text-base font-medium text-eRed">
+                No Data Found Or Vehicle insurance is still valid!!
               </p>
             )}
           </div>

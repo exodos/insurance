@@ -627,10 +627,10 @@ export interface NexusGenEnums {
   CommissioningStatus: "Commissioned" | "NotCommissioned"
   InjuryType: "CRITICAL" | "DEATH" | "SIMPLE"
   InsuranceStatus: "APPROVED" | "PendingApproval" | "PendingPayment"
-  IsInsured: "INSURED" | "NOTINSURED"
+  IsInsured: "INSURED" | "NOTINSURED" | "PENDING"
   MembershipRole: "BRANCHADMIN" | "INSURER" | "MEMBER" | "SUPERADMIN" | "TRAFFICPOLICEADMIN" | "TRAFFICPOLICEMEMBER" | "USER"
   OrgDesc: "INSURANCE" | "MINISTRY" | "TRAFFICPOLICE"
-  PaymentStatus: "Payed" | "Pending"
+  PaymentStatus: "Payed" | "PendingApproval" | "PendingPayment"
   STATUS: "APPROVED" | "SUSPENDED" | "TRANSFERABLE"
   Sort: "asc" | "desc"
   VehicleCategory: "BUSINESSUSE" | "PRIVATEUSE"
@@ -1210,7 +1210,7 @@ export interface NexusGenFieldTypes {
     claims: Array<NexusGenRootTypes['Claim'] | null> | null; // [Claim]
     id: string | null; // String
     issuedDate: NexusGenScalars['DateTime'] | null; // DateTime
-    payments: Array<NexusGenRootTypes['Payment'] | null> | null; // [Payment]
+    payments: NexusGenRootTypes['Payment'][] | null; // [Payment!]
     policies: NexusGenRootTypes['Policy'] | null; // Policy
     premiumTarif: number | null; // Float
     status: NexusGenEnums['InsuranceStatus'] | null; // InsuranceStatus
@@ -1544,6 +1544,7 @@ export interface NexusGenFieldTypes {
     lastName: string | null; // String
     mobileNumber: string | null; // String
     occupation: string | null; // String
+    payments: NexusGenRootTypes['Payment'][] | null; // [Payment!]
     regNumber: string | null; // String
     region: string | null; // String
     subCity: string | null; // String
@@ -1654,17 +1655,17 @@ export interface NexusGenFieldTypes {
     updatedAt: NexusGenScalars['DateTime'] | null; // DateTime
   }
   Payment: { // field return type
-    certificates: NexusGenRootTypes['Certificate'] | null; // Certificate
+    certificates: Array<NexusGenRootTypes['Certificate'] | null> | null; // [Certificate]
     commissionStatus: NexusGenEnums['CommissioningStatus'] | null; // CommissioningStatus
     createdAt: NexusGenScalars['DateTime'] | null; // DateTime
     deletedAt: NexusGenScalars['DateTime'] | null; // DateTime
     deletedStatus: boolean | null; // Boolean
     id: string | null; // String
+    insureds: NexusGenRootTypes['Insured'] | null; // Insured
     paymentStatus: NexusGenEnums['PaymentStatus'] | null; // PaymentStatus
     premiumTarif: number | null; // Float
     refNumber: string | null; // String
     updatedAt: NexusGenScalars['DateTime'] | null; // DateTime
-    vehicles: NexusGenRootTypes['Vehicle'] | null; // Vehicle
   }
   Policy: { // field return type
     certificates: NexusGenRootTypes['Certificate'] | null; // Certificate
@@ -1772,6 +1773,7 @@ export interface NexusGenFieldTypes {
     hitAndRunByIncidentNumber: NexusGenRootTypes['HitAndRunPoliceReport']; // HitAndRunPoliceReport!
     incidentNumberToClaim: NexusGenRootTypes['InsuredPoliceReport']; // InsuredPoliceReport!
     insuredBranchByMobileNumber: NexusGenRootTypes['Insured'] | null; // Insured
+    insuredBranchByRegNumber: NexusGenRootTypes['Insured'] | null; // Insured
     insuredByID: NexusGenRootTypes['Insured']; // Insured!
     insuredByMobileNumber: NexusGenRootTypes['Insured'] | null; // Insured
     insuredInsurerByMobileNumber: NexusGenRootTypes['Insured'] | null; // Insured
@@ -1911,7 +1913,6 @@ export interface NexusGenFieldTypes {
     isInsured: NexusGenEnums['IsInsured'] | null; // IsInsured
     manufacturedYear: number | null; // Int
     passengerNumber: number | null; // Int
-    payments: Array<NexusGenRootTypes['Payment'] | null> | null; // [Payment]
     plateNumber: string | null; // String
     premiumTarif: number | null; // Float
     purchasedYear: number | null; // Int
@@ -2315,6 +2316,7 @@ export interface NexusGenFieldTypeNames {
     lastName: 'String'
     mobileNumber: 'String'
     occupation: 'String'
+    payments: 'Payment'
     regNumber: 'String'
     region: 'String'
     subCity: 'String'
@@ -2431,11 +2433,11 @@ export interface NexusGenFieldTypeNames {
     deletedAt: 'DateTime'
     deletedStatus: 'Boolean'
     id: 'String'
+    insureds: 'Insured'
     paymentStatus: 'PaymentStatus'
     premiumTarif: 'Float'
     refNumber: 'String'
     updatedAt: 'DateTime'
-    vehicles: 'Vehicle'
   }
   Policy: { // field return type name
     certificates: 'Certificate'
@@ -2543,6 +2545,7 @@ export interface NexusGenFieldTypeNames {
     hitAndRunByIncidentNumber: 'HitAndRunPoliceReport'
     incidentNumberToClaim: 'InsuredPoliceReport'
     insuredBranchByMobileNumber: 'Insured'
+    insuredBranchByRegNumber: 'Insured'
     insuredByID: 'Insured'
     insuredByMobileNumber: 'Insured'
     insuredInsurerByMobileNumber: 'Insured'
@@ -2682,7 +2685,6 @@ export interface NexusGenFieldTypeNames {
     isInsured: 'IsInsured'
     manufacturedYear: 'Int'
     passengerNumber: 'Int'
-    payments: 'Payment'
     plateNumber: 'String'
     premiumTarif: 'Float'
     purchasedYear: 'Int'
@@ -3370,6 +3372,10 @@ export interface NexusGenArgTypes {
     insuredBranchByMobileNumber: { // args
       branchId: string; // String!
       mobileNumber: string; // String!
+    }
+    insuredBranchByRegNumber: { // args
+      branchId: string; // String!
+      regNumber: string; // String!
     }
     insuredByID: { // args
       id: string; // String!

@@ -6,6 +6,7 @@ import { createContext, useState } from "react";
 import { initializeApollo } from "@/lib/apollo";
 import Stepper from "@/components/proposal/Stepper";
 import Step from "@/components/proposal/Step";
+import { useRouter } from "next/router";
 
 const PlateCode = gql`
   query PlateCode {
@@ -45,11 +46,15 @@ const PlateCode = gql`
 export const FormContext = createContext(null!);
 export const VehicleInfoContext = createContext(null!);
 const CreateProposal = ({
-      data,
-      branchId,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  data,
+  branchId,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [formData, setFormData] = useState({});
+
+  const router = useRouter();
+  const [returnPath, setReturnPath] = useState(router.query.returnPage);
+  // console.log("return path", returnPath);
 
   const [plateRegionOption, setPlateRegionOption] = useState(data?.regionCode);
   const [plateCodeOption, setPlateCodeOption] = useState(data?.plateCode);
@@ -83,6 +88,7 @@ const CreateProposal = ({
           vehicleUsageOptions,
           vehicleCategoryOptions,
           branchId,
+          returnPath,
         }}
       >
         <div className="max-w-full mx-auto px-2 sm:px-6 lg:px-8">

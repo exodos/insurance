@@ -8,13 +8,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const parser = new XMLParser();
   let jsonObj = parser.parse(xmlRequest);
   let c2bValue = jsonObj["soapenv:Envelope"]["c2b:C2BPaymentQueryRequest"];
-  const certNumber = c2bValue.RefNumber;
-  const result = await prisma.certificate.findUnique({
+  const RefNumber = c2bValue.RefNumber;
+  const result = await prisma.payment.findFirst({
     where: {
-      certificateNumber: certNumber,
+      refNumber: RefNumber,
+      paymentStatus: "PendingPayment",
     },
     include: {
       insureds: true,
+      certificates: true,
     },
   });
 

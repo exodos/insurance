@@ -77,7 +77,7 @@ export const Certificate = objectType({
           .certificateRecords();
       },
     });
-    t.nullable.list.nullable.field("payments", {
+    t.nullable.list.nonNull.field("payments", {
       type: "Payment",
       async resolve(_parent, _args, ctx) {
         return await ctx.prisma.certificate
@@ -372,12 +372,7 @@ export const createCertificateMutation = extendType({
             plateNumber: args.plateNumber,
           },
           include: {
-            insureds: {
-              select: {
-                id: true,
-                // mobileNumber: true,
-              },
-            },
+            insureds: true,
             branchs: {
               select: {
                 id: true,
@@ -623,72 +618,83 @@ export const createCertificateMutation = extendType({
             args.plateNumber
           }`;
 
-        return await ctx.prisma.certificate.create({
-          data: {
-            certificateNumber: storeCertificateNumber,
-            premiumTarif:
-              vehicleDetail.premiumTarif +
-              premiumTariffBodily +
-              premiumTariffProperty,
-            vehicles: {
-              connect: {
-                plateNumber: args.plateNumber,
-              },
-            },
-            policies: {
-              create: {
-                policyNumber: storePolicyNumber,
-                policyStartDate: args.input.policies.policyStartDate,
-                policyExpireDate: addYears(
-                  new Date(args.input.policies.policyStartDate),
-                  1
-                ),
-                policyIssuedConditions:
-                  args.input.policies.policyIssuedConditions,
-                personsEntitledToUse: args.input.policies.personsEntitledToUse,
-              },
-            },
-            branchs: {
-              connect: {
-                id: vehicleDetail.branchs.id,
-              },
-            },
-            certificateRecords: {
-              create: {
-                policies: {
-                  connect: {
-                    policyNumber: storePolicyNumber,
-                  },
-                },
-                vehicles: {
-                  connect: {
-                    plateNumber: args.plateNumber,
-                  },
-                },
-                branchs: {
-                  connect: {
-                    id: vehicleDetail.branchs.id,
-                  },
+        return await ctx.prisma.$transaction(async (tx) => {
+          const certData = await tx.certificate.create({
+            data: {
+              certificateNumber: storeCertificateNumber,
+              premiumTarif:
+                vehicleDetail.premiumTarif +
+                premiumTariffBodily +
+                premiumTariffProperty,
+              vehicles: {
+                connect: {
+                  plateNumber: args.plateNumber,
                 },
               },
-            },
-            payments: {
-              create: {
-                refNumber: `Ref-${format(new Date(), "yyMMiHms")}-${
-                  args.plateNumber
-                }`,
-                premiumTarif:
-                  vehicleDetail.premiumTarif +
-                  premiumTariffBodily +
-                  premiumTariffProperty,
-                vehicles: {
-                  connect: {
-                    plateNumber: args.plateNumber,
+              policies: {
+                create: {
+                  policyNumber: storePolicyNumber,
+                  policyStartDate: args.input.policies.policyStartDate,
+                  policyExpireDate: addYears(
+                    new Date(args.input.policies.policyStartDate),
+                    1
+                  ),
+                  policyIssuedConditions:
+                    args.input.policies.policyIssuedConditions,
+                  personsEntitledToUse:
+                    args.input.policies.personsEntitledToUse,
+                },
+              },
+              branchs: {
+                connect: {
+                  id: vehicleDetail.branchs.id,
+                },
+              },
+              payments: {
+                create: {
+                  refNumber: `RN-${format(new Date(), "yyMMiHms")}`,
+                  premiumTarif:
+                    vehicleDetail.premiumTarif +
+                    premiumTariffBodily +
+                    premiumTariffProperty,
+                  insureds: {
+                    connect: {
+                      regNumber: vehicleDetail.insureds.regNumber,
+                    },
                   },
                 },
               },
+              certificateRecords: {
+                create: {
+                  policies: {
+                    connect: {
+                      policyNumber: storePolicyNumber,
+                    },
+                  },
+                  vehicles: {
+                    connect: {
+                      plateNumber: args.plateNumber,
+                    },
+                  },
+                  branchs: {
+                    connect: {
+                      id: vehicleDetail.branchs.id,
+                    },
+                  },
+                },
+              },
             },
-          },
+          });
+          const vehicleData = await tx.vehicle.update({
+            where: {
+              plateNumber: args.plateNumber,
+            },
+            data: {
+              isInsured: "PENDING",
+            },
+          });
+
+          return vehicleData;
         });
       },
     });
@@ -721,6 +727,21 @@ export const createInsuranceByBranchMutation = extendType({
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
+
+        const vehicleDetail = await ctx.prisma.vehicle.findFirst({
+          where: {
+            plateNumber: args.input.vehicles.plateNumber,
+          },
+          include: {
+            insureds: true,
+            branchs: {
+              select: {
+                id: true,
+                branchName: true,
+              },
+            },
+          },
+        });
         const tariffPremium = await ctx.prisma.tariff.findFirst({
           where: {
             vehicleType: args.input.vehicles.vehicleType,
@@ -973,118 +994,132 @@ export const createInsuranceByBranchMutation = extendType({
         }
 
         const storeCertificateNumber = `CN-${format(new Date(), "yyMMiHms")}`,
-          storePolicyNumber = `PN-${format(new Date(), "yyMMiHms")}`;
+          storePolicyNumber = `PN-${format(new Date(), "yyMMiHms")}`,
+          storeRegNumber = `REG-${format(new Date(), "yyMMiHms")}`;
 
-        return await ctx.prisma.certificate.create({
-          data: {
-            certificateNumber: storeCertificateNumber,
-            premiumTarif:
-              vehiclePremiumTarif + premiumTariffBodily + premiumTariffProperty,
-            branchs: {
-              connect: {
-                id: args.input.branchs.id,
-              },
-            },
-            policies: {
-              create: {
-                policyNumber: storePolicyNumber,
-                policyStartDate: args.input.policies.policyStartDate,
-                policyExpireDate: addYears(
-                  new Date(args.input.policies.policyStartDate),
-                  1
-                ),
-                policyIssuedConditions:
-                  args.input.policies.policyIssuedConditions,
-                personsEntitledToUse: args.input.policies.personsEntitledToUse,
-              },
-            },
-            vehicles: {
-              create: {
-                plateNumber: args.input.vehicles.plateNumber,
-                engineNumber: args.input.vehicles.engineNumber,
-                chassisNumber: args.input.vehicles.chassisNumber,
-                vehicleModel: args.input.vehicles.vehicleModel,
-                bodyType: args.input.vehicles.bodyType,
-                horsePower: args.input.vehicles.horsePower,
-                manufacturedYear: args.input.vehicles.manufacturedYear,
-                vehicleType: args.input.vehicles.vehicleType,
-                vehicleSubType: args.input.vehicles.vehicleSubType,
-                vehicleDetails: args.input.vehicles.vehicleDetails,
-                vehicleUsage: args.input.vehicles.vehicleUsage,
-                vehicleCategory: args.input.vehicles.vehicleCategory,
-                premiumTarif: vehiclePremiumTarif,
-                passengerNumber: args.input.vehicles.passengerNumber,
-                carryingCapacityInGoods:
-                  args.input.vehicles.carryingCapacityInGoods,
-                purchasedYear: args.input.vehicles.purchasedYear,
-                dutyFreeValue: args.input.vehicles.dutyFreeValue,
-                dutyPaidValue: args.input.vehicles.dutyPaidValue,
-                vehicleStatus: args.input.vehicles.vehicleStatus,
-                branchs: {
-                  connect: {
-                    id: args.input.branchs.id,
-                  },
+        return await ctx.prisma.$transaction(async (tx) => {
+          const certData = await tx.certificate.create({
+            data: {
+              certificateNumber: storeCertificateNumber,
+              premiumTarif:
+                vehiclePremiumTarif +
+                premiumTariffBodily +
+                premiumTariffProperty,
+              branchs: {
+                connect: {
+                  id: args.input.branchs.id,
                 },
-                insureds: {
-                  create: {
-                    regNumber: `REG-${format(new Date(), "yyMMiHms")}`,
-                    firstName: args.input.vehicles.insureds.firstName,
-                    lastName: args.input.vehicles.insureds.lastName,
-                    occupation: args.input.vehicles.insureds.occupation,
-                    region: args.input.vehicles.insureds.region,
-                    city: args.input.vehicles.insureds.city,
-                    subCity: args.input.vehicles.insureds.subCity,
-                    wereda: args.input.vehicles.insureds.wereda,
-                    kebelle: args.input.vehicles.insureds.kebelle,
-                    houseNumber: args.input.vehicles.insureds.houseNumber,
-                    mobileNumber: changePhone(
-                      args.input.vehicles.insureds.mobileNumber
-                    ),
-                    branchs: {
-                      connect: {
-                        id: args.input.branchs.id,
+              },
+              policies: {
+                create: {
+                  policyNumber: storePolicyNumber,
+                  policyStartDate: args.input.policies.policyStartDate,
+                  policyExpireDate: addYears(
+                    new Date(args.input.policies.policyStartDate),
+                    1
+                  ),
+                  policyIssuedConditions:
+                    args.input.policies.policyIssuedConditions,
+                  personsEntitledToUse:
+                    args.input.policies.personsEntitledToUse,
+                },
+              },
+              vehicles: {
+                create: {
+                  plateNumber: args.input.vehicles.plateNumber,
+                  engineNumber: args.input.vehicles.engineNumber,
+                  chassisNumber: args.input.vehicles.chassisNumber,
+                  vehicleModel: args.input.vehicles.vehicleModel,
+                  bodyType: args.input.vehicles.bodyType,
+                  horsePower: args.input.vehicles.horsePower,
+                  manufacturedYear: args.input.vehicles.manufacturedYear,
+                  vehicleType: args.input.vehicles.vehicleType,
+                  vehicleSubType: args.input.vehicles.vehicleSubType,
+                  vehicleDetails: args.input.vehicles.vehicleDetails,
+                  vehicleUsage: args.input.vehicles.vehicleUsage,
+                  vehicleCategory: args.input.vehicles.vehicleCategory,
+                  premiumTarif: vehiclePremiumTarif,
+                  passengerNumber: args.input.vehicles.passengerNumber,
+                  carryingCapacityInGoods:
+                    args.input.vehicles.carryingCapacityInGoods,
+                  purchasedYear: args.input.vehicles.purchasedYear,
+                  dutyFreeValue: args.input.vehicles.dutyFreeValue,
+                  dutyPaidValue: args.input.vehicles.dutyPaidValue,
+                  vehicleStatus: args.input.vehicles.vehicleStatus,
+                  branchs: {
+                    connect: {
+                      id: args.input.branchs.id,
+                    },
+                  },
+                  insureds: {
+                    create: {
+                      regNumber: storeRegNumber,
+                      firstName: args.input.vehicles.insureds.firstName,
+                      lastName: args.input.vehicles.insureds.lastName,
+                      occupation: args.input.vehicles.insureds.occupation,
+                      region: args.input.vehicles.insureds.region,
+                      city: args.input.vehicles.insureds.city,
+                      subCity: args.input.vehicles.insureds.subCity,
+                      wereda: args.input.vehicles.insureds.wereda,
+                      kebelle: args.input.vehicles.insureds.kebelle,
+                      houseNumber: args.input.vehicles.insureds.houseNumber,
+                      mobileNumber: changePhone(
+                        args.input.vehicles.insureds.mobileNumber
+                      ),
+                      branchs: {
+                        connect: {
+                          id: args.input.branchs.id,
+                        },
                       },
                     },
                   },
                 },
               },
-            },
-            payments: {
-              create: {
-                refNumber: `Ref-${format(new Date(), "yyMMiHms")}-${
-                  args.input.vehicles.plateNumber
-                }`,
-                premiumTarif:
-                  vehiclePremiumTarif +
-                  premiumTariffBodily +
-                  premiumTariffProperty,
-                vehicles: {
-                  connect: {
-                    plateNumber: args.input.vehicles.plateNumber,
+              payments: {
+                create: {
+                  refNumber: `RN-${format(new Date(), "yyMMiHms")}`,
+                  premiumTarif:
+                    vehiclePremiumTarif +
+                    premiumTariffBodily +
+                    premiumTariffProperty,
+                  insureds: {
+                    connect: {
+                      regNumber: storeRegNumber,
+                    },
+                  },
+                },
+              },
+              certificateRecords: {
+                create: {
+                  policies: {
+                    connect: {
+                      policyNumber: storePolicyNumber,
+                    },
+                  },
+                  vehicles: {
+                    connect: {
+                      plateNumber: args.input.vehicles.plateNumber,
+                    },
+                  },
+                  branchs: {
+                    connect: {
+                      id: args.input.branchs.id,
+                    },
                   },
                 },
               },
             },
-            certificateRecords: {
-              create: {
-                policies: {
-                  connect: {
-                    policyNumber: storePolicyNumber,
-                  },
-                },
-                vehicles: {
-                  connect: {
-                    plateNumber: args.input.vehicles.plateNumber,
-                  },
-                },
-                branchs: {
-                  connect: {
-                    id: args.input.branchs.id,
-                  },
-                },
-              },
+          });
+          const vehicleData = tx.vehicle.update({
+            where: {
+              plateNumber: args.input.vehicles.plateNumber,
             },
-          },
+            data: {
+              isInsured: "PENDING",
+            },
+          });
+
+          return vehicleData;
         });
       },
     });
@@ -1122,11 +1157,7 @@ export const createCertificateBranchMutation = extendType({
             plateNumber: args.plateNumber,
           },
           include: {
-            insureds: {
-              select: {
-                id: true,
-              },
-            },
+            insureds: true,
             branchs: {
               select: {
                 id: true,
@@ -1380,8 +1411,8 @@ export const createCertificateBranchMutation = extendType({
           }
         }
 
-        let certData = null;
-        let vehicleData = null;
+        // let certData = null;
+        // let vehicleData = null;
         const storeCertificateNumber = `CN-${format(new Date(), "yyMMiHms")}-${
             args.plateNumber
           }`,
@@ -1389,72 +1420,88 @@ export const createCertificateBranchMutation = extendType({
             args.plateNumber
           }`;
 
-        return await ctx.prisma.certificate.create({
-          data: {
-            certificateNumber: storeCertificateNumber,
-            premiumTarif:
-              vehicleDetail.premiumTarif +
-              premiumTariffBodily +
-              premiumTariffProperty,
-            vehicles: {
-              connect: {
-                plateNumber: args.plateNumber,
+        return await ctx.prisma.$transaction(async (tx) => {
+          const certData = tx.certificate.create({
+            data: {
+              certificateNumber: storeCertificateNumber,
+              premiumTarif:
+                vehicleDetail.premiumTarif +
+                premiumTariffBodily +
+                premiumTariffProperty,
+              vehicles: {
+                connect: {
+                  plateNumber: args.plateNumber,
+                },
               },
-            },
-            policies: {
-              create: {
-                policyNumber: storePolicyNumber,
-                policyStartDate: args.input.policies.policyStartDate,
-                policyExpireDate: addYears(
-                  new Date(args.input.policies.policyStartDate),
-                  1
-                ),
-                policyIssuedConditions:
-                  args.input.policies.policyIssuedConditions,
-                personsEntitledToUse: args.input.policies.personsEntitledToUse,
+              policies: {
+                create: {
+                  policyNumber: storePolicyNumber,
+                  policyStartDate: args.input.policies.policyStartDate,
+                  policyExpireDate: addYears(
+                    new Date(args.input.policies.policyStartDate),
+                    1
+                  ),
+                  policyIssuedConditions:
+                    args.input.policies.policyIssuedConditions,
+                  personsEntitledToUse:
+                    args.input.policies.personsEntitledToUse,
+                },
               },
-            },
-            branchs: {
-              connect: {
-                id: vehicleDetail.branchs.id,
+              branchs: {
+                connect: {
+                  id: vehicleDetail.branchs.id,
+                },
               },
-            },
-            payments: {
-              create: {
-                refNumber: `Ref-${format(new Date(), "yyMMiHms")}-${
-                  args.plateNumber
-                }`,
-                premiumTarif:
-                  vehicleDetail.premiumTarif +
-                  premiumTariffBodily +
-                  premiumTariffProperty,
-                vehicles: {
-                  connect: {
-                    plateNumber: args.plateNumber,
+              payments: {
+                create: {
+                  refNumber: `RN-${format(new Date(), "yyMMiHms")}`,
+                  premiumTarif:
+                    vehicleDetail.premiumTarif +
+                    premiumTariffBodily +
+                    premiumTariffProperty,
+                  insureds: {
+                    connect: {
+                      regNumber: vehicleDetail.insureds.regNumber,
+                    },
+                  },
+                  // vehicles: {
+                  //   connect: {
+                  //     plateNumber: args.plateNumber,
+                  //   },
+                  // },
+                },
+              },
+              certificateRecords: {
+                create: {
+                  policies: {
+                    connect: {
+                      policyNumber: storePolicyNumber,
+                    },
+                  },
+                  vehicles: {
+                    connect: {
+                      plateNumber: args.plateNumber,
+                    },
+                  },
+                  branchs: {
+                    connect: {
+                      id: vehicleDetail.branchs.id,
+                    },
                   },
                 },
               },
             },
-            certificateRecords: {
-              create: {
-                policies: {
-                  connect: {
-                    policyNumber: storePolicyNumber,
-                  },
-                },
-                vehicles: {
-                  connect: {
-                    plateNumber: args.plateNumber,
-                  },
-                },
-                branchs: {
-                  connect: {
-                    id: vehicleDetail.branchs.id,
-                  },
-                },
-              },
+          });
+          const vehicleData = tx.vehicle.update({
+            where: {
+              plateNumber: args.plateNumber,
             },
-          },
+            data: {
+              isInsured: "PENDING",
+            },
+          });
+
+          return vehicleData;
         });
       },
     });
@@ -1495,6 +1542,7 @@ export const createOrUpdateCertificateMutation = extendType({
           },
           include: {
             branchs: true,
+            insureds: true,
           },
         });
 
@@ -1740,8 +1788,6 @@ export const createOrUpdateCertificateMutation = extendType({
           }
         }
 
-        let certData = null;
-        let vehicleData = null;
         const storeCertificateNumber = `CN-${format(new Date(), "yyMMiHms")}-${
             args.plateNumber
           }`,
@@ -1754,134 +1800,143 @@ export const createOrUpdateCertificateMutation = extendType({
             ? oldCertData.policies.policyNumber
             : storePolicyNumber;
 
-        return await ctx.prisma.certificate.upsert({
-          where: {
-            vehiclePlateNumber: args.plateNumber,
-          },
-          update: {
-            premiumTarif:
-              vehicleDetail.premiumTarif +
-              premiumTariffBodily +
-              premiumTariffProperty,
-            policies: {
-              create: {
-                policyNumber: storePolicyNumber,
-                policyStartDate: args.input.policies.policyStartDate,
-                policyExpireDate: addYears(
-                  new Date(args.input.policies.policyStartDate),
-                  1
-                ),
-                policyIssuedConditions:
-                  args.input.policies.policyIssuedConditions,
-                personsEntitledToUse: args.input.policies.personsEntitledToUse,
-              },
+        return await ctx.prisma.$transaction(async (tx) => {
+          const certData = await tx.certificate.upsert({
+            where: {
+              vehiclePlateNumber: args.plateNumber,
             },
-            branchs: {
-              connect: {
-                id: args.input.branchs.id,
+            update: {
+              premiumTarif:
+                vehicleDetail.premiumTarif +
+                premiumTariffBodily +
+                premiumTariffProperty,
+              policies: {
+                create: {
+                  policyNumber: storePolicyNumber,
+                  policyStartDate: args.input.policies.policyStartDate,
+                  policyExpireDate: addYears(
+                    new Date(args.input.policies.policyStartDate),
+                    1
+                  ),
+                  policyIssuedConditions:
+                    args.input.policies.policyIssuedConditions,
+                  personsEntitledToUse:
+                    args.input.policies.personsEntitledToUse,
+                },
               },
-            },
-            payments: {
-              create: {
-                refNumber: `Ref-${format(new Date(), "yyMMiHms")}-${
-                  args.plateNumber
-                }`,
-                premiumTarif:
-                  vehicleDetail.premiumTarif +
-                  premiumTariffBodily +
-                  premiumTariffProperty,
-                vehicles: {
-                  connect: {
-                    plateNumber: args.plateNumber,
+              branchs: {
+                connect: {
+                  id: args.input.branchs.id,
+                },
+              },
+              payments: {
+                create: {
+                  refNumber: `RN-${format(new Date(), "yyMMiHms")}`,
+                  premiumTarif:
+                    vehicleDetail.premiumTarif +
+                    premiumTariffBodily +
+                    premiumTariffProperty,
+                  insureds: {
+                    connect: {
+                      regNumber: vehicleDetail.insureds.regNumber,
+                    },
+                  },
+                },
+              },
+              certificateRecords: {
+                create: {
+                  policies: {
+                    connect: {
+                      policyNumber: oldPolicyNumber,
+                    },
+                  },
+                  vehicles: {
+                    connect: {
+                      plateNumber: vehicleDetail.plateNumber,
+                    },
+                  },
+                  branchs: {
+                    connect: {
+                      id: vehicleDetail.branchId,
+                    },
                   },
                 },
               },
             },
-            certificateRecords: {
-              create: {
-                policies: {
-                  connect: {
-                    policyNumber: oldPolicyNumber,
+            create: {
+              certificateNumber: storeCertificateNumber,
+              premiumTarif:
+                vehicleDetail.premiumTarif +
+                premiumTariffBodily +
+                premiumTariffProperty,
+              vehicles: {
+                connect: {
+                  plateNumber: args.plateNumber,
+                },
+              },
+              policies: {
+                create: {
+                  policyNumber: storePolicyNumber,
+                  policyStartDate: args.input.policies.policyStartDate,
+                  policyExpireDate: addYears(
+                    new Date(args.input.policies.policyStartDate),
+                    1
+                  ),
+                  policyIssuedConditions:
+                    args.input.policies.policyIssuedConditions,
+                  personsEntitledToUse:
+                    args.input.policies.personsEntitledToUse,
+                },
+              },
+              branchs: {
+                connect: {
+                  id: args.input.branchs.id,
+                },
+              },
+              payments: {
+                create: {
+                  refNumber: `RN-${format(new Date(), "yyMMiHms")}`,
+                  premiumTarif:
+                    vehicleDetail.premiumTarif +
+                    premiumTariffBodily +
+                    premiumTariffProperty,
+                  insureds: {
+                    connect: {
+                      regNumber: vehicleDetail.insureds.regNumber,
+                    },
                   },
                 },
-                vehicles: {
-                  connect: {
-                    plateNumber: vehicleDetail.plateNumber,
+              },
+              certificateRecords: {
+                create: {
+                  policies: {
+                    connect: {
+                      policyNumber: storePolicyNumber,
+                    },
                   },
-                },
-                branchs: {
-                  connect: {
-                    id: vehicleDetail.branchId,
+                  vehicles: {
+                    connect: {
+                      plateNumber: args.plateNumber,
+                    },
+                  },
+                  branchs: {
+                    connect: {
+                      id: vehicleDetail.branchs.id,
+                    },
                   },
                 },
               },
             },
-          },
-          create: {
-            certificateNumber: storeCertificateNumber,
-            premiumTarif:
-              vehicleDetail.premiumTarif +
-              premiumTariffBodily +
-              premiumTariffProperty,
-            vehicles: {
-              connect: {
-                plateNumber: args.plateNumber,
-              },
+          });
+          const vehicleData = await tx.vehicle.update({
+            where: {
+              plateNumber: args.plateNumber,
             },
-            policies: {
-              create: {
-                policyNumber: storePolicyNumber,
-                policyStartDate: args.input.policies.policyStartDate,
-                policyExpireDate: addYears(
-                  new Date(args.input.policies.policyStartDate),
-                  1
-                ),
-                policyIssuedConditions:
-                  args.input.policies.policyIssuedConditions,
-                personsEntitledToUse: args.input.policies.personsEntitledToUse,
-              },
+            data: {
+              isInsured: "PENDING",
             },
-            branchs: {
-              connect: {
-                id: args.input.branchs.id,
-              },
-            },
-            payments: {
-              create: {
-                refNumber: `Ref-${format(new Date(), "yyMMiHms")}-${
-                  args.plateNumber
-                }`,
-                premiumTarif:
-                  vehicleDetail.premiumTarif +
-                  premiumTariffBodily +
-                  premiumTariffProperty,
-                vehicles: {
-                  connect: {
-                    plateNumber: args.plateNumber,
-                  },
-                },
-              },
-            },
-            certificateRecords: {
-              create: {
-                policies: {
-                  connect: {
-                    policyNumber: storePolicyNumber,
-                  },
-                },
-                vehicles: {
-                  connect: {
-                    plateNumber: args.plateNumber,
-                  },
-                },
-                branchs: {
-                  connect: {
-                    id: vehicleDetail.branchs.id,
-                  },
-                },
-              },
-            },
-          },
+          });
+          return vehicleData;
         });
       },
     });
@@ -2169,16 +2224,15 @@ export const updateCertificateMutation = extendType({
             },
             payments: {
               create: {
-                refNumber: `Ref-${format(new Date(), "yyMMiHms")}-${
-                  vPlate.vehiclePlateNumber
-                }`,
+                refNumber: `RN-${format(new Date(), "yyMMiHms")}`,
+                paymentStatus: "PendingPayment",
                 premiumTarif:
                   vPlate.premiumTarif +
                   premiumTariffBodily +
                   premiumTariffProperty,
-                vehicles: {
+                insureds: {
                   connect: {
-                    plateNumber: vPlate.vehiclePlateNumber,
+                    id: vPlate.vehicles.insuredId,
                   },
                 },
               },

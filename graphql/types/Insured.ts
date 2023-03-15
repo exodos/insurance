@@ -41,6 +41,16 @@ export const Insured = objectType({
           .vehicles();
       },
     });
+    t.nullable.list.nonNull.field("payments", {
+      type: "Payment",
+      async resolve(_parent, _args, ctx) {
+        return await ctx.prisma.insured
+          .findUnique({
+            where: { id: _parent.id },
+          })
+          .payments();
+      },
+    });
     t.field("branchs", {
       type: "Branch",
       async resolve(_parent, _args, ctx) {
@@ -265,6 +275,28 @@ export const insuredBranchByMobileNumberQuery = extendType({
     });
   },
 });
+
+export const insuredBranchByRegNumberQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.field("insuredBranchByRegNumber", {
+      type: Insured,
+      args: {
+        regNumber: nonNull(stringArg()),
+        branchId: nonNull(stringArg()),
+      },
+      resolve(_parent, args, ctx) {
+        return ctx.prisma.insured.findFirst({
+          where: {
+            regNumber: args.regNumber,
+            branchId: args.branchId,
+          },
+        });
+      },
+    });
+  },
+});
+
 export const insuredInsurerByMobileNumberQuery = extendType({
   type: "Query",
   definition(t) {

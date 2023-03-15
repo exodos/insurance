@@ -136,11 +136,11 @@ const VehicleByRegNumber = ({ branchId, path }) => {
               </p>
             )}
           </div>
-          <div className="px-10 ml-10">
+          <div className="max-w-[80%] mx-auto px-4">
             {feedVehicleByInsuredRegData?.feedVehicleByInsuredReg?.vehicles
               ?.length <= 0 && (
-              <p className="mt-2 max-w-2xl text-lg font-medium text-eRed">
-                No Vehicle Found!!{" "}
+              <p className="mt-2 max-w-2xl text-base font-medium text-eRed">
+                No Data Found With The Provided Registration Number !!
               </p>
             )}
           </div>

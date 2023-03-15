@@ -58,7 +58,7 @@ type Certificate {
   claims: [Claim]
   id: String
   issuedDate: DateTime
-  payments: [Payment]
+  payments: [Payment!]
   policies: Policy
   premiumTarif: Float
   status: InsuranceStatus
@@ -599,6 +599,7 @@ type Insured {
   lastName: String
   mobileNumber: String
   occupation: String
+  payments: [Payment!]
   regNumber: String
   region: String
   subCity: String
@@ -685,6 +686,7 @@ input InsuredPoliceReportUpdateInput {
 enum IsInsured {
   INSURED
   NOTINSURED
+  PENDING
 }
 
 """
@@ -795,17 +797,17 @@ input OrganizationOrderByInput {
 }
 
 type Payment {
-  certificates: Certificate
+  certificates: [Certificate]
   commissionStatus: CommissioningStatus
   createdAt: DateTime
   deletedAt: DateTime
   deletedStatus: Boolean
   id: String
+  insureds: Insured
   paymentStatus: PaymentStatus
   premiumTarif: Float
   refNumber: String
   updatedAt: DateTime
-  vehicles: Vehicle
 }
 
 input PaymentCreateInput {
@@ -821,7 +823,8 @@ input PaymentOrderByInput {
 
 enum PaymentStatus {
   Payed
-  Pending
+  PendingApproval
+  PendingPayment
 }
 
 input PaymentUpdateInput {
@@ -956,6 +959,7 @@ type Query {
   hitAndRunByIncidentNumber(incidentNumber: String!): HitAndRunPoliceReport!
   incidentNumberToClaim(incidentNumber: String!): InsuredPoliceReport!
   insuredBranchByMobileNumber(branchId: String!, mobileNumber: String!): Insured
+  insuredBranchByRegNumber(branchId: String!, regNumber: String!): Insured
   insuredByID(id: String!): Insured!
   insuredByMobileNumber(mobileNumber: String!): Insured
   insuredInsurerByMobileNumber(mobileNumber: String!, orgId: String!): Insured
@@ -1204,7 +1208,6 @@ type Vehicle {
   isInsured: IsInsured
   manufacturedYear: Int
   passengerNumber: Int
-  payments: [Payment]
   plateNumber: String
   premiumTarif: Float
   purchasedYear: Int

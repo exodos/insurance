@@ -67,10 +67,10 @@ const FeedCertificateBranch = gql`
 `;
 
 const BranchCertificate = ({
-  data,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
-  const { pathname, asPath } = useRouter();
+  const { pathname } = useRouter();
 
   return (
     <>
@@ -151,9 +151,9 @@ const BranchCertificate = ({
                     </Link>
                     <Link
                       href={{
-                        pathname: "/branch/certificate/export-certificate",
+                        pathname: "/branch/certificate/import-by-insureds",
                         query: {
-                          returnPage: asPath,
+                          returnPage: pathname,
                         },
                       }}
                     >
@@ -183,7 +183,7 @@ const BranchCertificate = ({
                       href={{
                         pathname: "/branch/certificate/export-certificate",
                         query: {
-                          returnPage: asPath,
+                          returnPage: pathname,
                         },
                       }}
                     >

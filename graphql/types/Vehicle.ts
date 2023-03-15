@@ -83,16 +83,6 @@ export const Vehicle = objectType({
           .claims();
       },
     });
-    t.nullable.list.nullable.field("payments", {
-      type: "Payment",
-      async resolve(_parent, _args, ctx) {
-        return await ctx.prisma.vehicle
-          .findUnique({
-            where: { id: _parent.id },
-          })
-          .payments();
-      },
-    });
   },
 });
 
@@ -329,7 +319,6 @@ export const vehicleByPlateNumberQuery = extendType({
               equals: args.plateNumber,
               mode: "insensitive",
             },
-            // status: "APPROVED",
           },
         });
       },
@@ -398,7 +387,6 @@ export const vehicleInsurerByPlateNumberQuery = extendType({
             branchs: {
               orgId: args.orgId,
             },
-            // status: "APPROVED",
           },
         });
       },
@@ -415,11 +403,24 @@ export const vehicleByInsuredMobileNumberQuery = extendType({
         mobileNumber: nonNull(stringArg()),
       },
       async resolve(_parent, args, ctx) {
+        const user = await ctx.prisma.user.findUnique({
+          where: {
+            email: ctx.session.user.email,
+          },
+          include: {
+            memberships: {
+              include: {
+                branchs: true,
+              },
+            },
+          },
+        });
         const vehicles = await ctx.prisma.vehicle.findMany({
           where: {
             insureds: {
               mobileNumber: changePhone(args.mobileNumber),
             },
+            branchId: user.memberships.branchs.id,
             isInsured: "NOTINSURED",
           },
           orderBy: {
@@ -443,12 +444,25 @@ export const vehicleByInsuredRegNumberQuery = extendType({
         regNumber: nonNull(stringArg()),
       },
       async resolve(_parent, args, ctx) {
+        const user = await ctx.prisma.user.findUnique({
+          where: {
+            email: ctx.session.user.email,
+          },
+          include: {
+            memberships: {
+              include: {
+                branchs: true,
+              },
+            },
+          },
+        });
         const vehicles = await ctx.prisma.vehicle.findMany({
           where: {
             insureds: {
               regNumber: args.regNumber,
             },
             isInsured: "NOTINSURED",
+            branchId: user.memberships.branchId,
           },
           // take: 20,
           orderBy: {
@@ -927,7 +941,7 @@ export const VehicleStatus = enumType({
 
 export const IsInsured = enumType({
   name: "IsInsured",
-  members: ["INSURED", "NOTINSURED"],
+  members: ["INSURED", "PENDING", "NOTINSURED"],
 });
 
 export const STATUS = enumType({

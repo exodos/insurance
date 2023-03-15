@@ -48,7 +48,6 @@ const AddOrUpdateCertificateModal = ({ branchId, vehicle, href }) => {
     personsEntitledToUse: Yup.string().required(
       "Persons Entitled To Use/Drive Is Required"
     ),
-    // premiumTarif: Yup.number().required("Tariff Code Is Required"),
   });
   const [formValues, setFormValues] = useState(null);
 

@@ -7,7 +7,6 @@ import {
 import NotificationContext from "@/store/notification-context";
 import { gql, useMutation } from "@apollo/client";
 import { useRouter } from "next/router";
-import { useSession } from "next-auth/react";
 
 const CreateInsuranceByBranch = gql`
   mutation CreateInsuranceByBranch($input: InsuranceCreateInput!) {
@@ -77,13 +76,14 @@ const CreateInsuranceByBranch = gql`
 `;
 
 const ProposalDetails = () => {
-  // const { data: session, status } = useSession();
   const { activeStepIndex, setActiveStepIndex, formData } =
     useContext(FormContext);
+  const { returnPath } = useContext(VehicleInfoContext);
   const notificationCtx = useContext(NotificationContext);
 
   const { branchId } = useContext(VehicleInfoContext);
   const router = useRouter();
+  console.log(returnPath);
   // const userRole = session?.user?.memberships?.role;
 
   const [createInsurance, { data, error, loading }] = useMutation(
@@ -168,7 +168,7 @@ const ProposalDetails = () => {
           },
         });
       },
-    }).then(() => router.push("/branch/certificate"));
+    }).then(() => router.push(returnPath));
   };
 
   return (

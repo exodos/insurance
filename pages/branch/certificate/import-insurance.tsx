@@ -11,13 +11,12 @@ import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import SiteHeader from "@/components/layout/header";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { isEmpty, isNull } from "lodash";
 import { BsArrowDownCircleFill } from "react-icons/bs";
 
 const ImportInsurance = ({
       branchId,
       insuredId,
-      pageURL,
+      path,
     }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [parsedData, setParsedData] = useState([]);
   const [tableRows, setTableRows] = useState([]);
@@ -28,10 +27,9 @@ const ImportInsurance = ({
   const router = useRouter();
 
   const initialValues = {
-    policyStartDate: new Date(),
+    policyStartDate: "",
     policyIssuedConditions: "",
     personsEntitledToUse: "",
-    vehicleFile: "",
   };
 
   const validate = Yup.object().shape({
@@ -114,7 +112,9 @@ const ImportInsurance = ({
             }
             response.json().then((data) => {
               notificationCtx.showNotification({
-                title: "Error", //           message: data.message || "Something Went Wrong",
+                title: "Error",
+                message:
+                  data.message || "Error occured while importing insurance!!",
                 status: "error",
               });
             });
@@ -134,7 +134,7 @@ const ImportInsurance = ({
               status: "error",
             });
           });
-        await router.push(pageURL);
+        await router.push(path);
       } catch (error) {
         notificationCtx.showNotification({
           title: "Error!",
@@ -301,10 +301,10 @@ const ImportInsurance = ({
                                 </tr>
                               </thead>
                               <tbody className="divide-y divide-gray-200 bg-white">
-                                {slicedValue.map((value, index) => {
+                                {slicedValue.map((value: any, index: any) => {
                                   return (
                                     <tr key={index}>
-                                      {value.map((val, i) => {
+                                      {value.map((val: any, i: any) => {
                                         return (
                                           <td
                                             key={i}
@@ -365,26 +365,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
-  const userRole = session?.user?.memberships?.role;
-  const pageURL = userRole === "INSURER" ? "insured" : "branch";
-  const branchId = session.user.memberships.branchId;
   const { query } = context;
   const insuredId = query.insured;
-  if (isEmpty(insuredId) || isNull(insuredId)) {
-    return {
-      redirect: {
-        destination: `${pageURL}/vehicle`,
-        permanent: false,
-      },
-    };
-  }
+  const returnPath = query.returnPage;
 
   return {
     props: {
       session,
-      branchId: branchId,
+      branchId: session?.user?.memberships?.branchId,
       insuredId: insuredId,
-      pageURL: pageURL,
+      path: returnPath,
     },
   };
 };

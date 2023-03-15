@@ -11,10 +11,10 @@ CREATE TYPE "CertificateStatus" AS ENUM ('CURRENT', 'ARCHIEVED');
 CREATE TYPE "ClaimProgress" AS ENUM ('OnProgress', 'Completed');
 
 -- CreateEnum
-CREATE TYPE "InsuranceStatus" AS ENUM ('APPROVED', 'SUSPENDED');
+CREATE TYPE "InsuranceStatus" AS ENUM ('APPROVED', 'PendingPayment', 'PendingApproval');
 
 -- CreateEnum
-CREATE TYPE "PaymentStatus" AS ENUM ('PAYED', 'NOTPAYED');
+CREATE TYPE "PaymentStatus" AS ENUM ('Payed', 'PendingPayment', 'PendingApproval');
 
 -- CreateEnum
 CREATE TYPE "CommissioningStatus" AS ENUM ('Commissioned', 'NotCommissioned');
@@ -29,10 +29,10 @@ CREATE TYPE "VEHICLESTATUS" AS ENUM ('NEW', 'RENEWAL', 'ADDITIONAL');
 CREATE TYPE "PaymentFor" AS ENUM ('THIRDPARTY', 'CLAIM');
 
 -- CreateEnum
-CREATE TYPE "IsInsured" AS ENUM ('INSURED', 'NOTINSURED');
+CREATE TYPE "IsInsured" AS ENUM ('INSURED', 'PENDING', 'NOTINSURED');
 
 -- CreateEnum
-CREATE TYPE "STATUS" AS ENUM ('APPROVED', 'SUSPENDED', 'TRANSFERABLE');
+CREATE TYPE "STATUS" AS ENUM ('APPROVED', 'SUSPENDED');
 
 -- CreateEnum
 CREATE TYPE "InjuryType" AS ENUM ('SIMPLE', 'CRITICAL', 'DEATH');
@@ -104,14 +104,13 @@ CREATE TABLE "Membership" (
 CREATE TABLE "Certificate" (
     "id" TEXT NOT NULL,
     "certificateNumber" TEXT NOT NULL,
-    "status" "InsuranceStatus" NOT NULL DEFAULT 'SUSPENDED',
+    "status" "InsuranceStatus" NOT NULL DEFAULT 'PendingApproval',
     "issuedDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "policyNumber" TEXT NOT NULL,
     "vehiclePlateNumber" TEXT NOT NULL,
     "branchId" TEXT NOT NULL,
     "premiumTarif" DOUBLE PRECISION NOT NULL,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "refNumber" TEXT,
 
     CONSTRAINT "Certificate_pkey" PRIMARY KEY ("id")
 );
@@ -413,9 +412,14 @@ CREATE TABLE "AccidentRecord" (
 CREATE TABLE "Payment" (
     "id" TEXT NOT NULL,
     "refNumber" TEXT NOT NULL,
-    "regNumber" TEXT NOT NULL,
-    "paymentStatus" "PaymentStatus" NOT NULL DEFAULT 'NOTPAYED',
+    "premiumTarif" DOUBLE PRECISION NOT NULL,
+    "paymentStatus" "PaymentStatus" NOT NULL DEFAULT 'PendingApproval',
     "commissionStatus" "CommissioningStatus" NOT NULL DEFAULT 'NotCommissioned',
+    "regNumber" TEXT,
+    "plateNumber" TEXT,
+    "certificateNumber" TEXT,
+    "deletedStatus" BOOLEAN NOT NULL DEFAULT false,
+    "deletedAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -714,9 +718,6 @@ ALTER TABLE "Certificate" ADD CONSTRAINT "Certificate_vehiclePlateNumber_fkey" F
 ALTER TABLE "Certificate" ADD CONSTRAINT "Certificate_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Certificate" ADD CONSTRAINT "Certificate_refNumber_fkey" FOREIGN KEY ("refNumber") REFERENCES "Payment"("refNumber") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "Insured" ADD CONSTRAINT "Insured_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -798,7 +799,13 @@ ALTER TABLE "AccidentRecord" ADD CONSTRAINT "AccidentRecord_plateNumber_fkey" FO
 ALTER TABLE "AccidentRecord" ADD CONSTRAINT "AccidentRecord_claimNumber_fkey" FOREIGN KEY ("claimNumber") REFERENCES "Claim"("claimNumber") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Payment" ADD CONSTRAINT "Payment_regNumber_fkey" FOREIGN KEY ("regNumber") REFERENCES "Insured"("regNumber") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Payment" ADD CONSTRAINT "Payment_regNumber_fkey" FOREIGN KEY ("regNumber") REFERENCES "Insured"("regNumber") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Payment" ADD CONSTRAINT "Payment_plateNumber_fkey" FOREIGN KEY ("plateNumber") REFERENCES "Vehicle"("plateNumber") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Payment" ADD CONSTRAINT "Payment_certificateNumber_fkey" FOREIGN KEY ("certificateNumber") REFERENCES "Certificate"("certificateNumber") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_BranchToThirdPartyLog" ADD CONSTRAINT "_BranchToThirdPartyLog_A_fkey" FOREIGN KEY ("A") REFERENCES "Branch"("id") ON DELETE CASCADE ON UPDATE CASCADE;
