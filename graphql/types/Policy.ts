@@ -65,7 +65,7 @@ export const PolicyPagination = extendType({
         const totalPolicy = await ctx.prisma.policy.count({
           where,
         }); // 2
-        const maxPage = Math.ceil(totalPolicy / 20);
+        const maxPage = Math.ceil(totalPolicy / args?.take);
 
         return {
           // 4

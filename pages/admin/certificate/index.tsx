@@ -95,7 +95,7 @@ const AdminCertificatePage = ({
                     <Link
                       href={{
                         pathname:
-                          "/branch/certificate/proposal-create-insurance",
+                          "/admin/certificate/admin-proposal-create-insurance",
                         query: {
                           returnPage: pathname,
                         },
@@ -125,7 +125,7 @@ const AdminCertificatePage = ({
                     </Link>
                     <Link
                       href={{
-                        pathname: "/branch/certificate/add-certificate",
+                        pathname: "/admin/certificate/admin-add-certificate",
                         query: {
                           returnPage: pathname,
                         },
@@ -155,7 +155,7 @@ const AdminCertificatePage = ({
                     </Link>
                     <Link
                       href={{
-                        pathname: "/branch/certificate/import-by-insureds",
+                        pathname: "/admin/certificate/admin-import-by-insured",
                         query: {
                           returnPage: pathname,
                         },
@@ -185,7 +185,7 @@ const AdminCertificatePage = ({
                     </Link>
                     <Link
                       href={{
-                        pathname: "/branch/certificate/export-certificate",
+                        pathname: "/admin/certificate/export-certificate",
                         query: {
                           returnPage: pathname,
                         },
@@ -221,12 +221,6 @@ const AdminCertificatePage = ({
         </div>
         <ListCertificate certificateData={data.feedCertificate} />
       </div>
-      {/* {showAddModal ? (
-        <AddCertificateModal
-          regionCode={data.regionCode}
-          codeList={data.plateCode}
-        />
-      ) : null} */}
     </>
   );
 };
@@ -237,7 +231,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
       redirect: {
         permanent: false,
-        destination: "/auth/signin",
+        destination: "/auth/sign-in",
+      },
+    };
+  } else if (session.user.memberships.role !== "SUPERADMIN") {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
       },
     };
   }
@@ -249,7 +250,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const filter = query.search;
 
   const curPage: any = page;
-  const perPage = 20;
+  const perPage = 10;
 
   const take = perPage;
   const skip = (curPage - 1) * perPage;

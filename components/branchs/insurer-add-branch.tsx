@@ -17,6 +17,7 @@ const CreateBranch = gql`
       region
       city
       mobileNumber
+      branchCode
       createdAt
       updatedAt
     }
@@ -36,6 +37,7 @@ const InsurerAddBranch = ({ orgId, href }) => {
 
   const initialValues = {
     branchName: "",
+    branchCode: "",
     region: "",
     city: "",
     mobileNumber: "",
@@ -54,6 +56,7 @@ const InsurerAddBranch = ({ orgId, href }) => {
   const onSubmit = async (values: any) => {
     const input = {
       branchName: values.branchName,
+      branchCode: values.branchCode,
       region: values.region,
       city: values.city,
       mobileNumber: changePhone(values.mobileNumber),
@@ -170,6 +173,27 @@ const InsurerAddBranch = ({ orgId, href }) => {
                               <div className="text-eRed text-sm italic mt-2">
                                 <ErrorMessage name="branchName" />
                               </div>
+                            </div>
+                          </div>
+                          <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
+                            <div>
+                              <label
+                                htmlFor="branchCode"
+                                className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                              >
+                                Branch Code
+                              </label>
+                            </div>
+                            <div className="sm:col-span-2">
+                              <Field
+                                type="text"
+                                name="branchCode"
+                                placeholder="Enter Branch Code"
+                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                              />
+                              {/* <div className="text-eRed text-sm italic mt-2">
+                                <ErrorMessage name="branchCode" />
+                              </div> */}
                             </div>
                           </div>
                           <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">

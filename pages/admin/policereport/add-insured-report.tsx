@@ -5,7 +5,6 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { authOptions } from "pages/api/auth/[...nextauth]";
 import { gql } from "apollo-server-micro";
 import { initializeApollo } from "lib/apollo";
-import InsuredPoliceReportCreate from "@/policereport/insured/insured-create-report";
 
 const PlateCode = gql`
   query PlateCode {
@@ -46,7 +45,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
       redirect: {
         permanent: false,
-        destination: "/auth/signin",
+        destination: "/auth/sign-in",
+      },
+    };
+  } else if (session.user.memberships.role !== "SUPERADMIN") {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
       },
     };
   }

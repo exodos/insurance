@@ -1,11 +1,10 @@
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { getServerSession, unstable_getServerSession } from "next-auth";
-import { SessionProvider, useSession } from "next-auth/react";
-import Head from "next/head";
+import { getServerSession } from "next-auth";
+import { useSession } from "next-auth/react";
 import { initializeApollo } from "../../../lib/apollo";
 import { gql } from "@apollo/client";
 import { authOptions } from "../../api/auth/[...nextauth]";
-import { BsPlusCircleFill, BsFillArrowUpCircleFill } from "react-icons/bs";
+import { BsFillArrowUpCircleFill } from "react-icons/bs";
 import ListClaim from "@/claim/list-claim";
 import { useRouter } from "next/router";
 import SiteHeader from "@/components/layout/header";
@@ -112,7 +111,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
       redirect: {
         permanent: false,
-        destination: "/auth/signin",
+        destination: "/auth/sign-in",
+      },
+    };
+  } else if (session.user.memberships.role !== "SUPERADMIN") {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
       },
     };
   }
@@ -124,7 +130,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const filter = query.search;
 
   const curPage: any = page;
-  const perPage = 20;
+  const perPage = 10;
 
   const take = perPage;
   const skip = (curPage - 1) * perPage;

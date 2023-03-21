@@ -25,8 +25,8 @@ const ExportTariff = gql`
 `;
 
 const ExportAdminTariff = ({
-  props,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      props,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [formValues, setFormValues] = useState(null);
 
   let slicedValue = null;
@@ -297,7 +297,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
       redirect: {
         permanent: false,
-        destination: "/auth/signin",
+        destination: "/auth/sign-in",
       },
     };
   } else if (session.user.memberships.role !== "SUPERADMIN") {

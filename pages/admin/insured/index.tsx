@@ -54,9 +54,9 @@ const FeedBranchByOrgDesc = gql`
 `;
 
 const AdminInsuredPage = ({
-  insuredData,
-  branchData,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      insuredData,
+      branchData,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -135,7 +135,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
       redirect: {
         permanent: false,
-        destination: "/auth/signin",
+        destination: "/auth/sign-in",
       },
     };
   } else if (session.user.memberships.role !== "SUPERADMIN") {

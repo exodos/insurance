@@ -11,8 +11,6 @@ import ReactTooltip from "react-tooltip";
 import { useRouter } from "next/router";
 import { changePhone } from "@/lib/config";
 import BranchAddVehicleModal from "@/components/vehicle/branch-add-vehicle";
-import { CgImport } from "react-icons/cg";
-import Link from "next/link";
 
 const InsuredBranchByMobileNumber = gql`
   query InsuredBranchByMobileNumber(
@@ -144,7 +142,6 @@ const AddVehicleByBranch = ({
                 },
               });
             }}
-            // enableReinitialize={true}
           >
             <Form className="space-y-6 sm:space-y-5 sm:pt-8">
               <div className="grid grid-cols-2">
@@ -374,42 +371,6 @@ const AddVehicleByBranch = ({
                                 </ReactTooltip>
                               </>
                             </td>
-                            {/* <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                              <>
-                                <Link
-                                  href={{
-                                    pathname:
-                                      "/branch/certificate/import-insurance",
-                                    query: {
-                                      insured:
-                                        insuredBranchByMobileNumberData
-                                          ?.insuredBranchByMobileNumber?.id,
-                                    },
-                                  }}
-                                  passHref
-                                  legacyBehavior
-                                >
-                                  <button
-                                    className="inline-flex items-center"
-                                    data-tip
-                                    data-type="warning"
-                                    data-for="importVehicle"
-                                  >
-                                    <CgImport
-                                      className="flex-shrink-0 h-6 w-6 text-lightGreen"
-                                      aria-hidden="true"
-                                    />
-                                  </button>
-                                </Link>
-                                <ReactTooltip
-                                  id="importVehicle"
-                                  place="top"
-                                  effect="solid"
-                                >
-                                  Import Vehicle
-                                </ReactTooltip>
-                              </>
-                            </td> */}
                           </tr>
                         </tbody>
                       </table>
@@ -427,7 +388,6 @@ const AddVehicleByBranch = ({
           regionCode={insuredBranchByMobileNumberData.regionCode}
           codeList={insuredBranchByMobileNumberData.plateCode}
           branchId={branchId}
-          //   branch={insuredByMobileNumberData.feedBranchByOrgDesc.branchs}
           uniqueTariff={insuredBranchByMobileNumberData.feedUniqueTariff}
           href={path}
           insuredId={createList}
@@ -446,17 +406,17 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         destination: "/auth/sign-in",
       },
     };
-  } else if (session.user.adminRestPassword) {
+  } else if (
+    session?.user?.memberships?.role !== "BRANCHADMIN" &&
+    session?.user?.memberships?.role !== "MEMBER"
+  ) {
     return {
       redirect: {
-        destination: "/user/force-reset",
+        destination: "/",
         permanent: false,
       },
     };
   }
-
-  // const { query } = context;
-  // const page = query.returnPage;
 
   return {
     props: {

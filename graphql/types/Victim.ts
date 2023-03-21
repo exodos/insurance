@@ -77,7 +77,7 @@ export const VictimPagination = extendType({
         const totalVictim = await ctx.prisma.victim.count({
           where,
         }); // 2
-        const maxPage = Math.ceil(totalVictim / 20);
+        const maxPage = Math.ceil(totalVictim / args?.take);
 
         return {
           // 4

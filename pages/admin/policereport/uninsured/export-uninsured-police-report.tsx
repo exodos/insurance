@@ -6,7 +6,6 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { endOfToday, format } from "date-fns";
 import SiteHeader from "@/layout/header";
-import PoliceReportExport from "@/components/policereport/insured/police-report-export";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import UnInsuredPoliceReportExport from "@/components/policereport/uninsured/uninsured-police-report-export";
 
@@ -52,8 +51,8 @@ const ExportUnInsuredPoliceReport = gql`
 `;
 
 const ExportAdminUnInsuredPoliceReport = ({
-  props,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      props,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [formValues, setFormValues] = useState(null);
 
   let slicedValue = null;
@@ -489,7 +488,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
       redirect: {
         permanent: false,
-        destination: "/auth/signin",
+        destination: "/auth/sign-in",
       },
     };
   } else if (session.user.memberships.role !== "SUPERADMIN") {

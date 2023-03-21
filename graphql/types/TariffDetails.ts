@@ -11,8 +11,8 @@ import {
 } from "nexus";
 import { Sort } from "./User";
 
-export const TariffDetal = objectType({
-  name: "TariffDetal",
+export const TariffDetails = objectType({
+  name: "TariffDetails",
   definition(t) {
     t.string("id");
     t.string("vehicleType");
@@ -29,12 +29,12 @@ export const FeedTariffVehicleSubType = extendType({
   type: "Query",
   definition(t) {
     t.nonNull.list.nonNull.field("tariffVehicleSubType", {
-      type: "TariffDetal",
+      type: "TariffDetails",
       args: {
         vehicleType: nonNull(stringArg()),
       },
       resolve: async (_parent, args, ctx) => {
-        return await ctx.prisma.tariffDetal.findMany({
+        return await ctx.prisma.tariffDetails.findMany({
           where: {
             vehicleType: args.vehicleType,
           },
@@ -50,13 +50,13 @@ export const FeedTariffVehicleUsage = extendType({
   type: "Query",
   definition(t) {
     t.nonNull.list.nonNull.field("tariffVehicleUsage", {
-      type: "TariffDetal",
+      type: "TariffDetails",
       args: {
         vehicleType: nonNull(stringArg()),
         vehicleSubType: nonNull(stringArg()),
       },
       resolve: async (_parent, args, ctx) => {
-        return await ctx.prisma.tariffDetal.findMany({
+        return await ctx.prisma.tariffDetails.findMany({
           where: {
             vehicleType: args.vehicleType,
             vehicleSubType: args.vehicleSubType,
@@ -72,9 +72,9 @@ export const FeedTariffVehicleType = extendType({
   type: "Query",
   definition(t) {
     t.nonNull.list.nonNull.field("tariffVehicleType", {
-      type: "TariffDetal",
+      type: "TariffDetails",
       resolve: async (_parent, _args, ctx) => {
-        return await ctx.prisma.tariffDetal.findMany({
+        return await ctx.prisma.tariffDetails.findMany({
           distinct: ["vehicleType"],
         });
       },
@@ -94,13 +94,13 @@ export const TariffVehicleDetailPagination = extendType({
         orderBy: arg({ type: list(nonNull(TariffDetalOrderByInput)) }),
       },
       async resolve(parent, args, ctx) {
-        const tariffDetals = await ctx.prisma.tariffDetal.findMany({
+        const tariffDetals = await ctx.prisma.tariffDetails.findMany({
           orderBy: args?.orderBy as
-            | Prisma.Enumerable<Prisma.TariffDetalOrderByWithRelationInput>
+            | Prisma.Enumerable<Prisma.TariffDetailsOrderByWithRelationInput>
             | undefined,
         });
 
-        const totalTariffDetals = await ctx.prisma.tariffDetal.count();
+        const totalTariffDetals = await ctx.prisma.tariffDetails.count();
         const maxPage = Math.ceil(totalTariffDetals / 20);
 
         return {
@@ -117,7 +117,7 @@ export const FeedTariffDetal = objectType({
   name: "FeedTariffDetal",
   definition(t) {
     t.nonNull.list.nonNull.field("tariffDetals", {
-      type: TariffDetal,
+      type: TariffDetails,
     });
     t.nonNull.int("totalTariffDetals");
     t.int("maxPage");

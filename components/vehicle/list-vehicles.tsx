@@ -129,7 +129,6 @@ const ListVehicle = ({
 
     if (vehicleData.data.vehicleByPlateNumber) {
       setShowDetailModal((prev) => !prev);
-      // setDetailtList(vehicleByPlateNumberData?.vehicleByPlateNumber);
       setDetailtList(vehicleData.data.vehicleByPlateNumber);
     }
   };

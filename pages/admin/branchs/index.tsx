@@ -1,16 +1,16 @@
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { getServerSession, unstable_getServerSession } from "next-auth";
-import { SessionProvider, useSession } from "next-auth/react";
-import Head from "next/head";
+import { getServerSession } from "next-auth";
+import { useSession } from "next-auth/react";
 import { initializeApollo } from "../../../lib/apollo";
 import { gql } from "@apollo/client";
 import { authOptions } from "../../api/auth/[...nextauth]";
-import { BsPlusCircleFill, BsFillArrowUpCircleFill } from "react-icons/bs";
-import { useState } from "react";
+import { BsFillArrowUpCircleFill, BsPlusCircleFill } from "react-icons/bs";
 import { useRouter } from "next/router";
 import SiteHeader from "@/components/layout/header";
 import ListBranchs from "@/branchs/list-branchs";
 import Link from "next/link";
+import { useState } from "react";
+import AdminAddBranch from "@/components/branchs/add-branchs";
 
 const FeedBranch = gql`
   query FeedBranch(
@@ -23,6 +23,7 @@ const FeedBranch = gql`
       branchs {
         id
         branchName
+        branchCode
         region
         city
         mobileNumber
@@ -34,12 +35,26 @@ const FeedBranch = gql`
     }
   }
 `;
+const ListAllOrganization = gql`
+  query ListAllOrganization {
+    listAllOrganization {
+      id
+      orgName
+    }
+  }
+`;
 
 const AdminBranchPage = ({
-      data,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  data,
+  ListOrg,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
+  const [showAddModal, setShowAddModal] = useState(false);
   const { asPath } = useRouter();
+
+  const handleAdd = () => {
+    setShowAddModal((prev) => !prev);
+  };
 
   return (
     <>
@@ -59,23 +74,38 @@ const AdminBranchPage = ({
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
                 {session.user.memberships.role === "SUPERADMIN" && (
-                  <Link
-                    href={{
-                      pathname: "/admin/branchs/export-branchs",
-                      query: {
-                        returnPage: asPath,
-                      },
-                    }}
-                    passHref
-                    legacyBehavior
-                  >
-                    <button type="button" className="inline-flex items-center">
-                      <BsFillArrowUpCircleFill
+                  <>
+                    <button
+                      type="button"
+                      className="inline-flex items-center"
+                      onClick={() => handleAdd()}
+                    >
+                      <BsPlusCircleFill
                         className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
                         aria-hidden="true"
                       />
                     </button>
-                  </Link>
+                    <Link
+                      href={{
+                        pathname: "/admin/branchs/export-branchs",
+                        query: {
+                          returnPage: asPath,
+                        },
+                      }}
+                      passHref
+                      legacyBehavior
+                    >
+                      <button
+                        type="button"
+                        className="inline-flex items-center"
+                      >
+                        <BsFillArrowUpCircleFill
+                          className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                          aria-hidden="true"
+                        />
+                      </button>
+                    </Link>
+                  </>
                 )}
               </div>
             )}
@@ -83,6 +113,10 @@ const AdminBranchPage = ({
         </div>
         <ListBranchs branchData={data.feedBranch} href={asPath} />
       </div>
+
+      {showAddModal ? (
+        <AdminAddBranch orgData={ListOrg?.listAllOrganization} />
+      ) : null}
     </>
   );
 };
@@ -112,7 +146,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const filter = query.search;
 
   const curPage: any = page;
-  const perPage = 20;
+  const perPage = 10;
 
   const take = perPage;
   const skip = (curPage - 1) * perPage;
@@ -133,10 +167,15 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     },
   });
 
+  const { data: ListOrg } = await apolloClient.query({
+    query: ListAllOrganization,
+  });
+
   return {
     props: {
       session,
       data,
+      ListOrg,
     },
   };
 };

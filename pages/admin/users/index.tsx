@@ -1,8 +1,4 @@
-import {
-  GetServerSideProps,
-  InferGetServerSidePropsType,
-  NextPage,
-} from "next";
+import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { getServerSession } from "next-auth";
 import { useSession } from "next-auth/react";
 import { initializeApollo } from "../../../lib/apollo";
@@ -63,9 +59,9 @@ const FeedRoleBranch = gql`
 `;
 
 const AdminUserPage = ({
-  userData,
-  roleBranchData,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      userData,
+      roleBranchData,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -92,35 +88,38 @@ const AdminUserPage = ({
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
                 {session.user.memberships.role === "SUPERADMIN" && (
-                  <button
-                    type="button"
-                    className="inline-flex items-center"
-                    onClick={() => handleAdd()}
-                  >
-                    <BsPlusCircleFill
-                      className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
-                      aria-hidden="true"
-                    />
-                  </button>
-                )}
-                {session.user.memberships.role === "SUPERADMIN" && (
-                  <Link
-                    href={{
-                      pathname: "/admin/users/export-user",
-                      query: {
-                        returnPage: asPath,
-                      },
-                    }}
-                    passHref
-                    legacyBehavior
-                  >
-                    <button type="button" className="inline-flex items-center">
-                      <BsFillArrowUpCircleFill
+                  <>
+                    <button
+                      type="button"
+                      className="inline-flex items-center"
+                      onClick={() => handleAdd()}
+                    >
+                      <BsPlusCircleFill
                         className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
                         aria-hidden="true"
                       />
                     </button>
-                  </Link>
+                    <Link
+                      href={{
+                        pathname: "/admin/users/export-user",
+                        query: {
+                          returnPage: asPath,
+                        },
+                      }}
+                      passHref
+                      legacyBehavior
+                    >
+                      <button
+                        type="button"
+                        className="inline-flex items-center"
+                      >
+                        <BsFillArrowUpCircleFill
+                          className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                          aria-hidden="true"
+                        />
+                      </button>
+                    </Link>
+                  </>
                 )}
               </div>
             )}
@@ -148,7 +147,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
       redirect: {
         permanent: false,
-        destination: "/auth/signin",
+        destination: "/auth/sign-in",
       },
     };
   } else if (session.user.memberships.role !== "SUPERADMIN") {
@@ -167,7 +166,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const filter = query.search;
 
   const curPage: any = page;
-  const perPage = 20;
+  const perPage = 10;
 
   const take = perPage;
   const skip = (curPage - 1) * perPage;

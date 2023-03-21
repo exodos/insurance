@@ -12,6 +12,7 @@ import SiteHeader from "@/components/layout/header";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { BsArrowDownCircleFill } from "react-icons/bs";
+import { format } from "date-fns";
 
 const ImportInsurance = ({
       branchId,
@@ -74,7 +75,6 @@ const ImportInsurance = ({
   };
 
   const onSubmit = async (values: any) => {
-    // values.preventDefault();
     const fullPlateDuplicate = hasDuplicate(parsedData, "plateNumber");
     const chassisNumberDuplicate = hasDuplicate(parsedData, "chassisNumber");
     const engineNumberDuplicate = hasDuplicate(parsedData, "engineNumber");
@@ -272,9 +272,6 @@ const ImportInsurance = ({
                           onChange={(e) => handleChange(e)}
                           className="block w-full text-sm text-deepGreen file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-lightGreen file:text-white hover:file:bg-deepGreen"
                         />
-                        {/* <div className="text-eRed text-sm italic mt-2">
-                        <ErrorMessage name="vehicleFile" />
-                      </div> */}
                       </label>
                     </div>
                   </div>
@@ -356,10 +353,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         destination: "/auth/sign-in",
       },
     };
-  } else if (session.user.adminRestPassword) {
+  } else if (
+    session?.user?.memberships?.role !== "BRANCHADMIN" &&
+    session?.user?.memberships?.role !== "MEMBER"
+  ) {
     return {
       redirect: {
-        destination: "/user/force-reset",
+        destination: "/",
         permanent: false,
       },
     };

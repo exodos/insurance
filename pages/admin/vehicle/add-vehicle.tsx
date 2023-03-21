@@ -1,18 +1,16 @@
 import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Head from "next/head";
-import { getServerSession, unstable_getServerSession } from "next-auth";
+import { getServerSession } from "next-auth";
 import { authOptions } from "../../api/auth/[...nextauth]";
 import { gql, useLazyQuery } from "@apollo/client";
-import { FormEvent, useState } from "react";
+import { useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { format } from "date-fns";
 import { IoIosAddCircle } from "react-icons/io";
 import ReactTooltip from "react-tooltip";
 import AddVehicleModal from "@/components/vehicle/add-vehicle";
 import { useRouter } from "next/router";
 import { changePhone } from "@/lib/config";
-// import CreateClaim from "@/claim-comp/create-claim";
 
 const InsuredByMobileNumber = gql`
   query InsuredByMobileNumber($mobileNumber: String!, $input: orgDescInput!) {
@@ -397,21 +395,18 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         destination: "/auth/sign-in",
       },
     };
-  } else if (session.user.adminRestPassword) {
+  } else if (session.user.memberships.role !== "SUPERADMIN") {
     return {
       redirect: {
-        destination: "/user/force-reset",
+        destination: "/",
         permanent: false,
       },
     };
   }
-  // const { query } = context;
-  // const page = query.returnPage;
 
   return {
     props: {
       session,
-      // page,
     },
   };
 };

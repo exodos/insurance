@@ -24,6 +24,7 @@ input AccidentRecordOrderByInput {
 }
 
 type Branch {
+  branchCode: String
   branchName: String
   certificates: [Certificate!]!
   city: String
@@ -39,6 +40,7 @@ type Branch {
   memberships: [Membership]
   mobileNumber: String
   organizations: Organization
+  payments: [Payment]
   policeBranchs: [InsuredPoliceReport!]!
   region: String
   unInsuredPoliceReports: [UnInsuredPoliceReport!]!
@@ -49,6 +51,10 @@ type Branch {
 input BranchOrderByInput {
   createdAt: Sort
   updatedAt: Sort
+}
+
+type BulkUpdateStatus {
+  count: Int!
 }
 
 type Certificate {
@@ -394,6 +400,24 @@ type FeedPayment {
   totalPayments: Int!
 }
 
+type FeedPaymentBranchByStatus {
+  maxPage: Int
+  payments: [Payment!]!
+  totalPayments: Int!
+}
+
+type FeedPaymentByStatus {
+  maxPage: Int
+  payments: [Payment!]!
+  totalPayments: Int!
+}
+
+type FeedPaymentInsurerByStatus {
+  maxPage: Int
+  payments: [Payment!]!
+  totalPayments: Int!
+}
+
 type FeedPolicy {
   maxPage: Int
   policy: [Policy!]!
@@ -418,7 +442,7 @@ type FeedTariff {
 
 type FeedTariffDetal {
   maxPage: Int
-  tariffDetals: [TariffDetal!]!
+  tariffDetals: [TariffDetails!]!
   totalTariffDetals: Int!
 }
 
@@ -492,6 +516,14 @@ type FeedVehicleByInsuredReg {
   vehicles: [Vehicle!]!
 }
 
+type FeedVehicleByMobile {
+  vehicles: [Vehicle!]!
+}
+
+type FeedVehicleByRegNumber {
+  vehicles: [Vehicle!]!
+}
+
 type FeedVehicleByStatus {
   maxPage: Int
   totalVehicle: Int!
@@ -502,6 +534,14 @@ type FeedVehicleInsurer {
   maxPage: Int
   totalVehicle: Int!
   vehicle: [Vehicle!]!
+}
+
+type FeedVehicleInsurerByMobile {
+  vehicles: [Vehicle!]!
+}
+
+type FeedVehicleInsurerByRegNumber {
+  vehicles: [Vehicle!]!
 }
 
 type FeedVehicleInsurerByStatus {
@@ -719,6 +759,7 @@ enum MembershipRole {
 
 type Mutation {
   adminChangeUserPassword(id: String!, password: String!): User!
+  bulkUpdateStatus(paymentRefNumber: [String]!): BulkUpdateStatus!
   changeUserPassword(currentPassword: String!, id: String!, password: String!): User!
   createBranch(input: branchCreateInput!): Branch!
   createCertificate(input: CertificateCreateInput!, plateNumber: String!): Certificate!
@@ -729,7 +770,6 @@ type Mutation {
   createInsuredPoliceReport(input: insuredPoliceReportCreateInput!): InsuredPoliceReport!
   createOrUpdateCertificate(input: CertificateCreateInput!, plateNumber: String!): Certificate!
   createOrganization(input: organizationCreateInput!): Organization!
-  createPayment(input: PaymentCreateInput!): Payment!
   createPolicy(input: PolicyCreateInput!): Policy!
   createTariff(input: TariffCreateInput!): Tariff!
   createUnInsuredPoliceReport(input: UnInsuredPoliceReportCreateInput!): UnInsuredPoliceReport!
@@ -744,7 +784,6 @@ type Mutation {
   deleteInsured(id: String!): Insured!
   deleteInsuredPoliceReport(id: String!): InsuredPoliceReport!
   deleteOrganization(orgId: String!): Organization!
-  deletePayment(refNumber: String!): Payment!
   deletePolicy(id: String!): Policy!
   deleteTariff(id: Int!): Tariff!
   deleteUnInsuredPoliceReport(id: String!): UnInsuredPoliceReport!
@@ -762,7 +801,7 @@ type Mutation {
   updateInsured(id: String!, input: insuredUpdateInput!): Insured!
   updateInsuredPoliceReport(id: String!, input: InsuredPoliceReportUpdateInput!): InsuredPoliceReport!
   updateOrganization(id: String!, input: organizationUpdateInput!): Organization!
-  updatePayment(input: PaymentUpdateInput!, refNumber: String!): Payment!
+  updatePaymentStatus(refNumber: String!): Payment!
   updatePolicy(id: String!, input: PolicyUpdateInput!): Policy!
   updatePremiumTariff(id: Int!, premiumTariff: Float!): Tariff!
   updateTariff(id: Int!, input: TariffUpdateInput!): Tariff!
@@ -797,6 +836,7 @@ input OrganizationOrderByInput {
 }
 
 type Payment {
+  branchs: Branch
   certificates: [Certificate]
   commissionStatus: CommissioningStatus
   createdAt: DateTime
@@ -825,6 +865,10 @@ enum PaymentStatus {
   Payed
   PendingApproval
   PendingPayment
+}
+
+input PaymentStatusInput {
+  paymentStatus: PaymentStatus
 }
 
 input PaymentUpdateInput {
@@ -865,6 +909,7 @@ input PolicyUpdateInput {
 }
 
 type Query {
+  branchByCode(branchCode: String!): Branch!
   branchByName(branchName: String!): Branch!
   branchRoleList: [Membership!]!
   certificateByCertificateNumber(certificateNumber: String!): Certificate!
@@ -935,6 +980,9 @@ type Query {
   feedMembership(filter: String, orderBy: [UserOrderByInput!], skip: Int, take: Int): FeedMembership!
   feedOrganization(filter: String, orderBy: [OrganizationOrderByInput!], skip: Int, take: Int): FeedOrganization!
   feedPayment(filter: String, orderBy: [PaymentOrderByInput!], skip: Int, take: Int): FeedPayment!
+  feedPaymentBranchByStatus(branchId: String!, filter: String, input: PaymentStatusInput!, orderBy: [PaymentOrderByInput!], skip: Int, take: Int): FeedPaymentBranchByStatus!
+  feedPaymentByStatus(filter: String, input: PaymentStatusInput!, orderBy: [PaymentOrderByInput!], skip: Int, take: Int): FeedPaymentByStatus!
+  feedPaymentInsurerByStatus(filter: String, input: PaymentStatusInput!, orderBy: [PaymentOrderByInput!], orgId: String!, skip: Int, take: Int): FeedPaymentInsurerByStatus!
   feedPlateCodeList: FeedCodeList!
   feedPolicy(filter: String, orderBy: [PolicyOrderByInput!], skip: Int, take: Int): FeedPolicy!
   feedRegionList: FeedRegionList!
@@ -952,17 +1000,23 @@ type Query {
   feedVehicleBranch(branchId: String!, filter: String, orderBy: [VehicleOrderByInput!], skip: Int, take: Int): FeedVehicleBranch!
   feedVehicleBranchByStatus(branchId: String!, filter: String, input: statusInput!, orderBy: [VehicleOrderByInput!], skip: Int, take: Int): FeedVehicleBranchByStatus!
   feedVehicleByInsured(mobileNumber: String!): FeedVehicleByInsured!
-  feedVehicleByInsuredReg(regNumber: String!): FeedVehicleByInsuredReg!
+  feedVehicleByInsuredReg(orgId: String!, regNumber: String!): FeedVehicleByInsuredReg!
+  feedVehicleByMobile(mobileNumber: String!): FeedVehicleByMobile!
+  feedVehicleByRegNumber(regNumber: String!): FeedVehicleByRegNumber!
   feedVehicleInsurer(filter: String, orderBy: [VehicleOrderByInput!], orgId: String!, skip: Int, take: Int): FeedVehicleInsurer!
+  feedVehicleInsurerByMobile(mobileNumber: String!, orgId: String!): FeedVehicleInsurerByMobile!
   feedVictim(filter: String, orderBy: [PolicyOrderByInput!], skip: Int, take: Int): FeedVictim!
   getVehicleByPlateNumber(plateNumber: String!): Vehicle
   hitAndRunByIncidentNumber(incidentNumber: String!): HitAndRunPoliceReport!
   incidentNumberToClaim(incidentNumber: String!): InsuredPoliceReport!
+  insuredAdminByMobileNumber(mobileNumber: String!): Insured
+  insuredAdminByRegNumber(regNumber: String!): Insured
   insuredBranchByMobileNumber(branchId: String!, mobileNumber: String!): Insured
   insuredBranchByRegNumber(branchId: String!, regNumber: String!): Insured
   insuredByID(id: String!): Insured!
   insuredByMobileNumber(mobileNumber: String!): Insured
   insuredInsurerByMobileNumber(mobileNumber: String!, orgId: String!): Insured
+  insuredInsurerByRegNumber(orgId: String!, regNumber: String!): Insured
   insuredPoliceReportByIncidentNumber(incidentNumber: String!): InsuredPoliceReport!
   listAllBranch: [Branch]
   listAllOrganization: [Organization]
@@ -977,9 +1031,9 @@ type Query {
   regionCode: [RegionList!]!
   roleList: [Membership!]!
   tariffByID(id: Int!): Tariff!
-  tariffVehicleSubType(vehicleType: String!): [TariffDetal!]!
-  tariffVehicleType: [TariffDetal!]!
-  tariffVehicleUsage(vehicleSubType: String!, vehicleType: String!): [TariffDetal!]!
+  tariffVehicleSubType(vehicleType: String!): [TariffDetails!]!
+  tariffVehicleType: [TariffDetails!]!
+  tariffVehicleUsage(vehicleSubType: String!, vehicleType: String!): [TariffDetails!]!
   thirdPartyLogsByEmail(userEmail: String!): [ThirdPartyLog]
   unInsuredPoliceReportByIncidentNumber(incidentNumber: String!): UnInsuredPoliceReport!
   userByEmail(email: String!): User!
@@ -1030,7 +1084,7 @@ input TariffCreateInput {
   vehicleUsage: String
 }
 
-type TariffDetal {
+type TariffDetails {
   createdAt: DateTime
   id: String
   premium: Float
@@ -1272,6 +1326,7 @@ input branchConnectInput {
 }
 
 input branchCreateInput {
+  branchCode: String
   branchName: String
   city: String
   mobileNumber: String
@@ -1280,6 +1335,7 @@ input branchCreateInput {
 }
 
 input branchUpdateInput {
+  branchCode: String
   branchName: String
   city: String
   mobileNumber: String

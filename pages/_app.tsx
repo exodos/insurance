@@ -1,7 +1,5 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
-import axios from "axios";
-import useSWR from "swr";
 import "nprogress/nprogress.css";
 import NProgress from "nprogress";
 import { Router, useRouter } from "next/router";

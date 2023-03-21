@@ -12,7 +12,7 @@ const ProposalCreateCertificate = () => {
   );
 
   const initialValues = {
-    policyStartDate: new Date(""),
+    policyStartDate: "",
     policyIssuedConditions: "",
     personsEntitledToUse: "",
   };

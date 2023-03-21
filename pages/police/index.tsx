@@ -40,10 +40,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         destination: "/auth/signin",
       },
     };
-  } else if (session.user.adminRestPassword) {
+  } else if (session?.user?.memberships?.role !== "TRAFFICPOLICEADMIN") {
     return {
       redirect: {
-        destination: "/auth/force-reset",
+        destination: "/",
         permanent: false,
       },
     };

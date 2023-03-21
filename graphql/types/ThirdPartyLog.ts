@@ -196,7 +196,7 @@ export const ThirdPartyLogPaginate = extendType({
         const totalThirdPartyLogs = await ctx.prisma.thirdPartyLog.count({
           where,
         });
-        const maxPage = Math.ceil(totalThirdPartyLogs / 20);
+        const maxPage = Math.ceil(totalThirdPartyLogs / args?.take);
 
         return {
           thirdPartyLogs,

@@ -110,7 +110,7 @@ export const UserPagination = extendType({
         const totalUser = await ctx.prisma.user.count({
           where,
         }); // 2
-        const maxPage = Math.ceil(totalUser / 20);
+        const maxPage = Math.ceil(totalUser / args?.take);
 
         return {
           user,
@@ -165,7 +165,7 @@ export const UserBranchPagination = extendType({
         const totalUser = await ctx.prisma.user.count({
           where,
         }); // 2
-        const maxPage = Math.ceil(totalUser / 20);
+        const maxPage = Math.ceil(totalUser / args?.take);
 
         return {
           user,
@@ -224,7 +224,7 @@ export const UserInsurerPagination = extendType({
         const totalUser = await ctx.prisma.user.count({
           where,
         }); // 2
-        const maxPage = Math.ceil(totalUser / 20);
+        const maxPage = Math.ceil(totalUser / args?.take);
 
         return {
           user,

@@ -35,6 +35,7 @@ model Branch {
   region                 String
   city                   String
   mobileNumber           String                  @unique
+  branchCode             String?                 @unique
   memberships            Membership[]
   vehicles               Vehicle[]
   insuredPoliceReports   InsuredPoliceReport[]   @relation(name: "insuranceBranch")
@@ -55,6 +56,7 @@ model Branch {
   policeReport           UnInsuredPoliceReport[] @relation(name: "unInsuredPoliceReporter")
   certificateRecords     CertificateRecord[]
   // insurances             Insurance[]
+  payments               Payment[]
 }
 
 model Organization {
@@ -478,10 +480,11 @@ model Payment {
   premiumTarif     Float
   paymentStatus    PaymentStatus       @default(PendingApproval)
   commissionStatus CommissioningStatus @default(NotCommissioned)
-  insureds         Insured?            @relation(fields: [insuredId], references: [id])
-  insuredId        String?
-  // vehicles         Vehicle[]
+  insureds         Insured             @relation(fields: [insuredId], references: [id])
+  insuredId        String
   certificates     Certificate[]
+  branchs          Branch              @relation(fields: [branchCode], references: [branchCode])
+  branchCode       String
   deletedStatus    Boolean             @default(false)
   deletedAt        DateTime?
   createdAt        DateTime            @default(now())

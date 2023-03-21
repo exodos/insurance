@@ -27,7 +27,9 @@ declare module "next-auth" {
     } & DefaultSession["user"];
   }
 
-  // interface User {
-  //   role?: MembershipRole;
-  // }
+  interface User {
+    memberships: {
+      role: MembershipRole;
+    };
+  }
 }

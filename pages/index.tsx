@@ -36,7 +36,6 @@ const Home = (
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getServerSession(context.req, context.res, authOptions);
-
   if (!session) {
     return {
       redirect: {
@@ -60,7 +59,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   } else if (
     session?.user?.memberships?.role === "MEMBER" ||
-    session?.user?.memberships?.role === "BRANCHADMIN"
+    session?.user?.memberships?.role === "BRANCHADMIN" ||
+    session?.user?.memberships?.role === "USER"
   ) {
     return {
       redirect: {
@@ -83,8 +83,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       },
     };
   }
-
-  // console.log(session.user.memberships.role);
 
   return {
     props: {

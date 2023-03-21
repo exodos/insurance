@@ -22,7 +22,6 @@
 import { fieldAuthorizePlugin, makeSchema } from "nexus";
 import { join, resolve } from "path";
 import * as types from "./types";
-import { nexusShield, allow } from "nexus-shield";
 import { ForbiddenError } from "apollo-server-micro";
 
 export const schema = makeSchema({

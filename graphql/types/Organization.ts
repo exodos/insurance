@@ -70,7 +70,7 @@ export const OrganizationPagination = extendType({
         const totalOrganization = await ctx.prisma.organization.count({
           where,
         }); // 2
-        const maxPage = Math.ceil(totalOrganization / 20);
+        const maxPage = Math.ceil(totalOrganization / args?.take);
 
         return {
           organizations,

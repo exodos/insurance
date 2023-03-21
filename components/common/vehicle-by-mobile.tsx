@@ -342,13 +342,6 @@ const VehicleByMobileNumber = ({ branchId, path }) => {
                                   <td className="whitespace-nowrap py-4 pl-4 pr-4 text-sm text-gray-500 sm:pr-6">
                                     {item?.isInsured}
                                   </td>
-                                  {/* {((item?.certificates &&
-                                    item?.certificates?.policies &&
-                                    checkPolicy(
-                                      item.certificates.policies
-                                        .policyExpireDate
-                                    )) ||
-                                    item?.isInsured === "NOTINSURED") && ( */}
                                   <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                     <>
                                       <button
@@ -372,7 +365,6 @@ const VehicleByMobileNumber = ({ branchId, path }) => {
                                       </ReactTooltip>
                                     </>
                                   </td>
-                                  {/* )} */}
                                 </tr>
                               )
                             )}
@@ -390,7 +382,7 @@ const VehicleByMobileNumber = ({ branchId, path }) => {
       {showCreateModal ? (
         <AddOrUpdateCertificateModal
           vehicle={createList}
-          href={"/branch/certificate"}
+          href={path}
           branchId={branchId}
         />
       ) : null}

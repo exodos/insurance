@@ -1,6 +1,6 @@
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { getServerSession, unstable_getServerSession } from "next-auth";
-import { SessionProvider, useSession } from "next-auth/react";
+import { getServerSession } from "next-auth";
+import { useSession } from "next-auth/react";
 import { gql } from "@apollo/client";
 import { BsPlusCircleFill, BsFillArrowUpCircleFill } from "react-icons/bs";
 import { useState } from "react";
@@ -10,6 +10,7 @@ import { useRouter } from "next/router";
 import SiteHeader from "@/components/layout/header";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { initializeApollo } from "@/lib/apollo";
+import ListPoliceBranch from "@/components/branchs/list-police-branch";
 
 const FeedBranchInsurer = gql`
   query FeedBranchInsurer(
@@ -46,9 +47,9 @@ const FeedBranchInsurer = gql`
 `;
 
 const PoliceBranchPage = ({
-      data,
-      orgId,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  data,
+  orgId,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -98,7 +99,7 @@ const PoliceBranchPage = ({
             )}
           </div>
         </div>
-        <ListBranchs branchData={data.feedBranchInsurer} href={asPath} />
+        <ListPoliceBranch branchData={data.feedBranchInsurer} href={asPath} />
       </div>
       {showAddModal ? <InsurerAddBranch orgId={orgId} href={asPath} /> : null}
     </>
@@ -114,22 +115,23 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         destination: "/auth/signin",
       },
     };
+  } else if (session?.user?.memberships?.role !== "TRAFFICPOLICEADMIN") {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
   }
 
   const { query } = context;
-
   const page = query.page || 1;
-
   const filter = query.search;
-
   const curPage: any = page;
-  const perPage = 20;
-
+  const perPage = 10;
   const take = perPage;
   const skip = (curPage - 1) * perPage;
-
   const apolloClient = initializeApollo();
-
   const { data } = await apolloClient.query({
     query: FeedBranchInsurer,
     variables: {
@@ -145,13 +147,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     },
   });
 
-  // console.log(session.user.memberships.role);
-
   return {
     props: {
       session,
       data,
-      orgId: session.user.memberships.branchs.orgId,
+      orgId: session?.user?.memberships?.branchs?.orgId,
     },
   };
 };

@@ -7,6 +7,7 @@ import {
 import NotificationContext from "@/store/notification-context";
 import { gql, useMutation } from "@apollo/client";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 const CreateInsuranceByBranch = gql`
   mutation CreateInsuranceByBranch($input: InsuranceCreateInput!) {
@@ -78,12 +79,10 @@ const CreateInsuranceByBranch = gql`
 const ProposalDetails = () => {
   const { activeStepIndex, setActiveStepIndex, formData } =
     useContext(FormContext);
-  const { returnPath } = useContext(VehicleInfoContext);
   const notificationCtx = useContext(NotificationContext);
 
-  const { branchId } = useContext(VehicleInfoContext);
+  const { branchId, returnPath } = useContext(VehicleInfoContext);
   const router = useRouter();
-  console.log(returnPath);
   // const userRole = session?.user?.memberships?.role;
 
   const [createInsurance, { data, error, loading }] = useMutation(
@@ -459,13 +458,14 @@ const ProposalDetails = () => {
           </div>
           <div className="flex-shrink-0 border-t border-gray-200 px-4 py-5 sm:px-6">
             <div className="flex justify-end space-x-3">
-              <button
-                type="button"
-                className="rounded-md border border-gray-300 bg-white py-2 px-8 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                // onClick={onSubmit}
-              >
-                Cancel
-              </button>
+              <Link href={returnPath} passHref legacyBehavior>
+                <button
+                  type="button"
+                  className="rounded-md border border-gray-300 bg-white py-2 px-8 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                >
+                  Cancel
+                </button>
+              </Link>
               <button
                 type="submit"
                 onClick={onSubmit}

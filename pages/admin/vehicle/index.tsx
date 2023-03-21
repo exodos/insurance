@@ -174,7 +174,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
       redirect: {
         permanent: false,
-        destination: "/auth/signin",
+        destination: "/auth/sign-in",
+      },
+    };
+  } else if (session.user.memberships.role !== "SUPERADMIN") {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
       },
     };
   }
@@ -186,7 +193,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const filter = query.search;
 
   const curPage: any = page;
-  const perPage = 20;
+  const perPage = 10;
 
   const take = perPage;
   const skip = (curPage - 1) * perPage;

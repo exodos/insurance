@@ -67,7 +67,7 @@ export const TariffPagination = extendType({
         const totalTariff = await ctx.prisma.tariff.count({
           where,
         });
-        const maxPage = Math.ceil(totalTariff / 10);
+        const maxPage = Math.ceil(totalTariff / args?.take);
 
         return {
           tariff,

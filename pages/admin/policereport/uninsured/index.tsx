@@ -1,11 +1,10 @@
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { getServerSession, unstable_getServerSession } from "next-auth";
-import { SessionProvider, useSession } from "next-auth/react";
+import { getServerSession } from "next-auth";
+import { useSession } from "next-auth/react";
 import { initializeApollo } from "../../../../lib/apollo";
 import { gql } from "@apollo/client";
 import { authOptions } from "../../../api/auth/[...nextauth]";
-import { BsPlusCircleFill, BsFillArrowUpCircleFill } from "react-icons/bs";
-import { useState } from "react";
+import { BsFillArrowUpCircleFill } from "react-icons/bs";
 import ListUnInsuredPoliceReport from "@/policereport/uninsured/list-uninsured";
 import { useRouter } from "next/router";
 import SiteHeader from "@/components/layout/header";
@@ -136,7 +135,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
       redirect: {
         permanent: false,
-        destination: "/auth/signin",
+        destination: "/auth/sign-in",
       },
     };
   } else if (session.user.memberships.role !== "SUPERADMIN") {
@@ -149,17 +148,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
   const { query } = context;
-
   const page = query.page || 1;
-
   const filter = query.search;
-
   const curPage: any = page;
-  const perPage = 20;
-
+  const perPage = 10;
   const take = perPage;
   const skip = (curPage - 1) * perPage;
-
   const apolloClient = initializeApollo();
 
   const { data } = await apolloClient.query({

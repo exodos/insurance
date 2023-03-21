@@ -4,15 +4,11 @@ import { useSession } from "next-auth/react";
 import { initializeApollo } from "../../../lib/apollo";
 import { gql, useLazyQuery } from "@apollo/client";
 import { authOptions } from "../../api/auth/[...nextauth]";
-import { BsPlusCircleFill, BsFillArrowUpCircleFill } from "react-icons/bs";
 import { useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { endOfToday, format } from "date-fns";
-import { useRouter } from "next/router";
 import SiteHeader from "@/layout/header";
-import AddUserModal from "@/components/users/add-user";
-import UserExport from "@/components/users/user-export";
 import ClaimExport from "@/components/claim/claim-export";
 
 const UserQuery = gql`
@@ -60,8 +56,8 @@ const ExportClaimQuery = gql`
 `;
 
 const ExportAdminClaim = ({
-  props,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      props,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const [formValues, setFormValues] = useState(null);
 
@@ -375,7 +371,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
       redirect: {
         permanent: false,
-        destination: "/auth/signin",
+        destination: "/auth/sign-in",
       },
     };
   } else if (session.user.memberships.role !== "SUPERADMIN") {

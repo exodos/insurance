@@ -84,8 +84,8 @@ const FeedInsuredPoliceReport = gql`
 `;
 
 const AdminInsuredPoliceReport = ({
-  data,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const { asPath } = useRouter();
 
@@ -153,7 +153,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
       redirect: {
         permanent: false,
-        destination: "/auth/signin",
+        destination: "/auth/sign-in",
       },
     };
   } else if (session.user.memberships.role !== "SUPERADMIN") {
@@ -165,20 +165,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
-  // console.log(session.user);
-
   const { query } = context;
-
   const page = query.page || 1;
-
   const filter = query.search;
-
   const curPage: any = page;
-  const perPage = 20;
-
+  const perPage = 10;
   const take = perPage;
   const skip = (curPage - 1) * perPage;
-
   const apolloClient = initializeApollo();
 
   const { data } = await apolloClient.query({

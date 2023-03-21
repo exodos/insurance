@@ -22,10 +22,10 @@ const PlateCode = gql`
 `;
 
 const AddPoliceReport = ({
-  data,
-  userId,
-  branchId,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+      userId,
+      branchId,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const router = useRouter();
   const path = router.query.returnPage;
 
@@ -58,10 +58,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         destination: "/auth/signin",
       },
     };
-  } else if (session.user.adminRestPassword) {
+  } else if (session?.user?.memberships?.role !== "TRAFFICPOLICEADMIN") {
     return {
       redirect: {
-        destination: "/user/force-reset",
+        destination: "/",
         permanent: false,
       },
     };

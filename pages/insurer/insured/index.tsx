@@ -1,6 +1,6 @@
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { getServerSession, unstable_getServerSession } from "next-auth";
-import { SessionProvider, useSession } from "next-auth/react";
+import { getServerSession } from "next-auth";
+import { useSession } from "next-auth/react";
 import { initializeApollo } from "../../../lib/apollo";
 import { gql } from "@apollo/client";
 import { authOptions } from "../../api/auth/[...nextauth]";
@@ -137,20 +137,22 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         destination: "/auth/signin",
       },
     };
+  } else if (session?.user?.memberships?.role !== "INSURER") {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
   }
 
   const { query } = context;
-
   const page = query.page || 1;
-
   const filter = query.search;
-
   const curPage: any = page;
-  const perPage = 20;
-
+  const perPage = 10;
   const take = perPage;
   const skip = (curPage - 1) * perPage;
-
   const apolloClient = initializeApollo();
 
   const { data } = await apolloClient.query({

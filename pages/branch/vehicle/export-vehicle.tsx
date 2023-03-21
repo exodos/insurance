@@ -527,6 +527,17 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         destination: "/auth/signin",
       },
     };
+  } else if (
+    session?.user?.memberships?.role !== "BRANCHADMIN" &&
+    session?.user?.memberships?.role !== "MEMBER" &&
+    session?.user?.memberships?.role !== "USER"
+  ) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
   }
 
   return {

@@ -1,3 +1,4 @@
+import { sendSmsMessage } from "./../../lib/config";
 import { Prisma } from "@prisma/client";
 import {
   arg,
@@ -37,16 +38,6 @@ export const Payment = objectType({
           .insureds();
       },
     });
-    // t.nullable.list.nullable.field("vehicles", {
-    //   type: "Vehicle",
-    //   async resolve(_parent, _args, ctx) {
-    //     return await ctx.prisma.payment
-    //       .findUnique({
-    //         where: { id: _parent.id },
-    //       })
-    //       .vehicles();
-    //   },
-    // });
     t.nullable.list.nullable.field("certificates", {
       type: "Certificate",
       async resolve(_parent, _args, ctx) {
@@ -55,6 +46,16 @@ export const Payment = objectType({
             where: { id: _parent.id },
           })
           .certificates();
+      },
+    });
+    t.field("branchs", {
+      type: "Branch",
+      async resolve(_parent, _args, ctx) {
+        return await ctx.prisma.payment
+          .findUnique({
+            where: { id: _parent.id },
+          })
+          .branchs();
       },
     });
   },
@@ -75,9 +76,17 @@ export const Paymentagination = extendType({
         const where = args.filter
           ? {
               refNumber: args.filter,
-              //   regNumber: args.filter,
-              //   plateNumber: args.filter,
-              //   certificateNumber: args.filter,
+              insureds: {
+                regNumber: args.filter,
+              },
+              certificates: {
+                some: {
+                  certificateNumber: args.filter,
+                  vehicles: {
+                    plateNumber: args.filter,
+                  },
+                },
+              },
             }
           : {};
 
@@ -93,7 +102,159 @@ export const Paymentagination = extendType({
         const totalPayments = await ctx.prisma.payment.count({
           where,
         });
-        const maxPage = Math.ceil(totalPayments / 20);
+        const maxPage = Math.ceil(totalPayments / args?.take);
+
+        return {
+          payments,
+          maxPage,
+          totalPayments,
+        };
+      },
+    });
+  },
+});
+
+export const PaymentStatusPagination = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.field("feedPaymentByStatus", {
+      type: FeedPaymentByStatus,
+      args: {
+        filter: stringArg(),
+        skip: intArg(),
+        take: intArg(),
+        input: nonNull(PaymentStatusInput),
+        orderBy: arg({ type: list(nonNull(PaymentOrderByInput)) }),
+      },
+      resolve: async (_parent, args, ctx) => {
+        const where = args.filter
+          ? {
+              refNumber: args.filter,
+              paymentStatus: args.input.paymentStatus,
+            }
+          : {
+              paymentStatus: args.input.paymentStatus,
+            };
+
+        const payments = await ctx.prisma.payment.findMany({
+          where,
+          skip: args?.skip as number | undefined,
+          take: args?.take as number | undefined,
+          orderBy: args?.orderBy as
+            | Prisma.Enumerable<Prisma.PaymentOrderByWithRelationInput>
+            | undefined,
+        });
+
+        const totalPayments = await ctx.prisma.payment.count({
+          where,
+        });
+        const maxPage = Math.ceil(totalPayments / args?.take);
+
+        return {
+          payments,
+          maxPage,
+          totalPayments,
+        };
+      },
+    });
+  },
+});
+
+export const PaymentStatusInsurerPagination = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.field("feedPaymentInsurerByStatus", {
+      type: FeedPaymentInsurerByStatus,
+      args: {
+        filter: stringArg(),
+        skip: intArg(),
+        take: intArg(),
+        orderBy: arg({ type: list(nonNull(PaymentOrderByInput)) }),
+        input: nonNull(PaymentStatusInput),
+        orgId: nonNull(stringArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        const where = args.filter
+          ? {
+              refNumber: args.filter,
+              paymentStatus: args.input.paymentStatus,
+              branchs: {
+                orgId: args.orgId,
+              },
+            }
+          : {
+              paymentStatus: args.input.paymentStatus,
+              branchs: {
+                orgId: args.orgId,
+              },
+            };
+
+        const payments = await ctx.prisma.payment.findMany({
+          where,
+          skip: args?.skip as number | undefined,
+          take: args?.take as number | undefined,
+          orderBy: args?.orderBy as
+            | Prisma.Enumerable<Prisma.PaymentOrderByWithRelationInput>
+            | undefined,
+        });
+
+        const totalPayments = await ctx.prisma.payment.count({
+          where,
+        });
+        const maxPage = Math.ceil(totalPayments / args?.take);
+
+        return {
+          payments,
+          maxPage,
+          totalPayments,
+        };
+      },
+    });
+  },
+});
+
+export const PaymentStatusBranchPagination = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.field("feedPaymentBranchByStatus", {
+      type: FeedPaymentBranchByStatus,
+      args: {
+        filter: stringArg(),
+        skip: intArg(),
+        take: intArg(),
+        orderBy: arg({ type: list(nonNull(PaymentOrderByInput)) }),
+        input: nonNull(PaymentStatusInput),
+        branchId: nonNull(stringArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        const where = args.filter
+          ? {
+              refNumber: args.filter,
+              paymentStatus: args.input.paymentStatus,
+              branchs: {
+                id: args.branchId,
+              },
+            }
+          : {
+              paymentStatus: args.input.paymentStatus,
+              branchs: {
+                id: args.branchId,
+              },
+            };
+
+        const payments = await ctx.prisma.payment.findMany({
+          where,
+          skip: args?.skip as number | undefined,
+          take: args?.take as number | undefined,
+          orderBy: args?.orderBy as
+            | Prisma.Enumerable<Prisma.PaymentOrderByWithRelationInput>
+            | undefined,
+        });
+
+        const totalPayments = await ctx.prisma.payment.count({
+          where,
+        });
+        const maxPage = Math.ceil(totalPayments / args?.take);
 
         return {
           payments,
@@ -139,13 +300,13 @@ export const paymentByIDQuery = extendType({
   },
 });
 
-export const createPaymentMutation = extendType({
+export const updatePaymentStatusMutation = extendType({
   type: "Mutation",
   definition(t) {
-    t.nonNull.field("createPayment", {
+    t.nonNull.field("updatePaymentStatus", {
       type: Payment,
       args: {
-        input: nonNull(PaymentCreateInput),
+        refNumber: nonNull(stringArg()),
       },
       resolve: async (_parent, args, ctx) => {
         const user = await ctx.prisma.user.findUnique({
@@ -156,51 +317,79 @@ export const createPaymentMutation = extendType({
             memberships: true,
           },
         });
-        if (!user || user.memberships.role !== "SUPERADMIN") {
+        if (
+          !user ||
+          (user.memberships.role !== "SUPERADMIN" &&
+            user.memberships.role !== "INSURER" &&
+            user.memberships.role !== "BRANCHADMIN")
+        ) {
           throw new Error(`You do not have permission to perform action`);
         }
-        const vehicleData = await ctx.prisma.vehicle.findFirst({
+
+        const certData = await ctx.prisma.payment.findFirst({
           where: {
-            plateNumber: args.input.vehicles.plateNumber,
+            refNumber: args.refNumber,
           },
           include: {
             insureds: true,
+            certificates: true,
           },
         });
-        return await ctx.prisma.payment.create({
+
+        const paymentData = await ctx.prisma.payment.update({
+          where: { refNumber: args.refNumber },
           data: {
-            refNumber: `RefN-${format(new Date(), "yyMMiHms")}`,
-            premiumTarif: args.input.premiumTarif,
-            insureds: {
-              connect: {
-                regNumber: vehicleData.insureds.regNumber,
-              },
-            },
-            // vehicles: {
-            //   connect: {
-            //     plateNumber: args.input.vehicles.plateNumber,
-            //   },
-            // },
+            paymentStatus: "PendingPayment",
             certificates: {
-              connect: {
-                certificateNumber: args.input.certificates.certificateNumber,
+              updateMany: {
+                where: {
+                  certificateNumber: {
+                    in: certData.certificates.map(
+                      (cId) => cId.certificateNumber
+                    ),
+                  },
+                },
+                data: {
+                  status: "PendingPayment",
+                },
               },
             },
           },
         });
+
+        if (paymentData) {
+          let mobileNumber = certData.insureds.mobileNumber;
+          let message = `Your reference number Is: ${args.refNumber}, Please pay with Telebirr using this reference number`;
+
+          await ctx.prisma.vehicle.updateMany({
+            where: {
+              certificates: {
+                certificateNumber: {
+                  in: certData.certificates.map((cId) => cId.certificateNumber),
+                },
+              },
+            },
+            data: {
+              isInsured: "PENDING",
+            },
+          });
+
+          await sendSmsMessage(mobileNumber, message);
+        }
+
+        return paymentData;
       },
     });
   },
 });
 
-export const updatePaymentMutation = extendType({
+export const bulkUpdatePaymentStatusMutation = extendType({
   type: "Mutation",
   definition(t) {
-    t.nonNull.field("updatePayment", {
-      type: Payment,
+    t.nonNull.field("bulkUpdateStatus", {
+      type: "BulkUpdateStatus",
       args: {
-        refNumber: nonNull(stringArg()),
-        input: nonNull(PaymentUpdateInput),
+        paymentRefNumber: nonNull(list(stringArg())),
       },
       resolve: async (_parent, args, ctx) => {
         const user = await ctx.prisma.user.findUnique({
@@ -211,47 +400,57 @@ export const updatePaymentMutation = extendType({
             memberships: true,
           },
         });
-        if (!user || user.memberships.role !== "SUPERADMIN") {
+        if (
+          !user ||
+          (user.memberships.role !== "SUPERADMIN" &&
+            user.memberships.role !== "INSURER" &&
+            user.memberships.role !== "BRANCHADMIN")
+        ) {
           throw new Error(`You do not have permission to perform action`);
         }
-        return await ctx.prisma.payment.update({
-          where: { refNumber: args.refNumber },
-          data: {
-            ...args.input,
-          },
-        });
-      },
-    });
-  },
-});
 
-export const deletePaymentMutation = extendType({
-  type: "Mutation",
-  definition(t) {
-    t.nonNull.field("deletePayment", {
-      type: Payment,
-      args: {
-        refNumber: nonNull(stringArg()),
-      },
-      resolve: async (_parent, args, ctx) => {
-        const user = await ctx.prisma.user.findUnique({
+        const cert = await ctx.prisma.payment.findFirst({
           where: {
-            email: ctx.session.user.email,
+            refNumber: {
+              in: args.paymentRefNumber.map((cId) => cId),
+            },
           },
           include: {
-            memberships: true,
+            insureds: true,
+            certificates: true,
           },
         });
-        if (!user || user.memberships.role !== "SUPERADMIN") {
-          throw new Error(`You do not have permission to perform action`);
-        }
 
-        return await ctx.prisma.payment.update({
-          where: { refNumber: args.refNumber },
-          data: {
-            deletedStatus: true,
-            deletedAt: new Date(),
-          },
+        // let mobileNumber=cert.insureds.mobileNumber;
+        // let message=`Your Payement reference Number Is: ${}`
+
+        return await ctx.prisma.$transaction(async (tx) => {
+          const paymentData = await tx.payment.updateMany({
+            where: {
+              refNumber: {
+                in: args.paymentRefNumber.map((cId) => cId),
+              },
+            },
+            data: {
+              paymentStatus: "PendingPayment",
+            },
+          });
+
+          const certData = await tx.certificate.updateMany({
+            where: {
+              certificateNumber: {
+                in: cert.certificates.map((cN) => cN.certificateNumber),
+              },
+            },
+            data: {
+              status: "PendingPayment",
+            },
+          });
+
+          // if (paymentData && certData) {
+          //   sendSmsMessage()
+          // }
+          return certData;
         });
       },
     });
@@ -260,6 +459,32 @@ export const deletePaymentMutation = extendType({
 
 export const FeedPayment = objectType({
   name: "FeedPayment",
+  definition(t) {
+    t.nonNull.list.nonNull.field("payments", { type: Payment });
+    t.nonNull.int("totalPayments");
+    t.int("maxPage");
+  },
+});
+export const FeedPaymentByStatus = objectType({
+  name: "FeedPaymentByStatus",
+  definition(t) {
+    t.nonNull.list.nonNull.field("payments", { type: Payment });
+    t.nonNull.int("totalPayments");
+    t.int("maxPage");
+  },
+});
+
+export const FeedPaymentInsurerByStatus = objectType({
+  name: "FeedPaymentInsurerByStatus",
+  definition(t) {
+    t.nonNull.list.nonNull.field("payments", { type: Payment });
+    t.nonNull.int("totalPayments");
+    t.int("maxPage");
+  },
+});
+
+export const FeedPaymentBranchByStatus = objectType({
+  name: "FeedPaymentBranchByStatus",
   definition(t) {
     t.nonNull.list.nonNull.field("payments", { type: Payment });
     t.nonNull.int("totalPayments");
@@ -284,6 +509,13 @@ export const PaymentCreateInput = inputObjectType({
   },
 });
 
+export const PaymentStatusInput = inputObjectType({
+  name: "PaymentStatusInput",
+  definition(t) {
+    t.field("paymentStatus", { type: PaymentStatus });
+  },
+});
+
 export const PaymentUpdateInput = inputObjectType({
   name: "PaymentUpdateInput",
   definition(t) {
@@ -300,4 +532,11 @@ export const PaymentStatus = enumType({
 export const CommissioningStatus = enumType({
   name: "CommissioningStatus",
   members: ["Commissioned", "NotCommissioned"],
+});
+
+export const BulkUpdateStatus = objectType({
+  name: "BulkUpdateStatus",
+  definition(t) {
+    t.nonNull.int("count");
+  },
 });

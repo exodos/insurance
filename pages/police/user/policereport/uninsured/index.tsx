@@ -1,5 +1,5 @@
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { SessionProvider, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { gql } from "@apollo/client";
 import { BsPlusCircleFill, BsFillArrowUpCircleFill } from "react-icons/bs";
 import { useState } from "react";
@@ -86,10 +86,10 @@ const FeedUnInsuredPoliceReportPolice = gql`
 `;
 
 const UnInsuredPoliceReport = ({
-  data,
-  userId,
-  branchId,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+      userId,
+      branchId,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -170,20 +170,22 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         destination: "/auth/signin",
       },
     };
+  } else if (session?.user?.memberships?.role !== "TRAFFICPOLICEMEMBER") {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
   }
 
   const { query } = context;
-
   const page = query.page || 1;
-
   const filter = query.search;
-
   const curPage: any = page;
-  const perPage = 20;
-
+  const perPage = 10;
   const take = perPage;
   const skip = (curPage - 1) * perPage;
-
   const apolloClient = initializeApollo();
 
   const { data } = await apolloClient.query({

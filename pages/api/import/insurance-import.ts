@@ -5,117 +5,6 @@ import { authOptions } from "../auth/[...nextauth]";
 import { NextApiRequest, NextApiResponse } from "next";
 import { addYears, format, subYears } from "date-fns";
 
-const createInsurance = async (
-  vehicle,
-  vehiclePremiumTarif,
-  insuredId: string,
-  branchId,
-  paymentReference,
-  certificatePremiumTarif,
-  paymentPremiumTariff,
-  policyStartDate,
-  policyIssuedConditions,
-  personsEntitledToUse
-) => {
-  const storeCertNumber = `CN-${format(new Date(), "yyMMiHms")}-${
-    vehicle.plateNumber
-  }`;
-  return await prisma.$transaction(async (tx) => {
-    let vehicleData = null,
-      paymentData = null;
-    vehicleData = await tx.vehicle.create({
-      data: {
-        plateNumber: vehicle.plateNumber,
-        engineNumber: vehicle.engineNumber,
-        chassisNumber: vehicle.chassisNumber,
-        vehicleModel: vehicle.vehicleModel,
-        bodyType: vehicle.bodyType,
-        horsePower: vehicle.horsePower,
-        manufacturedYear: Number(vehicle.manufacturedYear),
-        vehicleType: vehicle.vehicleType,
-        vehicleSubType: vehicle.vehicleSubType,
-        vehicleDetails: vehicle.vehicleDetails,
-        vehicleUsage: vehicle.vehicleUsage,
-        vehicleCategory: vehicle.vehicleCategory,
-        premiumTarif: Number(vehiclePremiumTarif),
-        passengerNumber: Number(vehicle.passengerNumber),
-        carryingCapacityInGoods: vehicle.carryingCapacityInGoods,
-        purchasedYear: Number(vehicle.purchasedYear),
-        dutyFreeValue: Number(vehicle.dutyFreeValue),
-        dutyPaidValue: Number(vehicle.dutyPaidValue),
-        vehicleStatus: vehicle.vehicleStatus,
-        isInsured: "PENDING",
-        insureds: {
-          connect: {
-            id: insuredId,
-          },
-        },
-        branchs: {
-          connect: {
-            id: branchId,
-          },
-        },
-        certificates: {
-          create: {
-            certificateNumber: storeCertNumber,
-            premiumTarif: Number(certificatePremiumTarif),
-            branchs: {
-              connect: {
-                id: branchId,
-              },
-            },
-            policies: {
-              create: {
-                policyNumber: `PN-${format(new Date(), "yyMMiHms")}-${
-                  vehicle.plateNumber
-                }`,
-                policyStartDate: new Date(policyStartDate),
-                policyExpireDate: addYears(new Date(policyStartDate), 1),
-                policyIssuedConditions: policyIssuedConditions,
-                personsEntitledToUse: personsEntitledToUse,
-              },
-            },
-          },
-        },
-      },
-    });
-    paymentData = await tx.payment.upsert({
-      where: {
-        refNumber: paymentReference,
-      },
-      update: {
-        premiumTarif: paymentPremiumTariff,
-        insureds: {
-          connect: {
-            id: insuredId,
-          },
-        },
-        certificates: {
-          connect: {
-            certificateNumber: storeCertNumber,
-          },
-        },
-      },
-      create: {
-        refNumber: paymentReference,
-        premiumTarif: paymentPremiumTariff,
-        insureds: {
-          connect: {
-            id: insuredId,
-          },
-        },
-        certificates: {
-          connect: {
-            certificateNumber: storeCertNumber,
-          },
-        },
-      },
-    });
-
-    return paymentData;
-  });
-};
-
 const handler = nc({
   onError: (err, req: NextApiRequest, res: NextApiResponse, next) => {
     console.error(err.stack);
@@ -156,8 +45,7 @@ const handler = nc({
     const startYear = subYears(new Date(policyStartDate), 1);
     const endYear = new Date(policyStartDate);
     let paymentPremium = 0;
-
-    const paymentRef = `RefN-${format(new Date(), "yyMMiHms")}`;
+    let certificateNumberArray = [];
 
     try {
       const vehicleData = await Promise.all(
@@ -170,7 +58,7 @@ const handler = nc({
 
           if (checkVehicle) {
             res.status(412).json({
-              message: `One of the vehicle With PlateNumber ${v.plateNumber} already exist!! Please Check the data and try again`,
+              message: `Vehicle With PlateNumber ${v.plateNumber} already exist!! Please Check the data and try again`,
             });
           } else {
             let countSlightBodilyInjury = await prisma.accidentRecord.aggregate(
@@ -425,28 +313,100 @@ const handler = nc({
             paymentPremium +=
               calPremiumTarif + premiumTariffBodily + premiumTariffProperty;
 
-            let storeCert = `CN-${format(new Date(), "yyMMiHms")}-${
+            let storeCertNumber = `CN-${format(new Date(), "yyMMiHms")}-${
               v.plateNumber
             }`;
-            let paymentReference = `RN-${format(new Date(), "yyMMiHms")}`;
+            certificateNumberArray.push(storeCertNumber);
+
             let certificatePremiumTarif =
               calPremiumTarif + premiumTariffBodily + premiumTariffProperty;
 
-            let result = await createInsurance(
-              v,
-              calPremiumTarif,
-              insuredId,
-              branchId,
-              paymentReference,
-              certificatePremiumTarif,
-              paymentPremium,
-              policyStartDate,
-              policyIssuedConditions,
-              personsEntitledToUse
-            );
+            await prisma.vehicle.create({
+              data: {
+                plateNumber: v.plateNumber,
+                engineNumber: v.engineNumber,
+                chassisNumber: v.chassisNumber,
+                vehicleModel: v.vehicleModel,
+                bodyType: v.bodyType,
+                horsePower: v.horsePower,
+                manufacturedYear: Number(v.manufacturedYear),
+                vehicleType: v.vehicleType,
+                vehicleSubType: v.vehicleSubType,
+                vehicleDetails: v.vehicleDetails,
+                vehicleUsage: v.vehicleUsage,
+                vehicleCategory: v.vehicleCategory,
+                premiumTarif: Number(calPremiumTarif),
+                passengerNumber: Number(v.passengerNumber),
+                carryingCapacityInGoods: v.carryingCapacityInGoods,
+                purchasedYear: Number(v.purchasedYear),
+                dutyFreeValue: Number(v.dutyFreeValue),
+                dutyPaidValue: Number(v.dutyPaidValue),
+                vehicleStatus: v.vehicleStatus,
+                isInsured: "PENDING",
+                insureds: {
+                  connect: {
+                    id: insuredId,
+                  },
+                },
+                branchs: {
+                  connect: {
+                    id: branchId,
+                  },
+                },
+                certificates: {
+                  create: {
+                    certificateNumber: storeCertNumber,
+                    premiumTarif: Number(certificatePremiumTarif),
+                    branchs: {
+                      connect: {
+                        id: branchId,
+                      },
+                    },
+                    policies: {
+                      create: {
+                        policyNumber: `PN-${format(new Date(), "yyMMiHms")}-${
+                          v.plateNumber
+                        }`,
+                        policyStartDate: new Date(policyStartDate),
+                        policyExpireDate: addYears(
+                          new Date(policyStartDate),
+                          1
+                        ),
+                        policyIssuedConditions: policyIssuedConditions,
+                        personsEntitledToUse: personsEntitledToUse,
+                      },
+                    },
+                  },
+                },
+              },
+            });
           }
         })
       );
+
+      if (vehicleData) {
+        await prisma.payment.create({
+          data: {
+            refNumber: `RN-${format(new Date(), "yyMMiHms")}`,
+            premiumTarif: paymentPremium,
+            insureds: {
+              connect: {
+                id: insuredId,
+              },
+            },
+            branchs: {
+              connect: {
+                id: branchId,
+              },
+            },
+            certificates: {
+              connect: certificateNumberArray.map((certN) => ({
+                certificateNumber: certN,
+              })),
+            },
+          },
+        });
+      }
 
       res.status(200).json(vehicleData);
     } catch (err) {

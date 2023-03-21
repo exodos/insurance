@@ -99,7 +99,7 @@ export const InsuredPagination = extendType({
         const totalInsured = await ctx.prisma.insured.count({
           where,
         });
-        const maxPage = Math.ceil(totalInsured / 20);
+        const maxPage = Math.ceil(totalInsured / args?.take);
 
         return {
           insured,
@@ -154,7 +154,7 @@ export const InsuredBranchPagination = extendType({
         const totalInsured = await ctx.prisma.insured.count({
           where,
         });
-        const maxPage = Math.ceil(totalInsured / 20);
+        const maxPage = Math.ceil(totalInsured / args?.take);
 
         return {
           insured,
@@ -209,7 +209,7 @@ export const InsuredInsurerPagination = extendType({
         const totalInsured = await ctx.prisma.insured.count({
           where,
         });
-        const maxPage = Math.ceil(totalInsured / 20);
+        const maxPage = Math.ceil(totalInsured / args?.take);
 
         return {
           insured,
@@ -276,6 +276,24 @@ export const insuredBranchByMobileNumberQuery = extendType({
   },
 });
 
+export const insuredAdminByMobileNumberQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.field("insuredAdminByMobileNumber", {
+      type: Insured,
+      args: {
+        mobileNumber: nonNull(stringArg()),
+      },
+      resolve(_parent, args, ctx) {
+        return ctx.prisma.insured.findFirst({
+          where: {
+            mobileNumber: args.mobileNumber,
+          },
+        });
+      },
+    });
+  },
+});
 export const insuredBranchByRegNumberQuery = extendType({
   type: "Query",
   definition(t) {
@@ -296,6 +314,24 @@ export const insuredBranchByRegNumberQuery = extendType({
     });
   },
 });
+export const insuredAdminByRegNumberQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.field("insuredAdminByRegNumber", {
+      type: Insured,
+      args: {
+        regNumber: nonNull(stringArg()),
+      },
+      resolve(_parent, args, ctx) {
+        return ctx.prisma.insured.findFirst({
+          where: {
+            regNumber: args.regNumber,
+          },
+        });
+      },
+    });
+  },
+});
 
 export const insuredInsurerByMobileNumberQuery = extendType({
   type: "Query",
@@ -309,7 +345,30 @@ export const insuredInsurerByMobileNumberQuery = extendType({
       resolve(_parent, args, ctx) {
         return ctx.prisma.insured.findFirst({
           where: {
-            mobileNumber: args.mobileNumber,
+            mobileNumber: changePhone(args.mobileNumber),
+            branchs: {
+              orgId: args.orgId,
+            },
+          },
+        });
+      },
+    });
+  },
+});
+
+export const insuredInsurerByRegNumberQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.field("insuredInsurerByRegNumber", {
+      type: Insured,
+      args: {
+        regNumber: nonNull(stringArg()),
+        orgId: nonNull(stringArg()),
+      },
+      resolve(_parent, args, ctx) {
+        return ctx.prisma.insured.findFirst({
+          where: {
+            regNumber: args.regNumber,
             branchs: {
               orgId: args.orgId,
             },

@@ -73,7 +73,7 @@ export const AccidentRecordPagination = extendType({
         const totalAccidentRecord = await ctx.prisma.accidentRecord.count({
           where,
         });
-        const maxPage = Math.ceil(totalAccidentRecord / 20);
+        const maxPage = Math.ceil(totalAccidentRecord / args?.take);
 
         return {
           accidentRecords,

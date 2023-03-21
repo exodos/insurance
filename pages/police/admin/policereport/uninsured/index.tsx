@@ -85,10 +85,10 @@ const FeedUnInsuredPoliceReport = gql`
 `;
 
 const UnInsuredPoliceReport = ({
-  data,
-  userId,
-  branchId,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+      userId,
+      branchId,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -169,17 +169,20 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         destination: "/auth/signin",
       },
     };
+  } else if (session?.user?.memberships?.role !== "TRAFFICPOLICEADMIN") {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
   }
 
   const { query } = context;
-
   const page = query.page || 1;
-
   const filter = query.search;
-
   const curPage: any = page;
-  const perPage = 20;
-
+  const perPage = 10;
   const take = perPage;
   const skip = (curPage - 1) * perPage;
 

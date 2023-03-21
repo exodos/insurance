@@ -17,6 +17,7 @@ const ExportBranch = gql`
       region
       city
       mobileNumber
+      branchCode
       createdAt
       updatedAt
       organizations {
@@ -201,6 +202,12 @@ const ExportAdminBranch = ({
                                   scope="col"
                                   className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
                                 >
+                                  Branch Code
+                                </th>
+                                <th
+                                  scope="col"
+                                  className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
+                                >
                                   Region
                                 </th>
                                 <th
@@ -241,6 +248,9 @@ const ExportAdminBranch = ({
                                   <tr key={item?.id}>
                                     <td className="whitespace-nowrap py-4 pl-4 pr-4 text-sm text-gray-500 sm:pr-6">
                                       {item?.branchName}
+                                    </td>
+                                    <td className="whitespace-nowrap py-4 pl-4 pr-4 text-sm text-gray-500 sm:pr-6">
+                                      {item?.branchCode}
                                     </td>
                                     <td className="whitespace-nowrap py-4 pl-4 pr-4 text-sm text-gray-500 sm:pr-6">
                                       {item?.region}

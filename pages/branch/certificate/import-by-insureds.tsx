@@ -4,11 +4,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../api/auth/[...nextauth]";
 import { useState } from "react";
 import { useRouter } from "next/router";
-import VehicleByRegNumber from "@/components/common/vehicle-by-reg";
 import { gql } from "apollo-server-micro";
 import { initializeApollo } from "@/lib/apollo";
-import VehicleByPlateNumber from "@/components/common/vehicle-plate";
-import VehicleByMobileNumber from "@/components/common/vehicle-by-mobile";
 import ImportVehicleByRegNumber from "@/components/common/import-vehicle-by-reg";
 import ImportVehicleByMobileNumber from "@/components/common/import-vehicle-by-mobile";
 
@@ -26,9 +23,9 @@ const FeedPlate = gql`
 `;
 
 const ImportCertificateByInsureds = ({
-  data,
-  branchId,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+      branchId,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [showMobileForm, setShowMobileForm] = useState(false);
   const [showRegForm, setShowRegForm] = useState(false);
   const router = useRouter();
@@ -117,10 +114,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         destination: "/auth/sign-in",
       },
     };
-  } else if (session.user.adminRestPassword) {
+  } else if (
+    session?.user?.memberships?.role !== "BRANCHADMIN" &&
+    session?.user?.memberships?.role !== "MEMBER"
+  ) {
     return {
       redirect: {
-        destination: "/user/force-reset",
+        destination: "/",
         permanent: false,
       },
     };

@@ -45,8 +45,8 @@ const ExportCertificateBranch = gql`
 `;
 
 const ExportBranchCertificate = ({
-  branchId,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      branchId,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [formValues, setFormValues] = useState(null);
 
   let slicedValue = null;
@@ -371,7 +371,18 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
       redirect: {
         permanent: false,
-        destination: "/auth/signin",
+        destination: "/auth/sign-in",
+      },
+    };
+  } else if (
+    session?.user?.memberships?.role !== "BRANCHADMIN" &&
+    session?.user?.memberships?.role !== "MEMBER" &&
+    session?.user?.memberships?.role !== "USER"
+  ) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
       },
     };
   }

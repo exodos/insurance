@@ -15,10 +15,10 @@ import { isEmpty, isNull } from "lodash";
 import { BsArrowDownCircleFill } from "react-icons/bs";
 
 const ImportInsuranceInsured = ({
-  branchId,
-  insuredId,
-  pageURL,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      branchId,
+      insuredId,
+      pageURL,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [parsedData, setParsedData] = useState([]);
   const [tableRows, setTableRows] = useState([]);
   const [values, setValues] = useState([]);
@@ -562,10 +562,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         destination: "/auth/sign-in",
       },
     };
-  } else if (session.user.adminRestPassword) {
+  } else if (
+    session?.user?.memberships?.role !== "BRANCHADMIN" &&
+    session?.user?.memberships?.role !== "MEMBER"
+  ) {
     return {
       redirect: {
-        destination: "/user/force-reset",
+        destination: "/",
         permanent: false,
       },
     };

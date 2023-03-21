@@ -662,6 +662,11 @@ export const createCertificateMutation = extendType({
                       regNumber: vehicleDetail.insureds.regNumber,
                     },
                   },
+                  branchs: {
+                    connect: {
+                      id: vehicleDetail.branchs.id,
+                    },
+                  },
                 },
               },
               certificateRecords: {
@@ -1087,6 +1092,11 @@ export const createInsuranceByBranchMutation = extendType({
                       regNumber: storeRegNumber,
                     },
                   },
+                  branchs: {
+                    connect: {
+                      id: args.input.branchs.id,
+                    },
+                  },
                 },
               },
               certificateRecords: {
@@ -1464,11 +1474,11 @@ export const createCertificateBranchMutation = extendType({
                       regNumber: vehicleDetail.insureds.regNumber,
                     },
                   },
-                  // vehicles: {
-                  //   connect: {
-                  //     plateNumber: args.plateNumber,
-                  //   },
-                  // },
+                  branchs: {
+                    connect: {
+                      id: vehicleDetail.branchs.id,
+                    },
+                  },
                 },
               },
               certificateRecords: {
@@ -1826,10 +1836,11 @@ export const createOrUpdateCertificateMutation = extendType({
               },
               branchs: {
                 connect: {
-                  id: args.input.branchs.id,
+                  id: vehicleDetail.branchs.id,
                 },
               },
               payments: {
+                // set: [],
                 create: {
                   refNumber: `RN-${format(new Date(), "yyMMiHms")}`,
                   premiumTarif:
@@ -1839,6 +1850,11 @@ export const createOrUpdateCertificateMutation = extendType({
                   insureds: {
                     connect: {
                       regNumber: vehicleDetail.insureds.regNumber,
+                    },
+                  },
+                  branchs: {
+                    connect: {
+                      id: vehicleDetail.branchs.id,
                     },
                   },
                 },
@@ -1890,7 +1906,7 @@ export const createOrUpdateCertificateMutation = extendType({
               },
               branchs: {
                 connect: {
-                  id: args.input.branchs.id,
+                  id: vehicleDetail.branchs.id,
                 },
               },
               payments: {
@@ -1903,6 +1919,11 @@ export const createOrUpdateCertificateMutation = extendType({
                   insureds: {
                     connect: {
                       regNumber: vehicleDetail.insureds.regNumber,
+                    },
+                  },
+                  branchs: {
+                    connect: {
+                      id: vehicleDetail.branchs.id,
                     },
                   },
                 },
@@ -2233,6 +2254,11 @@ export const updateCertificateMutation = extendType({
                 insureds: {
                   connect: {
                     id: vPlate.vehicles.insuredId,
+                  },
+                },
+                branchs: {
+                  connect: {
+                    id: vPlate.branchId,
                   },
                 },
               },

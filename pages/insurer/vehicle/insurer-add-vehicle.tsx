@@ -1,12 +1,11 @@
 import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Head from "next/head";
-import { getServerSession, unstable_getServerSession } from "next-auth";
+import { getServerSession } from "next-auth";
 import { authOptions } from "../../api/auth/[...nextauth]";
 import { gql, useLazyQuery } from "@apollo/client";
-import { FormEvent, useState } from "react";
+import { useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { format } from "date-fns";
 import { IoIosAddCircle } from "react-icons/io";
 import ReactTooltip from "react-tooltip";
 import AddVehicleModal from "@/components/vehicle/add-vehicle";
@@ -15,7 +14,6 @@ import { changePhone } from "@/lib/config";
 import { useSession } from "next-auth/react";
 import { CgImport } from "react-icons/cg";
 import Link from "next/link";
-// import CreateClaim from "@/claim-comp/create-claim";
 
 const InsuredInsurerByMobileNumber = gql`
   query InsuredInsurerByMobileNumber($mobileNumber: String!, $orgId: String!) {
@@ -78,7 +76,6 @@ const AddVehicleByInsurer = ({
 
   const router = useRouter();
   const path = router.query.returnPage;
-  // console.log(path);
 
   const phoneRegExp = /^(^\+251|^251|^0)?9\d{8}$/;
 
@@ -100,8 +97,6 @@ const AddVehicleByInsurer = ({
       data: insuredInsurerByMobileNumberData,
     },
   ] = useLazyQuery(InsuredInsurerByMobileNumber);
-
-  // console.log(insuredInsurerByMobileNumberData?.insuredInsurerByMobileNumber);
 
   const handleAdd = (value: any) => {
     setShowCreateModal((prev) => !prev);
@@ -438,21 +433,18 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         destination: "/auth/sign-in",
       },
     };
-  } else if (session.user.adminRestPassword) {
+  } else if (session?.user?.memberships?.role !== "INSURER") {
     return {
       redirect: {
-        destination: "/user/force-reset",
+        destination: "/",
         permanent: false,
       },
     };
   }
-  // const { query } = context;
-  // const page = query.returnPage;
 
   return {
     props: {
       session,
-      // page,
     },
   };
 };

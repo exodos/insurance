@@ -1,7 +1,6 @@
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { getServerSession } from "next-auth";
 import { useSession } from "next-auth/react";
-import { initializeApollo } from "../../../lib/apollo";
 import { gql, useLazyQuery } from "@apollo/client";
 import { authOptions } from "../../api/auth/[...nextauth]";
 import { useState } from "react";
@@ -354,15 +353,18 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         destination: "/auth/signin",
       },
     };
+  } else if (
+    session?.user?.memberships?.role !== "BRANCHADMIN" &&
+    session?.user?.memberships?.role !== "MEMBER" &&
+    session?.user?.memberships?.role !== "USER"
+  ) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
   }
-  // else if (session.user.memberships.role !== "SUPERADMIN") {
-  //   return {
-  //     redirect: {
-  //       destination: "/",
-  //       permanent: false,
-  //     },
-  //   };
-  // }
 
   return {
     props: {

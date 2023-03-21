@@ -41,8 +41,8 @@ const ExportInsuredInsurer = gql`
 `;
 
 const ExportInsurerInsured = ({
-  orgId,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      orgId,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [formValues, setFormValues] = useState(null);
 
   let slicedValue = null;
@@ -386,6 +386,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       redirect: {
         permanent: false,
         destination: "/auth/signin",
+      },
+    };
+  } else if (session?.user?.memberships?.role !== "INSURER") {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
       },
     };
   }

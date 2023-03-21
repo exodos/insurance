@@ -18,6 +18,7 @@ export const Branch = objectType({
   definition(t) {
     t.string("id");
     t.string("branchName");
+    t.string("branchCode");
     t.string("region");
     t.string("city");
     t.string("mobileNumber");
@@ -153,6 +154,16 @@ export const Branch = objectType({
           .insureds();
       },
     });
+    t.nullable.list.nullable.field("payments", {
+      type: "Payment",
+      async resolve(_parent, _args, ctx) {
+        return await ctx.prisma.branch
+          .findUnique({
+            where: { id: _parent.id },
+          })
+          .payments();
+      },
+    });
   },
 });
 
@@ -195,7 +206,7 @@ export const BranchPagination = extendType({
         const totalBranch = await ctx.prisma.branch.count({
           where,
         }); // 2
-        const maxPage = Math.ceil(totalBranch / 20);
+        const maxPage = Math.ceil(totalBranch / args?.take);
 
         return {
           branchs,
@@ -254,7 +265,7 @@ export const BranchInsurerPagination = extendType({
         const totalBranch = await ctx.prisma.branch.count({
           where,
         }); // 2
-        const maxPage = Math.ceil(totalBranch / 20);
+        const maxPage = Math.ceil(totalBranch / args?.take);
 
         return {
           branchs,
@@ -326,6 +337,23 @@ export const branchByName = extendType({
         return await ctx.prisma.branch.findUnique({
           where: {
             branchName: args.branchName,
+          },
+        });
+      },
+    });
+  },
+});
+
+export const branchByCode = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.field("branchByCode", {
+      type: Branch,
+      args: { branchCode: nonNull(stringArg()) },
+      resolve: async (_parent, args, ctx) => {
+        return await ctx.prisma.branch.findUnique({
+          where: {
+            branchCode: args.branchCode,
           },
         });
       },
@@ -470,6 +498,7 @@ export const createBranchMutation = extendType({
           data: {
             // ...args.input,
             branchName: args.input.branchName,
+            branchCode: args.input.branchCode,
             region: args.input.region ?? null,
             city: args.input.city ?? null,
             mobileNumber: args.input.mobileNumber,
@@ -561,6 +590,7 @@ export const branchCreateInput = inputObjectType({
   name: "branchCreateInput",
   definition(t) {
     t.string("branchName");
+    t.nullable.string("branchCode");
     t.nullable.string("region");
     t.nullable.string("city");
     t.string("mobileNumber");
@@ -572,6 +602,7 @@ export const branchUpdateInput = inputObjectType({
   name: "branchUpdateInput",
   definition(t) {
     t.string("branchName");
+    t.nullable.string("branchCode");
     t.string("region");
     t.string("city");
     t.string("mobileNumber");

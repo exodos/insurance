@@ -1,7 +1,5 @@
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { getServerSession } from "next-auth";
-import { useSession } from "next-auth/react";
-import { initializeApollo } from "../../../lib/apollo";
 import { gql, useLazyQuery } from "@apollo/client";
 import { authOptions } from "../../api/auth/[...nextauth]";
 import { useState } from "react";
@@ -9,7 +7,6 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { endOfToday, format } from "date-fns";
 import SiteHeader from "@/layout/header";
-import ClaimExport from "@/components/claim/claim-export";
 import PoliceReportExport from "@/components/policereport/insured/police-report-export";
 
 const ExportInsuredPoliceReportQuery = gql`
@@ -504,7 +501,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
       redirect: {
         permanent: false,
-        destination: "/auth/signin",
+        destination: "/auth/sign-in",
       },
     };
   } else if (session.user.memberships.role !== "SUPERADMIN") {

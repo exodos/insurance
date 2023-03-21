@@ -7,9 +7,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { endOfToday, format } from "date-fns";
 import SiteHeader from "@/layout/header";
-import ClaimExport from "@/components/claim/claim-export";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
-import { initializeApollo } from "@/lib/apollo";
 import HitAndRunExport from "@/components/claim/hitrunclaim/hit-and-run-export";
 
 const UserQuery = gql`
@@ -48,8 +46,8 @@ const ExportClaimQuery = gql`
 `;
 
 const ExportAdminHitAndRun = ({
-  props,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      props,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [formValues, setFormValues] = useState(null);
 
   let slicedValue = null;
@@ -346,7 +344,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
       redirect: {
         permanent: false,
-        destination: "/auth/signin",
+        destination: "/auth/sign-in",
+      },
+    };
+  } else if (session.user.memberships.role !== "SUPERADMIN") {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
       },
     };
   }

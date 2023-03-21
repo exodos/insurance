@@ -120,7 +120,7 @@ export const VehiclePagination = extendType({
         const totalVehicle = await ctx.prisma.vehicle.count({
           where,
         });
-        const maxPage = Math.ceil(totalVehicle / 20);
+        const maxPage = Math.ceil(totalVehicle / args?.take);
 
         return {
           vehicle,
@@ -173,7 +173,7 @@ export const VehicleBranchByStatusPagination = extendType({
         const totalVehicle = await ctx.prisma.vehicle.count({
           where,
         });
-        const maxPage = Math.ceil(totalVehicle / 20);
+        const maxPage = Math.ceil(totalVehicle / args?.take);
 
         return {
           vehicle,
@@ -223,7 +223,7 @@ export const VehicleBranchPagination = extendType({
         const totalVehicle = await ctx.prisma.vehicle.count({
           where,
         });
-        const maxPage = Math.ceil(totalVehicle / 20);
+        const maxPage = Math.ceil(totalVehicle / args?.take);
 
         return {
           vehicle,
@@ -277,7 +277,7 @@ export const VehicleInsurerPagination = extendType({
         const totalVehicle = await ctx.prisma.vehicle.count({
           where,
         });
-        const maxPage = Math.ceil(totalVehicle / 20);
+        const maxPage = Math.ceil(totalVehicle / args?.take);
 
         return {
           vehicle,
@@ -434,6 +434,65 @@ export const vehicleByInsuredMobileNumberQuery = extendType({
     });
   },
 });
+export const vehicleByMobileNumberQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.field("feedVehicleByMobile", {
+      type: FeedVehicleByMobile,
+      args: {
+        mobileNumber: nonNull(stringArg()),
+      },
+      async resolve(_parent, args, ctx) {
+        const vehicles = await ctx.prisma.vehicle.findMany({
+          where: {
+            insureds: {
+              mobileNumber: changePhone(args.mobileNumber),
+            },
+            isInsured: "NOTINSURED",
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
+        });
+        return {
+          vehicles,
+        };
+      },
+    });
+  },
+});
+
+export const vehicleInsurerByMobileNumberQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.field("feedVehicleInsurerByMobile", {
+      type: FeedVehicleInsurerByMobile,
+      args: {
+        mobileNumber: nonNull(stringArg()),
+        orgId: nonNull(stringArg()),
+      },
+      async resolve(_parent, args, ctx) {
+        const vehicles = await ctx.prisma.vehicle.findMany({
+          where: {
+            insureds: {
+              mobileNumber: changePhone(args.mobileNumber),
+            },
+            branchs: {
+              orgId: args.orgId,
+            },
+            isInsured: "NOTINSURED",
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
+        });
+        return {
+          vehicles,
+        };
+      },
+    });
+  },
+});
 
 export const vehicleByInsuredRegNumberQuery = extendType({
   type: "Query",
@@ -442,27 +501,47 @@ export const vehicleByInsuredRegNumberQuery = extendType({
       type: FeedVehicleByInsuredReg,
       args: {
         regNumber: nonNull(stringArg()),
+        orgId: nonNull(stringArg()),
       },
       async resolve(_parent, args, ctx) {
-        const user = await ctx.prisma.user.findUnique({
-          where: {
-            email: ctx.session.user.email,
-          },
-          include: {
-            memberships: {
-              include: {
-                branchs: true,
-              },
-            },
-          },
-        });
         const vehicles = await ctx.prisma.vehicle.findMany({
           where: {
             insureds: {
               regNumber: args.regNumber,
             },
             isInsured: "NOTINSURED",
-            branchId: user.memberships.branchId,
+            branchs: {
+              orgId: args.orgId,
+            },
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
+        });
+
+        return {
+          vehicles,
+        };
+      },
+    });
+  },
+});
+
+export const vehicleByRegNumberQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.field("feedVehicleByRegNumber", {
+      type: FeedVehicleByRegNumber,
+      args: {
+        regNumber: nonNull(stringArg()),
+      },
+      async resolve(_parent, args, ctx) {
+        const vehicles = await ctx.prisma.vehicle.findMany({
+          where: {
+            insureds: {
+              regNumber: args.regNumber,
+            },
+            isInsured: "NOTINSURED",
           },
           // take: 20,
           orderBy: {
@@ -816,6 +895,34 @@ export const FeedVehicleByInsured = objectType({
 
 export const FeedVehicleByInsuredReg = objectType({
   name: "FeedVehicleByInsuredReg",
+  definition(t) {
+    t.nonNull.list.nonNull.field("vehicles", { type: Vehicle });
+  },
+});
+
+export const FeedVehicleByMobile = objectType({
+  name: "FeedVehicleByMobile",
+  definition(t) {
+    t.nonNull.list.nonNull.field("vehicles", { type: Vehicle });
+  },
+});
+
+export const FeedVehicleByRegNumber = objectType({
+  name: "FeedVehicleByRegNumber",
+  definition(t) {
+    t.nonNull.list.nonNull.field("vehicles", { type: Vehicle });
+  },
+});
+
+export const FeedVehicleInsurerByMobile = objectType({
+  name: "FeedVehicleInsurerByMobile",
+  definition(t) {
+    t.nonNull.list.nonNull.field("vehicles", { type: Vehicle });
+  },
+});
+
+export const FeedVehicleInsurerByRegNumber = objectType({
+  name: "FeedVehicleInsurerByRegNumber",
   definition(t) {
     t.nonNull.list.nonNull.field("vehicles", { type: Vehicle });
   },

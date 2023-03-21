@@ -46,8 +46,8 @@ const ExportCertificateInsurer = gql`
 `;
 
 const ExportInsurerCertificate = ({
-  orgId,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      orgId,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [formValues, setFormValues] = useState(null);
 
   let slicedValue = null;
@@ -375,12 +375,19 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         destination: "/auth/signin",
       },
     };
+  } else if (session?.user?.memberships?.role !== "INSURER") {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
   }
 
   return {
     props: {
       session,
-      orgId: session.user.memberships.branchs.orgId,
+      orgId: session?.user?.memberships?.branchs?.orgId,
     },
   };
 };

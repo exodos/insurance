@@ -81,7 +81,7 @@ export const ClaimHitAndRunPagination = extendType({
         const totalClaimHitAndRun = await ctx.prisma.claimHitAndRun.count({
           where,
         });
-        const maxPage = Math.ceil(totalClaimHitAndRun / 20);
+        const maxPage = Math.ceil(totalClaimHitAndRun / args?.take);
 
         return {
           claimHitAndRuns,
@@ -135,7 +135,7 @@ export const ClaimHitAndRunByPolicePagination = extendType({
         const totalClaimHitAndRun = await ctx.prisma.claimHitAndRun.count({
           where,
         });
-        const maxPage = Math.ceil(totalClaimHitAndRun / 20);
+        const maxPage = Math.ceil(totalClaimHitAndRun / args?.take);
 
         return {
           claimHitAndRuns,

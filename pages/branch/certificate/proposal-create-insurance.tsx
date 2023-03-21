@@ -46,9 +46,9 @@ const PlateCode = gql`
 export const FormContext = createContext(null!);
 export const VehicleInfoContext = createContext(null!);
 const CreateProposal = ({
-  data,
-  branchId,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+      branchId,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [formData, setFormData] = useState({});
 
@@ -109,16 +109,19 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         destination: "/auth/sign-in",
       },
     };
-  } else if (session.user.adminRestPassword) {
+  } else if (
+    session?.user?.memberships?.role !== "BRANCHADMIN" &&
+    session?.user?.memberships?.role !== "MEMBER"
+  ) {
     return {
       redirect: {
-        destination: "/user/force-reset",
+        destination: "/",
         permanent: false,
       },
     };
   }
-  const apolloClient = initializeApollo();
 
+  const apolloClient = initializeApollo();
   const { data } = await apolloClient.query({
     query: PlateCode,
   });

@@ -95,7 +95,13 @@ const BranchCertificate = ({
                   session.user.memberships.role === "MEMBER") && (
                   <>
                     <Link
-                      href={"/branch/certificate/proposal-create-insurance"}
+                      href={{
+                        pathname:
+                          "/branch/certificate/proposal-create-insurance",
+                        query: {
+                          returnPage: pathname,
+                        },
+                      }}
                     >
                       <>
                         <button
@@ -227,20 +233,27 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
       redirect: {
         permanent: false,
-        destination: "/auth/signin",
+        destination: "/auth/sign-in",
+      },
+    };
+  } else if (
+    session?.user?.memberships?.role !== "BRANCHADMIN" &&
+    session?.user?.memberships?.role !== "MEMBER" &&
+    session?.user?.memberships?.role !== "USER"
+  ) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
       },
     };
   }
 
   const { query } = context;
-
   const page = query.page || 1;
-
   const filter = query.search;
-
   const curPage: any = page;
-  const perPage = 20;
-
+  const perPage = 10;
   const take = perPage;
   const skip = (curPage - 1) * perPage;
 

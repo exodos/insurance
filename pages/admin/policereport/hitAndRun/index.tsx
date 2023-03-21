@@ -1,10 +1,9 @@
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { getServerSession, unstable_getServerSession } from "next-auth";
-import { SessionProvider, useSession } from "next-auth/react";
-import Head from "next/head";
+import { getServerSession } from "next-auth";
+import { useSession } from "next-auth/react";
 import { initializeApollo } from "../../../../lib/apollo";
 import { gql } from "@apollo/client";
-import { BsPlusCircleFill, BsFillArrowUpCircleFill } from "react-icons/bs";
+import { BsFillArrowUpCircleFill } from "react-icons/bs";
 import { authOptions } from "pages/api/auth/[...nextauth]";
 import ListHitAndRun from "@/policereport/hitandrun/list-hit-and-run";
 import { useRouter } from "next/router";
@@ -120,7 +119,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
       redirect: {
         permanent: false,
-        destination: "/auth/signin",
+        destination: "/auth/sign-in",
       },
     };
   } else if (session.user.memberships.role !== "SUPERADMIN") {
@@ -132,8 +131,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
-  // console.log(session.user);
-
   const { query } = context;
 
   const page = query.page || 1;
@@ -141,7 +138,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const filter = query.search;
 
   const curPage: any = page;
-  const perPage = 20;
+  const perPage = 10;
 
   const take = perPage;
   const skip = (curPage - 1) * perPage;
@@ -151,7 +148,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const { data } = await apolloClient.query({
     query: FeedHitAndRunPoliceReport,
     variables: {
-      orgId: "1932fcdc-1694-48b2-b286-e9458329a574",
       filter: filter,
       skip: skip,
       take: take,
@@ -162,6 +158,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       ],
     },
   });
+
+  // console.log(data);
 
   return {
     props: {

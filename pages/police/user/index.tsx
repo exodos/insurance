@@ -1,14 +1,11 @@
 import SiteHeader from "@/components/layout/header";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { getServerSession, unstable_getServerSession } from "next-auth";
-import { SessionProvider, useSession } from "next-auth/react";
+import { getServerSession } from "next-auth";
 
 const PoliceUserDashboard = ({
       data,
     }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  const { data: session, status } = useSession();
-
   return (
     <>
       <SiteHeader
@@ -40,10 +37,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         destination: "/auth/signin",
       },
     };
-  } else if (session.user.adminRestPassword) {
+  } else if (session?.user?.memberships?.role !== "TRAFFICPOLICEMEMBER") {
     return {
       redirect: {
-        destination: "/auth/force-reset",
+        destination: "/",
         permanent: false,
       },
     };

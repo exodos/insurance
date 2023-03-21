@@ -1,10 +1,8 @@
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { getServerSession } from "next-auth";
 import { useSession } from "next-auth/react";
-import { initializeApollo } from "../../../lib/apollo";
 import { gql, useLazyQuery } from "@apollo/client";
 import { authOptions } from "../../api/auth/[...nextauth]";
-import { BsPlusCircleFill, BsFillArrowUpCircleFill } from "react-icons/bs";
 import { useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
@@ -370,6 +368,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       redirect: {
         permanent: false,
         destination: "/auth/signin",
+      },
+    };
+  } else if (session?.user?.memberships?.role !== "INSURER") {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
       },
     };
   }

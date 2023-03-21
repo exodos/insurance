@@ -6,6 +6,7 @@ import { BiUpArrowCircle } from "react-icons/bi";
 const BranchsExport = ({ branchs }) => {
   const [branchsHeaders] = useState([
     { label: "Branch Name", key: "branchName" },
+    { label: "Branch Code", key: "branchCode" },
     { label: "Region", key: "region" },
     { label: "City", key: "city" },
     { label: "Phone Number", key: "mobileNumber" },
@@ -16,6 +17,7 @@ const BranchsExport = ({ branchs }) => {
 
   const data = branchs.map((item: any) => ({
     branchName: item?.branchName,
+    branchCode: item?.branchCode,
     region: item?.region,
     city: item?.city,
     mobileNumber: item?.mobileNumber,

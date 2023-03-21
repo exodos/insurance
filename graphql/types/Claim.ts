@@ -124,7 +124,7 @@ export const ClaimPagination = extendType({
         const totalClaim = await ctx.prisma.claim.count({
           where,
         });
-        const maxPage = Math.ceil(totalClaim / 20);
+        const maxPage = Math.ceil(totalClaim / args?.take);
 
         return {
           claim,
@@ -172,7 +172,7 @@ export const ClaimBranchPagination = extendType({
         const totalClaim = await ctx.prisma.claim.count({
           where,
         });
-        const maxPage = Math.ceil(totalClaim / 20);
+        const maxPage = Math.ceil(totalClaim / args?.take);
 
         return {
           claim,
@@ -224,7 +224,7 @@ export const ClaimInsurerPagination = extendType({
         const totalClaim = await ctx.prisma.claim.count({
           where,
         });
-        const maxPage = Math.ceil(totalClaim / 20);
+        const maxPage = Math.ceil(totalClaim / args?.take);
 
         return {
           claim,
@@ -280,7 +280,7 @@ export const ClaimPolicePagination = extendType({
         const totalClaim = await ctx.prisma.claim.count({
           where,
         });
-        const maxPage = Math.ceil(totalClaim / 20);
+        const maxPage = Math.ceil(totalClaim / args?.take);
 
         return {
           claim,

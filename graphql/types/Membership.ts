@@ -70,7 +70,7 @@ export const MembershipPagination = extendType({
         const totalMembership = await ctx.prisma.membership.count({
           where,
         }); // 2
-        const maxPage = Math.ceil(totalMembership / 20);
+        const maxPage = Math.ceil(totalMembership / args?.take);
 
         return {
           membership,

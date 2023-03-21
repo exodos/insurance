@@ -66,6 +66,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           current: false,
         },
         {
+          name: "Payment",
+          icon: "FaPaypal",
+          current: false,
+          children: [
+            { name: "Payed", href: "/admin/payments" },
+            { name: "Pending Payment", href: "/admin/payments/payment" },
+            { name: "Pending Approval", href: "/admin/payments/approval" },
+          ],
+        },
+        {
           name: "Tariff",
           href: "/admin/tariff",
           icon: "FaCcAmazonPay",
@@ -114,48 +124,116 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           icon: "FaCertificate",
           current: false,
         },
+        {
+          name: "Payment",
+          icon: "FaPaypal",
+          current: false,
+          children: [
+            { name: "Payed", href: "/insurer/payments" },
+            { name: "Pending Payment", href: "/insurer/payments/payment" },
+            { name: "Pending Approval", href: "/insurer/payments/approval" },
+          ],
+        },
       ];
     } else if (
       session?.user.memberships.role === "MEMBER" ||
       session?.user.memberships.role === "USER" ||
       session?.user.memberships.role === "BRANCHADMIN"
     ) {
-      navigation = [
-        { name: "Home", href: "/branch", icon: "FaHome", current: true },
-        {
-          name: "Users",
-          href: "/branch/users",
-          icon: "FaUserFriends",
-          current: false,
-        },
-        {
-          name: "Claims",
-          href: "/branch/claim",
-          icon: "FaCommentDollar",
-          current: false,
-        },
-        {
-          name: "Police Report",
-          href: "/branch/policereport",
-          icon: "FaCarCrash",
-          current: false,
-        },
-        {
-          name: "Insured",
-          icon: "FaUserCheck",
-          current: false,
-          children: [
-            { name: "Owner", href: "/branch/insured" },
-            { name: "Vehicle", href: "/branch/vehicle" },
-          ],
-        },
-        {
-          name: "Certificate",
-          href: "/branch/certificate",
-          icon: "FaCertificate",
-          current: false,
-        },
-      ];
+      if (session?.user.memberships.role === "BRANCHADMIN") {
+        navigation = [
+          { name: "Home", href: "/branch", icon: "FaHome", current: true },
+          {
+            name: "Users",
+            href: "/branch/users",
+            icon: "FaUserFriends",
+            current: false,
+          },
+          {
+            name: "Claims",
+            href: "/branch/claim",
+            icon: "FaCommentDollar",
+            current: false,
+          },
+          {
+            name: "Police Report",
+            href: "/branch/policereport",
+            icon: "FaCarCrash",
+            current: false,
+          },
+          {
+            name: "Insured",
+            icon: "FaUserCheck",
+            current: false,
+            children: [
+              { name: "Owner", href: "/branch/insured" },
+              { name: "Vehicle", href: "/branch/vehicle" },
+            ],
+          },
+          {
+            name: "Certificate",
+            href: "/branch/certificate",
+            icon: "FaCertificate",
+            current: false,
+          },
+          {
+            name: "Payment",
+            icon: "FaPaypal",
+            current: false,
+            children: [
+              { name: "Payed", href: "/insurer/payments" },
+              { name: "Pending Payment", href: "/branch/payments/payment" },
+              { name: "Pending Approval", href: "/branch/payments/approval" },
+            ],
+          },
+        ];
+      } else {
+        navigation = [
+          { name: "Home", href: "/branch", icon: "FaHome", current: true },
+          {
+            name: "Users",
+            href: "/branch/users",
+            icon: "FaUserFriends",
+            current: false,
+          },
+          {
+            name: "Claims",
+            href: "/branch/claim",
+            icon: "FaCommentDollar",
+            current: false,
+          },
+          {
+            name: "Police Report",
+            href: "/branch/policereport",
+            icon: "FaCarCrash",
+            current: false,
+          },
+          {
+            name: "Insured",
+            icon: "FaUserCheck",
+            current: false,
+            children: [
+              { name: "Owner", href: "/branch/insured" },
+              { name: "Vehicle", href: "/branch/vehicle" },
+            ],
+          },
+          {
+            name: "Certificate",
+            href: "/branch/certificate",
+            icon: "FaCertificate",
+            current: false,
+          },
+          {
+            name: "Payment",
+            icon: "FaPaypal",
+            current: false,
+            children: [
+              { name: "Payed", href: "/insurer/payments" },
+              { name: "Pending Payment", href: "/branch/payments/payment" },
+            ],
+          },
+        ];
+      }
     } else if (session?.user.memberships.role === "TRAFFICPOLICEADMIN") {
       navigation = [
         {

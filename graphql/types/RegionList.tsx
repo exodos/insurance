@@ -45,7 +45,7 @@ export const RegionListPagination = extendType({
         const regionList = await ctx.prisma.regionList.findMany();
 
         const totalRegionList = await ctx.prisma.regionList.count();
-        const maxPage = Math.ceil(totalRegionList / 20);
+        const maxPage = Math.ceil(totalRegionList / 10);
 
         return {
           // 4

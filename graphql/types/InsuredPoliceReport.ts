@@ -150,7 +150,7 @@ export const InsuredPoliceReportPagination = extendType({
           await ctx.prisma.insuredPoliceReport.count({
             where,
           });
-        const maxPage = Math.ceil(totalInsuredPoliceReport / 10);
+        const maxPage = Math.ceil(totalInsuredPoliceReport / args?.take);
 
         return {
           insuredPoliceReports,
@@ -198,7 +198,7 @@ export const InsuredBranchPoliceReportPagination = extendType({
           await ctx.prisma.insuredPoliceReport.count({
             where,
           });
-        const maxPage = Math.ceil(totalInsuredPoliceReport / 10);
+        const maxPage = Math.ceil(totalInsuredPoliceReport / args?.take);
 
         return {
           insuredPoliceReports,
@@ -250,7 +250,7 @@ export const PoliceReportPaginationByPolice = extendType({
           await ctx.prisma.insuredPoliceReport.count({
             where,
           });
-        const maxPage = Math.ceil(totalInsuredPoliceReport / 10);
+        const maxPage = Math.ceil(totalInsuredPoliceReport / args?.take);
 
         return {
           insuredPoliceReports,
@@ -302,7 +302,7 @@ export const InsuredInsurerPoliceReportPagination = extendType({
           await ctx.prisma.insuredPoliceReport.count({
             where,
           });
-        const maxPage = Math.ceil(totalInsuredPoliceReport / 10);
+        const maxPage = Math.ceil(totalInsuredPoliceReport / args?.take);
 
         return {
           insuredPoliceReports,
@@ -354,7 +354,7 @@ export const InsuredPolicePoliceReportPagination = extendType({
           await ctx.prisma.insuredPoliceReport.count({
             where,
           });
-        const maxPage = Math.ceil(totalInsuredPoliceReport / 10);
+        const maxPage = Math.ceil(totalInsuredPoliceReport / args?.take);
 
         return {
           insuredPoliceReports,

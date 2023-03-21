@@ -2,7 +2,6 @@ import React from "react";
 import Head from "next/head";
 import { getServerSession } from "next-auth";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { SessionProvider } from "next-auth/react";
 import { authOptions } from "pages/api/auth/[...nextauth]";
 import { gql } from "apollo-server-micro";
 import { initializeApollo } from "lib/apollo";
@@ -62,10 +61,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         permanent: false,
       },
     };
+  } else if (session?.user?.memberships?.role !== "TRAFFICPOLICEMEMBER") {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
   }
 
   const apolloClient = initializeApollo();
-
   const { data } = await apolloClient.query({
     query: PlateCode,
   });

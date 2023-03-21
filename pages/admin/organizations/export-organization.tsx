@@ -7,7 +7,6 @@ import * as Yup from "yup";
 import { endOfToday, format } from "date-fns";
 import SiteHeader from "@/layout/header";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
-import HitAndRunPoliceReportExport from "@/components/policereport/hitandrun/hit-and-run-export";
 import OrganizationExport from "@/components/organizations/organization-export";
 
 const ExportOrganization = gql`
@@ -26,8 +25,8 @@ const ExportOrganization = gql`
 `;
 
 const ExportOrganizationPage = ({
-  props,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      props,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [formValues, setFormValues] = useState(null);
 
   let slicedValue = null;
@@ -283,7 +282,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
       redirect: {
         permanent: false,
-        destination: "/auth/signin",
+        destination: "/auth/sign-in",
       },
     };
   } else if (session.user.memberships.role !== "SUPERADMIN") {

@@ -89,7 +89,7 @@ export const HitAndRunPoliceReportPagination = extendType({
         take: intArg(),
         orderBy: arg({
           type: list(nonNull(HitAndRunPoliceReportOrderByInput)),
-        }), // 1
+        }),
       },
       async resolve(parent, args, ctx) {
         const where = args.filter
@@ -114,7 +114,7 @@ export const HitAndRunPoliceReportPagination = extendType({
           await ctx.prisma.hitAndRunPoliceReport.count({
             where,
           });
-        const maxPage = Math.ceil(totalHitAndRunPoliceReport / 10);
+        const maxPage = Math.ceil(totalHitAndRunPoliceReport / args?.take);
 
         return {
           hitAndRunPoliceReport,
@@ -168,7 +168,7 @@ export const HitAndRunPoliceReportPolicePagination = extendType({
           await ctx.prisma.hitAndRunPoliceReport.count({
             where,
           });
-        const maxPage = Math.ceil(totalHitAndRunPoliceReport / 10);
+        const maxPage = Math.ceil(totalHitAndRunPoliceReport / args?.take);
 
         return {
           hitAndRunPoliceReport,

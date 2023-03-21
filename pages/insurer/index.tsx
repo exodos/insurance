@@ -1,6 +1,6 @@
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { getServerSession, unstable_getServerSession } from "next-auth";
-import { SessionProvider, useSession } from "next-auth/react";
+import { getServerSession } from "next-auth";
+import { useSession } from "next-auth/react";
 import { authOptions } from "../api/auth/[...nextauth]";
 import SiteHeader from "@/components/layout/header";
 
@@ -40,10 +40,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         destination: "/auth/signin",
       },
     };
-  } else if (session.user.adminRestPassword) {
+  } else if (session?.user?.memberships?.role !== "INSURER") {
     return {
       redirect: {
-        destination: "/auth/force-reset",
+        destination: "/",
         permanent: false,
       },
     };

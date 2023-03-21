@@ -77,7 +77,7 @@ export const claimUnInsuredPagination = extendType({
         const totalClaimUnInsured = await ctx.prisma.claimUnInsured.count({
           where,
         });
-        const maxPage = Math.ceil(totalClaimUnInsured / 20);
+        const maxPage = Math.ceil(totalClaimUnInsured / args?.take);
 
         return {
           claimUnInsured,
@@ -131,7 +131,7 @@ export const claimUnInsuredByPolicePagination = extendType({
         const totalClaimUnInsured = await ctx.prisma.claimUnInsured.count({
           where,
         });
-        const maxPage = Math.ceil(totalClaimUnInsured / 20);
+        const maxPage = Math.ceil(totalClaimUnInsured / args?.take);
 
         return {
           claimUnInsured,
