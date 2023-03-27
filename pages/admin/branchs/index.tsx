@@ -47,9 +47,9 @@ const ListAllOrganization = gql`
 `;
 
 const AdminBranchPage = ({
-  data,
-  ListOrg,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+      ListOrg,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
   const { asPath } = useRouter();
@@ -108,7 +108,6 @@ const AdminBranchPage = ({
                         },
                       }}
                       passHref
-                      legacyBehavior
                     >
                       <>
                         <button

@@ -56,9 +56,9 @@ const FeedBranchByOrgDesc = gql`
 `;
 
 const AdminInsuredPage = ({
-  insuredData,
-  branchData,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      insuredData,
+      branchData,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -117,7 +117,6 @@ const AdminInsuredPage = ({
                         },
                       }}
                       passHref
-                      legacyBehavior
                     >
                       <>
                         <button

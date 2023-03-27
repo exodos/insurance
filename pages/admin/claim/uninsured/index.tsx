@@ -46,8 +46,8 @@ const FeedClaimUnInsured = gql`
 `;
 
 const AdminClaimUnInsured = ({
-  data,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
 
   const { asPath } = useRouter();
@@ -85,7 +85,6 @@ const AdminClaimUnInsured = ({
                       },
                     }}
                     passHref
-                    legacyBehavior
                   >
                     <>
                       <button

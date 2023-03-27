@@ -86,8 +86,8 @@ const FeedInsuredPoliceReport = gql`
 `;
 
 const AdminInsuredPoliceReport = ({
-  data,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const { asPath } = useRouter();
 
@@ -123,6 +123,7 @@ const AdminInsuredPoliceReport = ({
                         returnPage: asPath,
                       },
                     }}
+                    passHref
                   >
                     <>
                       <button

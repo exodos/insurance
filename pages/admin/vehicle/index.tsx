@@ -94,8 +94,8 @@ const FeedVehicle = gql`
 `;
 
 const AdminVehiclePage = ({
-  data,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const { pathname, asPath } = useRouter();
 

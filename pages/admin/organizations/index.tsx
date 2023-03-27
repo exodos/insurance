@@ -95,7 +95,6 @@ const AdminOrganizationPage = ({
                         Add Insurer
                       </ReactTooltip>
                     </>
-
                     <Link
                       href={{
                         pathname: "/admin/organizations/export-organization",
@@ -104,7 +103,6 @@ const AdminOrganizationPage = ({
                         },
                       }}
                       passHref
-                      legacyBehavior
                     >
                       <>
                         <button
@@ -119,7 +117,6 @@ const AdminOrganizationPage = ({
                             aria-hidden="true"
                           />
                         </button>
-
                         <ReactTooltip
                           id="exportInsurer"
                           place="top"

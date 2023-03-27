@@ -61,9 +61,9 @@ const FeedRoleBranch = gql`
 `;
 
 const AdminUserPage = ({
-  userData,
-  roleBranchData,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      userData,
+      roleBranchData,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -92,7 +92,6 @@ const AdminUserPage = ({
                 <Report />
               </div>
             </div>
-
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
                 {session.user.memberships.role === "SUPERADMIN" && (
@@ -115,7 +114,6 @@ const AdminUserPage = ({
                         },
                       }}
                       passHref
-                      legacyBehavior
                     >
                       <button
                         type="button"

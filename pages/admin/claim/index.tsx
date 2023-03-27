@@ -92,7 +92,6 @@ const AdminClaimPage = ({
                       },
                     }}
                     passHref
-                    legacyBehavior
                   >
                     <>
                       <button

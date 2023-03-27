@@ -64,8 +64,8 @@ const FeedCertificate = gql`
 `;
 
 const AdminCertificatePage = ({
-  data,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const { pathname, asPath } = useRouter();
 
@@ -98,6 +98,7 @@ const AdminCertificatePage = ({
                           returnPage: pathname,
                         },
                       }}
+                      passHref
                     >
                       <>
                         <button
@@ -128,6 +129,7 @@ const AdminCertificatePage = ({
                           returnPage: pathname,
                         },
                       }}
+                      passHref
                     >
                       <>
                         <button
@@ -158,6 +160,7 @@ const AdminCertificatePage = ({
                           returnPage: pathname,
                         },
                       }}
+                      passHref
                     >
                       <>
                         <button
@@ -188,6 +191,7 @@ const AdminCertificatePage = ({
                           returnPage: pathname,
                         },
                       }}
+                      passHref
                     >
                       <>
                         <button

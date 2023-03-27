@@ -96,6 +96,7 @@ const AdminHitAndRunPoliceReport = ({
                         returnPage: asPath,
                       },
                     }}
+                    passHref
                   >
                     <>
                       <button

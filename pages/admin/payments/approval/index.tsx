@@ -54,8 +54,8 @@ const FeedPaymentByStatus = gql`
 `;
 
 const AdminPendingApprovalPage = ({
-  data,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const { asPath } = useRouter();
 
@@ -90,7 +90,6 @@ const AdminPendingApprovalPage = ({
                       },
                     }}
                     passHref
-                    legacyBehavior
                   >
                     <>
                       <button

@@ -55,8 +55,8 @@ const FeedPaymentByStatus = gql`
 `;
 
 const AdminPayedPaymentPage = ({
-  data,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const { asPath } = useRouter();
 
@@ -90,6 +90,7 @@ const AdminPayedPaymentPage = ({
                         paymentStatus: "Payed",
                       },
                     }}
+                    passHref
                   >
                     <>
                       <button
