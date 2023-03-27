@@ -4,6 +4,7 @@ import { prisma } from "../../lib/prisma";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const xmlRequest = req.body;
+  let xmlResponse;
   const options = {
     parseTagValue: true,
   };
@@ -11,48 +12,140 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const parser = new XMLParser(options);
   let jsonObj = parser.parse(xmlRequest);
   let c2b = jsonObj["soapenv:Envelope"];
-  let jsonValue = jsonObj["soapenv:Envelope"]["c2b:C2BPaymentQueryRequest"];
-  const RefNumber = jsonValue.RefNumber;
   let soapAction = Object.keys(c2b)[0];
 
   if (soapAction === "c2b:C2BPaymentQueryRequest") {
-    res.status(200).send(`Yes Its: ${RefNumber}`);
-  } else {
-    res.status(200).send("No its not");
+    const jsonValue = jsonObj["soapenv:Envelope"]["c2b:C2BPaymentQueryRequest"];
+    const RefNumber = jsonValue.RefNumber;
+    const TransID = jsonValue.TransID;
+    const BillRefNumber = jsonValue.BillRefNumber;
+
+    const result = await prisma.payment.findFirst({
+      where: {
+        refNumber: RefNumber,
+      },
+      include: {
+        insureds: true,
+      },
+    });
+
+    if (result) {
+      xmlResponse = `
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:c2b="http://cps.huawei.com/cpsinterface/c2bpayment">
+     <soapenv:Header/>
+     <soapenv:Body>
+        <c2b:C2BPaymentQueryResult> 
+         <ResultCode>0</ResultCode> 
+         <ResultDesc>Success</ResultDesc> 
+         <TransID>${TransID}</TransID> 
+         <BillRefNumber>${BillRefNumber}</BillRefNumber> 
+         <UtilityName>thirdpartyinsurance</UtilityName> 
+         <CustomerName>${result.insureds.firstName}</CustomerName> 
+         <Amount>${result.premiumTarif}</Amount>
+         <BranchCode>${result.branchCode}</BranchCode>
+         <PlateNumber>OR-55395</PlateNumber>
+       </c2b:C2BPaymentQueryResult> 
+    </soapenv:Body>
+    </soapenv:Envelope>`;
+
+      // res.status(200).send(xmlResponse);
+    } else {
+      xmlResponse = `
+      <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:c2b="http://cps.huawei.com/cpsinterface/c2bpayment">
+       <soapenv:Header/>
+       <soapenv:Body>
+          <c2b:C2BPaymentQueryResult> 
+           <ResultCode>1</ResultCode> 
+           <ResultDesc>Fail</ResultDesc> 
+           <TransID>${TransID}</TransID> 
+           <BillRefNumber>${BillRefNumber}</BillRefNumber> 
+           <UtilityName>thirdpartyinsurance</UtilityName> 
+         </c2b:C2BPaymentQueryResult> 
+      </soapenv:Body>
+      </soapenv:Envelope>`;
+    }
+  } else if (soapAction === "c2b:C2BPaymentConfirmationRequest") {
+    const jsonValue =
+      jsonObj["soapenv:Envelope"]["c2b:C2BPaymentConfirmationRequest"];
+    const RefNumber = jsonValue.RefNumber;
+    const TransID = jsonValue.TransID;
+    const BillRefNumber = jsonValue.BillRefNumber;
+
+    const result = await prisma.payment.findFirst({
+      where: {
+        refNumber: RefNumber,
+      },
+      include: {
+        insureds: true,
+        certificates: true,
+      },
+    });
+
+    if (result) {
+      const response = await prisma.$transaction(async (tx) => {
+        const paymentData = await tx.payment.update({
+          where: { refNumber: RefNumber },
+          data: {
+            paymentStatus: "Payed",
+          },
+        });
+
+        const certData = await tx.certificate.updateMany({
+          where: {
+            certificateNumber: {
+              in: result.certificates.map((c) => c.certificateNumber),
+            },
+          },
+          data: {
+            status: "APPROVED",
+          },
+        });
+        const vehicleData = await tx.vehicle.updateMany({
+          where: {
+            certificates: {
+              certificateNumber: {
+                in: result.certificates.map((c) => c.certificateNumber),
+              },
+            },
+          },
+          data: {
+            isInsured: "INSURED",
+          },
+        });
+
+        return vehicleData;
+      });
+
+      if (response) {
+        xmlResponse = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:c2b="http://cps.huawei.com/cpsinterface/c2bpayment"> 
+         <soapenv:Header/> 
+         <soapenv:Body> 
+            <c2bC2BPaymentConfirmationResult>0</c2bC2BPaymentConfirmationResult> 
+        </soapenv:Body> 
+        </soapenv:Envelope> `;
+
+        res.status(200).send(xmlResponse);
+      } else {
+        xmlResponse = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:c2b="http://cps.huawei.com/cpsinterface/c2bpayment"> 
+         <soapenv:Header/> 
+         <soapenv:Body> 
+            <c2b:C2BPaymentConfirmationResult>1</c2b:C2BPaymentConfirmationResult> 
+        </soapenv:Body> 
+        </soapenv:Envelope> `;
+
+        res.status(200).send(xmlResponse);
+      }
+    }
   }
 
-  // let c2bValue = jsonObj["soapenv:Envelope"]["c2b:C2BPaymentQueryRequest"];
-  // const RefNumber = c2bValue.RefNumber;
-  // res.status(200).send(RefNumber);
+  xmlResponse = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:c2b="http://cps.huawei.com/cpsinterface/c2bpayment"> 
+  <soapenv:Header/> 
+  <soapenv:Body> 
+     <c2b:C2BPaymentConfirmationResult>1</c2b:C2BPaymentConfirmationResult> 
+ </soapenv:Body> 
+ </soapenv:Envelope> `;
 
-  //   const result = await prisma.payment.findFirst({
-  //     where: {
-  //       refNumber: RefNumber,
-  //       paymentStatus: "PendingPayment",
-  //     },
-  //     include: {
-  //       insureds: true,
-  //       certificates: true,
-  //     },
-  //   });
-
-  //   if (result) {
-  //     const xmlResult = `
-  //   <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:c2b="http://cps.huawei.com/cpsinterface/c2bpayment">
-  //    <soapenv:Header/>
-  //    <soapenv:Body>
-  //       <c2b:C2BPaymentValidationResult>
-  //       <CustomerName>${result.insureds.firstName}</CustomerName>
-  //       <PremiumTarif>${result.premiumTarif}</PremiumTarif>
-  //       </c2b:C2BPaymentValidationResult>
-  //    </soapenv:Body>
-  // </soapenv:Envelope>
-  // `;
-
-  //     res.status(200).send(xmlResult);
-  //   } else {
-  //     res.status(200).json({ message: "No Found" });
-  //   }
+  res.status(200).send(xmlResponse);
 };
 
 export default handler;

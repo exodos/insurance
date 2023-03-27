@@ -32,6 +32,7 @@
       "@/claim/uninsured/*": ["components/claim/uninsured/*"],
       "@/tariff/*": ["components/tariff/*"],
       "@/common/*": ["components/common/*"],
+      "@/report/*": ["components/report/*"],
       "@/store/*": ["store/*"]
     }
   },

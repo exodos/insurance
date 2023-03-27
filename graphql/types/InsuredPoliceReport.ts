@@ -1,3 +1,4 @@
+import { changePhone, sendSmsMessage } from "@/lib/config";
 import { Prisma } from "@prisma/client";
 import format from "date-fns/format";
 import {
@@ -445,9 +446,65 @@ export const createInsuredPoliceReportMutation = extendType({
             certificates: true,
           },
         });
-        return await ctx.prisma.insuredPoliceReport.create({
+
+        const victimVehicle = await ctx.prisma.vehicle.findFirst({
+          where: {
+            plateNumber:
+              args.input.vehicle_PoliceReport_victimVehicle.plateNumber,
+          },
+          include: {
+            branchs: true,
+            insureds: true,
+            certificates: true,
+          },
+        });
+
+        if (!responsibleVehicle) {
+          throw new Error(
+            `The responsible vehicle may not be existed!! Please try again`
+          );
+        } else if (responsibleVehicle.isInsured !== "INSURED") {
+          throw new Error(
+            `The responsible vehicle may not be insured!! Please try again`
+          );
+        } else if (!victimVehicle) {
+          throw new Error(
+            `The Victim vehicle may not be existed!! Please try again`
+          );
+        } else if (victimVehicle.isInsured !== "INSURED") {
+          throw new Error(
+            `The victim vehicle may not be insured!! Please try again`
+          );
+        }
+
+        const claimNumber = `CN-${format(new Date(), "yyMMiHms")}`,
+          incidentNumber = `IN-${format(new Date(), "yyMMiHms")}`,
+          victimMobileNumber = changePhone(args.input.victimPhoneNumber),
+          victimName = args.input.victimDriverName;
+
+        const newValue = {
+          incidentNumber: incidentNumber,
+          victimDriverName: args.input.victimDriverName,
+          victimLicenceNumber: args.input.victimLicenceNumber,
+          victimLevel: args.input.victimLevel,
+          victimRegion: args.input.victimRegion,
+          victimSubCity: args.input.victimSubCity,
+          victimCity: args.input.victimCity,
+          victimWereda: args.input.victimWereda,
+          victimKebelle: args.input.victimKebelle,
+          victimHouseNo: args.input.victimHouseNo,
+          victimPhoneNumber: victimMobileNumber,
+          incidentCause: args.input.incidentCause,
+          incidentDate: new Date(args.input.incidentDate).toDateString(),
+          incidentPlace: args.input.incidentPlace,
+          incidentTime: args.input.incidentTime,
+          responsibleDriverName: args.input.responsibleDriverName,
+          responsiblePhoneNumber: args.input.responsiblePhoneNumber,
+        };
+
+        const response = await ctx.prisma.insuredPoliceReport.create({
           data: {
-            incidentNumber: `IN-${format(new Date(), "yyMMiHms")}`,
+            incidentNumber: incidentNumber,
             victimDriverName: args.input.victimDriverName,
             victimLicenceNumber: args.input.victimLicenceNumber,
             victimLevel: args.input.victimLevel,
@@ -457,7 +514,7 @@ export const createInsuredPoliceReportMutation = extendType({
             victimWereda: args.input.victimWereda,
             victimKebelle: args.input.victimKebelle,
             victimHouseNo: args.input.victimHouseNo,
-            victimPhoneNumber: args.input.victimPhoneNumber,
+            victimPhoneNumber: victimMobileNumber,
             incidentCause: args.input.incidentCause,
             incidentDate: args.input.incidentDate,
             incidentPlace: args.input.incidentPlace,
@@ -504,7 +561,7 @@ export const createInsuredPoliceReportMutation = extendType({
             },
             claims: {
               create: {
-                claimNumber: `CN-${format(new Date(), "yyMMiHms")}`,
+                claimNumber: claimNumber,
                 damageEstimate: args.input.claims.damageEstimate,
                 insureds: {
                   connect: {
@@ -528,10 +585,31 @@ export const createInsuredPoliceReportMutation = extendType({
                       responsibleVehicle.certificates.certificateNumber,
                   },
                 },
+                thirdPartyLogs: {
+                  create: {
+                    userEmail: user.email,
+                    action: "Create",
+                    mode: "InsuredPoliceReport",
+                    newValue: newValue,
+                    branchCon: {
+                      connect: {
+                        id: args.input.policeBranch.id,
+                      },
+                    },
+                  },
+                },
               },
             },
           },
         });
+
+        if (response) {
+          const mobileNumber = victimMobileNumber;
+          const message = `Dear ${victimName}, The claim number is: ${claimNumber}`;
+          await sendSmsMessage(mobileNumber, message);
+        }
+
+        return response;
       },
     });
   },
@@ -563,10 +641,65 @@ export const updateInsuredPoliceReportMutation = extendType({
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
+        const oldPolice = await ctx.prisma.insuredPoliceReport.findFirst({
+          where: { id: args.id },
+        });
+
+        const oldValue = {
+          victimDriverName: oldPolice?.victimDriverName,
+          victimLicenceNumber: oldPolice?.victimLicenceNumber,
+          victimLevel: oldPolice?.victimLevel,
+          victimRegion: oldPolice?.victimRegion,
+          victimSubCity: oldPolice?.victimSubCity,
+          victimCity: oldPolice?.victimCity,
+          victimWereda: oldPolice?.victimWereda,
+          victimKebelle: oldPolice?.victimKebelle,
+          victimHouseNo: oldPolice?.victimHouseNo,
+          victimPhoneNumber: oldPolice?.victimPhoneNumber,
+          incidentCause: oldPolice?.incidentCause,
+          incidentDate: new Date(oldPolice.incidentDate).toDateString(),
+          incidentPlace: oldPolice?.incidentPlace,
+          incidentTime: oldPolice?.incidentTime,
+          responsibleDriverName: oldPolice?.responsibleDriverName,
+          responsiblePhoneNumber: oldPolice?.responsiblePhoneNumber,
+        };
+
+        const newValue = {
+          victimDriverName: args?.input?.victimDriverName,
+          victimLicenceNumber: args?.input?.victimLicenceNumber,
+          victimLevel: args?.input?.victimLevel,
+          victimRegion: args?.input?.victimRegion,
+          victimSubCity: args?.input?.victimSubCity,
+          victimCity: args?.input?.victimCity,
+          victimWereda: args?.input?.victimWereda,
+          victimKebelle: args?.input?.victimKebelle,
+          victimHouseNo: args?.input?.victimHouseNo,
+          victimPhoneNumber: args?.input?.victimPhoneNumber,
+          incidentCause: args?.input?.incidentCause,
+          incidentDate: args?.input?.incidentDate,
+          incidentPlace: args?.input?.incidentPlace,
+          incidentTime: args?.input?.incidentTime,
+          responsibleDriverName: args?.input?.responsibleDriverName,
+          responsiblePhoneNumber: args?.input?.responsiblePhoneNumber,
+        };
         return await ctx.prisma.insuredPoliceReport.update({
           where: { id: args.id },
           data: {
             ...args.input,
+            thirdPartyLogs: {
+              create: {
+                userEmail: user.email,
+                action: "Create",
+                mode: "InsuredPoliceReport",
+                oldValue: oldValue,
+                newValue: newValue,
+                branchCon: {
+                  connect: {
+                    id: oldPolice.policeBranchId,
+                  },
+                },
+              },
+            },
           },
         });
       },
@@ -598,10 +731,48 @@ export const deleteInsuredPoliceReportMutation = extendType({
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
-        return await ctx.prisma.insuredPoliceReport.delete({
-          where: {
-            id: args.id,
-          },
+        const oldPolice = await ctx.prisma.insuredPoliceReport.findFirst({
+          where: { id: args.id },
+        });
+
+        const oldValue = {
+          victimDriverName: oldPolice?.victimDriverName,
+          victimLicenceNumber: oldPolice?.victimLicenceNumber,
+          victimLevel: oldPolice?.victimLevel,
+          victimRegion: oldPolice?.victimRegion,
+          victimSubCity: oldPolice?.victimSubCity,
+          victimCity: oldPolice?.victimCity,
+          victimWereda: oldPolice?.victimWereda,
+          victimKebelle: oldPolice?.victimKebelle,
+          victimHouseNo: oldPolice?.victimHouseNo,
+          victimPhoneNumber: oldPolice?.victimPhoneNumber,
+          incidentCause: oldPolice?.incidentCause,
+          incidentDate: new Date(oldPolice.incidentDate).toDateString(),
+          incidentPlace: oldPolice?.incidentPlace,
+          incidentTime: oldPolice?.incidentTime,
+          responsibleDriverName: oldPolice?.responsibleDriverName,
+          responsiblePhoneNumber: oldPolice?.responsiblePhoneNumber,
+        };
+        return await ctx.prisma.$transaction(async (tx) => {
+          const police = await tx.insuredPoliceReport.delete({
+            where: {
+              id: args.id,
+            },
+          });
+          const logger = await tx.thirdPartyLog.create({
+            data: {
+              userEmail: user.email,
+              action: "Delete",
+              mode: "InsuredPoliceReport",
+              oldValue: oldValue,
+              branchCon: {
+                connect: {
+                  id: oldPolice.policeBranchId,
+                },
+              },
+            },
+          });
+          return logger;
         });
       },
     });
@@ -800,9 +971,6 @@ export const InsuredPoliceReportUpdateInput = inputObjectType({
     t.string("incidentTime");
     t.string("responsibleDriverName");
     t.string("responsiblePhoneNumber");
-    // t.string("trafficPoliceName");
-    // t.string("trafficPolicePhoneNumber");
-    // t.string("policeStationName");
   },
 });
 

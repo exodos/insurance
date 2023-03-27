@@ -6,8 +6,9 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { IoIosAddCircle } from "react-icons/io";
 import ReactTooltip from "react-tooltip";
-import AddCertificateModal from "../certificate/add-certificate";
 import AddOrUpdateCertificateModal from "../certificate/add-update-certificate";
+import { FaExchangeAlt } from "react-icons/fa";
+import TransferCertificateModal from "../certificate/transfer-certificate";
 
 const VehicleBranchByPlateNumber = gql`
   query GetVehicleByPlateNumber($plateNumber: String!) {
@@ -46,6 +47,8 @@ const VehicleByPlateNumber = ({ code, region, branchId, path }) => {
   const [formValues, setFormValues] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createList, setCreateList] = useState([]);
+  const [showTransferModal, setShowTransferModal] = useState(false);
+  const [transferList, setTransferList] = useState([]);
   const [codeOptions, setCodeOptions] = useState(code);
   const [regionOptions, setRegionOptions] = useState(region);
 
@@ -65,6 +68,8 @@ const VehicleByPlateNumber = ({ code, region, branchId, path }) => {
       .required("Plate Number Is Required"),
   });
 
+  let transfer = false;
+
   const [
     vehicleData,
     {
@@ -77,6 +82,21 @@ const VehicleByPlateNumber = ({ code, region, branchId, path }) => {
   const handleAdd = (value: any) => {
     setShowCreateModal((prev) => !prev);
     setCreateList(value);
+  };
+
+  if (vehicleBranchByPlateNumberData?.getVehicleByPlateNumber) {
+    transfer =
+      vehicleBranchByPlateNumberData?.getVehicleByPlateNumber?.branchs.id ===
+      branchId
+        ? false
+        : true;
+  }
+
+  console.log(transfer);
+
+  const handleTransfer = (value: any) => {
+    setShowTransferModal((prev) => !prev);
+    setTransferList(value);
   };
 
   return (
@@ -466,41 +486,64 @@ const VehicleByPlateNumber = ({ code, region, branchId, path }) => {
                                   ?.getVehicleByPlateNumber?.isInsured
                               }
                             </td>
-                            {/* {((item?.certificates &&
-                                    item?.certificates?.policies &&
-                                    checkPolicy(
-                                      item.certificates.policies
-                                        .policyExpireDate
-                                    )) ||
-                                    item?.isInsured === "NOTINSURED") && ( */}
-                            <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                              <>
-                                <button
-                                  onClick={() =>
-                                    handleAdd(
-                                      vehicleBranchByPlateNumberData?.getVehicleByPlateNumber
-                                    )
-                                  }
-                                  className="inline-flex items-center"
-                                  data-tip
-                                  data-type="success"
-                                  data-for="addVehicle"
-                                >
-                                  <IoIosAddCircle
-                                    className="flex-shrink-0 h-6 w-6 text-lightGreen"
-                                    aria-hidden="true"
-                                  />
-                                </button>
-                                <ReactTooltip
-                                  id="addVehicle"
-                                  place="top"
-                                  effect="solid"
-                                >
-                                  Add Vehicle
-                                </ReactTooltip>
-                              </>
-                            </td>
-                            {/* )} */}
+                            {!transfer && (
+                              <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                <>
+                                  <button
+                                    onClick={() =>
+                                      handleAdd(
+                                        vehicleBranchByPlateNumberData?.getVehicleByPlateNumber
+                                      )
+                                    }
+                                    className="inline-flex items-center"
+                                    data-tip
+                                    data-type="success"
+                                    data-for="addVehicle"
+                                  >
+                                    <IoIosAddCircle
+                                      className="flex-shrink-0 h-6 w-6 text-lightGreen"
+                                      aria-hidden="true"
+                                    />
+                                  </button>
+                                  <ReactTooltip
+                                    id="addVehicle"
+                                    place="top"
+                                    effect="solid"
+                                  >
+                                    Add Vehicle
+                                  </ReactTooltip>
+                                </>
+                              </td>
+                            )}
+                            {transfer && (
+                              <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                <>
+                                  <button
+                                    onClick={() =>
+                                      handleTransfer(
+                                        vehicleBranchByPlateNumberData?.getVehicleByPlateNumber
+                                      )
+                                    }
+                                    className="inline-flex items-center"
+                                    data-tip
+                                    data-type="success"
+                                    data-for="transferVehicle"
+                                  >
+                                    <FaExchangeAlt
+                                      className="flex-shrink-0 h-6 w-6 text-lightGreen"
+                                      aria-hidden="true"
+                                    />
+                                  </button>
+                                  <ReactTooltip
+                                    id="transferVehicle"
+                                    place="top"
+                                    effect="solid"
+                                  >
+                                    Transfer Vehicle
+                                  </ReactTooltip>
+                                </>
+                              </td>
+                            )}
                           </tr>
                         </tbody>
                       </table>
@@ -512,10 +555,16 @@ const VehicleByPlateNumber = ({ code, region, branchId, path }) => {
           )}
         </div>
       </div>
-
       {showCreateModal ? (
         <AddOrUpdateCertificateModal
           vehicle={createList}
+          href={path}
+          branchId={branchId}
+        />
+      ) : null}
+      {showTransferModal ? (
+        <TransferCertificateModal
+          vehicle={transferList}
           href={path}
           branchId={branchId}
         />

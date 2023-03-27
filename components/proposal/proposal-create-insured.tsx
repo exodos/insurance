@@ -266,7 +266,7 @@ const ProposalCreateInsured = () => {
               <div className="pt-5">
                 <div className="flex justify-center">
                   <button
-                    className="rounded-md border border-gray-300 bg-lightBlue ml-5 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-deepBlue focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    className="rounded-md border border-gray-300 bg-lightGreen ml-5 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-deepGreen focus:outline-none focus:ring-2 focus:ring-lightBlue focus:ring-offset-2"
                     type="submit"
                   >
                     Continue

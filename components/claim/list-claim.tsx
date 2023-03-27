@@ -218,20 +218,18 @@ const ListClaim = ({ claimData, href }) => {
                           >
                             <span className="sr-only">Edit</span>
                           </th>
-                          </>
-                          )}
+                        </>
+                      )}
                       {(session.user.memberships.role === "SUPERADMIN" ||
-                        session.user.memberships.role ===
-                          "INSURER" ||
-                        session.user.memberships.role ===
-                          "BRANCHADMIN" || session.user.memberships.role ===
-                          "MEMBER" ) && (
-                          <th
-                            scope="col"
-                            className="relative py-3.5 pl-3 pr-4 sm:pr-6"
-                          >
-                            <span className="sr-only">Complete</span>
-                          </th>                        
+                        session.user.memberships.role === "INSURER" ||
+                        session.user.memberships.role === "BRANCHADMIN" ||
+                        session.user.memberships.role === "MEMBER") && (
+                        <th
+                          scope="col"
+                          className="relative py-3.5 pl-3 pr-4 sm:pr-6"
+                        >
+                          <span className="sr-only">Complete</span>
+                        </th>
                       )}
                     </tr>
                   </thead>
@@ -316,7 +314,7 @@ const ListClaim = ({ claimData, href }) => {
                                     className="text-indigo-600 hover:text-indigo-900"
                                     data-tip
                                     data-type="warning"
-                                    data-for="editClaim"
+                                    data-for="updateEstimatedDamage"
                                   >
                                     <AiFillEdit
                                       className="flex-shrink-0 h-5 w-5 text-gray-400"
@@ -324,46 +322,44 @@ const ListClaim = ({ claimData, href }) => {
                                     />
                                   </button>
                                   <ReactTooltip
-                                    id="editClaim"
+                                    id="updateEstimatedDamage"
                                     place="top"
                                     effect="solid"
                                   >
-                                    Edit Claim
+                                    Update Estimated Damage
                                   </ReactTooltip>
                                 </>
                               </td>
-                              </>
-                              )}
+                            </>
+                          )}
 
-                      {(session.user.memberships.role === "SUPERADMIN" ||
-                        session.user.memberships.role ===
-                          "INSURER" ||
-                        session.user.memberships.role ===
-                          "BRANCHADMIN" || session.user.memberships.role ===
-                          "MEMBER" ) && (
-                              <td className="relative whitespace-nowrap py-4 pl-2 pr-3 text-right text-sm font-medium sm:pr-6">
-                                <>
-                                  <button
-                                    onClick={() => handleAccident(item.id)}
-                                    className="text-indigo-600 hover:text-indigo-900"
-                                    data-tip
-                                    data-type="success"
-                                    data-for="accidentRecord"
-                                  >
-                                    <HiCheckBadge
-                                      className="flex-shrink-0 h-6 w-6 text-lightGreen"
-                                      aria-hidden="true"
-                                    />
-                                  </button>
-                                  <ReactTooltip
-                                    id="accidentRecord"
-                                    place="top"
-                                    effect="solid"
-                                  >
-                                    Complete
-                                  </ReactTooltip>
-                                </>
-                              </td>
+                          {(session.user.memberships.role === "SUPERADMIN" ||
+                            session.user.memberships.role === "INSURER" ||
+                            session.user.memberships.role === "BRANCHADMIN" ||
+                            session.user.memberships.role === "MEMBER") && (
+                            <td className="relative whitespace-nowrap py-4 pl-2 pr-3 text-right text-sm font-medium sm:pr-6">
+                              <>
+                                <button
+                                  onClick={() => handleAccident(item.id)}
+                                  className="text-indigo-600 hover:text-indigo-900"
+                                  data-tip
+                                  data-type="success"
+                                  data-for="accidentRecord"
+                                >
+                                  <HiCheckBadge
+                                    className="flex-shrink-0 h-6 w-6 text-lightGreen"
+                                    aria-hidden="true"
+                                  />
+                                </button>
+                                <ReactTooltip
+                                  id="accidentRecord"
+                                  place="top"
+                                  effect="solid"
+                                >
+                                  Complete
+                                </ReactTooltip>
+                              </>
+                            </td>
                           )}
                         </tr>
                       ))}

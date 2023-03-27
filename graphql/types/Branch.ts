@@ -493,18 +493,33 @@ export const createBranchMutation = extendType({
         ) {
           throw new Error(`You do not have permission to perform this action`);
         }
+        const newValue = {
+          branchName: args.input.branchName,
+          branchCode: args.input.branchCode ?? null,
+          region: args.input.region ?? null,
+          city: args.input.city ?? null,
+          mobileNumber: args.input.mobileNumber,
+          orgId: args.input.organizations.id,
+        };
 
         return await ctx.prisma.branch.create({
           data: {
-            // ...args.input,
             branchName: args.input.branchName,
-            branchCode: args.input.branchCode,
+            branchCode: args.input.branchCode ?? null,
             region: args.input.region ?? null,
             city: args.input.city ?? null,
             mobileNumber: args.input.mobileNumber,
             organizations: {
               connect: {
                 id: args.input.organizations.id,
+              },
+            },
+            thirdPartyLog: {
+              create: {
+                userEmail: user.email,
+                action: "Create",
+                mode: "Branch",
+                newValue: newValue,
               },
             },
           },
@@ -540,10 +555,42 @@ export const updateBranchMutation = extendType({
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
+        const oldBranch = await ctx.prisma.branch.findUnique({
+          where: { id: args.id },
+          include: {
+            organizations: true,
+          },
+        });
+
+        const oldValue = {
+          branchName: oldBranch?.branchName,
+          branchCode: oldBranch?.branchCode ?? null,
+          region: oldBranch?.region ?? null,
+          city: oldBranch?.city ?? null,
+          mobileNumber: oldBranch?.mobileNumber,
+          orgId: oldBranch.organizations.id,
+        };
+        const newValue = {
+          branchName: args.input.branchName,
+          branchCode: args.input.branchCode ?? null,
+          region: args.input.region ?? null,
+          city: args.input.city ?? null,
+          mobileNumber: args.input.mobileNumber,
+          orgId: oldBranch.organizations.id,
+        };
         return ctx.prisma.branch.update({
           where: { id: args.id },
           data: {
             ...args.input,
+            thirdPartyLog: {
+              create: {
+                userEmail: user.email,
+                action: "Edit",
+                mode: "Branch",
+                oldValue: oldValue,
+                newValue: newValue,
+              },
+            },
           },
         });
       },
@@ -576,10 +623,37 @@ export const deleteBranchMutation = extendType({
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
-        return await ctx.prisma.branch.delete({
-          where: {
-            id: args.branchId,
+        const oldBranch = await ctx.prisma.branch.findUnique({
+          where: { id: args.branchId },
+          include: {
+            organizations: true,
           },
+        });
+        const oldValue = {
+          branchName: oldBranch?.branchName,
+          branchCode: oldBranch?.branchCode ?? null,
+          region: oldBranch?.region ?? null,
+          city: oldBranch?.city ?? null,
+          mobileNumber: oldBranch?.mobileNumber,
+          orgId: oldBranch.organizations.id,
+        };
+
+        return await ctx.prisma.$transaction(async (tx) => {
+          const branch = await tx.branch.delete({
+            where: {
+              id: args.branchId,
+            },
+          });
+          const logger = await tx.thirdPartyLog.create({
+            data: {
+              userEmail: user.email,
+              action: "Delete",
+              mode: "Branch",
+              oldValue: oldValue,
+            },
+          });
+
+          return logger;
         });
       },
     });

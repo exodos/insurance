@@ -1,3 +1,4 @@
+import { changePhone, sendSmsMessage } from "@/lib/config";
 import { victimCreateInput } from "./Victim";
 import { Prisma } from "@prisma/client";
 import format from "date-fns/format";
@@ -222,9 +223,43 @@ export const createHitAndRunPoliceReportMutation = extendType({
           throw new Error(`You do not have permission to perform the action`);
         }
 
-        return await ctx.prisma.hitAndRunPoliceReport.create({
+        const claimNumber = `CN-${format(new Date(), "yyMMiHms")}`,
+          incidentNumber = `IN-${format(new Date(), "yyMMiHms")}`,
+          claimerPhoneNumber = changePhone(
+            args.input.claimHitAndRuns.claimerPhoneNumber
+          ),
+          claimerFullName = args.input.claimHitAndRuns.claimerFullName;
+
+        const newValue = {
+          incidentNumber: incidentNumber,
+          incidentCause: args.input.incidentCause,
+          incidentDate: args.input.incidentDate,
+          incidentPlace: args.input.incidentPlace,
+          incidentTime: args.input.incidentTime,
+          policeBranch: {
+            id: args.input.policeBranch.id,
+          },
+          trafficPolices: {
+            id: args.input.trafficPolices.id,
+          },
+          claimHitAndRuns: {
+            claimNumber: claimNumber,
+            damageEstimate: args.input.claimHitAndRuns.damageEstimate,
+            claimerFullName: claimerFullName,
+            claimerRegion: args.input.claimHitAndRuns.claimerRegion,
+            claimerCity: args.input.claimHitAndRuns.claimerCity,
+            claimerPhoneNumber: claimerPhoneNumber,
+            branchs: {
+              connect: {
+                id: args.input.branchs.id,
+              },
+            },
+          },
+        };
+
+        const response = await ctx.prisma.hitAndRunPoliceReport.create({
           data: {
-            incidentNumber: `IN-${format(new Date(), "yyMMiHms")}`,
+            incidentNumber: incidentNumber,
             incidentCause: args.input.incidentCause,
             incidentDate: args.input.incidentDate,
             incidentPlace: args.input.incidentPlace,
@@ -256,14 +291,26 @@ export const createHitAndRunPoliceReportMutation = extendType({
             },
             claimHitAndRuns: {
               create: {
-                claimNumber: `CN-${format(new Date(), "yyMMiHms")}`,
+                claimNumber: claimNumber,
                 damageEstimate: args.input.claimHitAndRuns.damageEstimate,
-                claimerFullName: args.input.claimHitAndRuns.claimerFullName,
+                claimerFullName: claimerFullName,
                 claimerRegion: args.input.claimHitAndRuns.claimerRegion,
                 claimerCity: args.input.claimHitAndRuns.claimerCity,
-                claimerPhoneNumber:
-                  args.input.claimHitAndRuns.claimerPhoneNumber,
+                claimerPhoneNumber: claimerPhoneNumber,
                 branchs: {
+                  connect: {
+                    id: args.input.branchs.id,
+                  },
+                },
+              },
+            },
+            thirdPartyLogs: {
+              create: {
+                userEmail: user.email,
+                action: "Create",
+                mode: "HitAndRunPoliceReport",
+                newValue: newValue,
+                branchCon: {
                   connect: {
                     id: args.input.branchs.id,
                   },
@@ -272,6 +319,14 @@ export const createHitAndRunPoliceReportMutation = extendType({
             },
           },
         });
+
+        if (response) {
+          const mobileNumber = claimerPhoneNumber;
+          const message = `Dear ${claimerFullName}, The claim number is: ${claimNumber}`;
+          await sendSmsMessage(mobileNumber, message);
+        }
+
+        return response;
       },
     });
   },
@@ -302,17 +357,46 @@ export const updateHitAndRunPoliceReport = extendType({
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
+        const oldHit = await ctx.prisma.hitAndRunPoliceReport.findFirst({
+          where: {
+            id: args.id,
+          },
+        });
+
+        const oldValue = {
+          incidentCause: oldHit?.incidentCause,
+          incidentDate: new Date(oldHit.incidentDate).toDateString(),
+          incidentPlace: oldHit?.incidentPlace,
+          incidentTime: oldHit?.incidentTime,
+        };
+
+        const newValue = {
+          incidentCause: args.input.incidentCause,
+          incidentDate: new Date(args.input.incidentDate).toDateString(),
+          incidentPlace: args.input.incidentPlace,
+          incidentTime: args.input.incidentTime,
+        };
         return await ctx.prisma.hitAndRunPoliceReport.update({
           where: { id: args.id },
           data: {
-            // ...args.input,
             incidentCause: args.input.incidentCause,
             incidentDate: args.input.incidentDate,
             incidentPlace: args.input.incidentPlace,
             incidentTime: args.input.incidentTime,
-            // trafficPoliceName: args.input.trafficPoliceName,
-            // trafficPolicePhoneNumber: args.input.trafficPoliceName,
-            // policeStationName: args.input.policeStationName,
+            thirdPartyLogs: {
+              create: {
+                userEmail: user.email,
+                action: "Edit",
+                mode: "HitAndRunPoliceReport",
+                oldValue: oldValue,
+                newValue: newValue,
+                branchCon: {
+                  connect: {
+                    id: oldHit.branchId,
+                  },
+                },
+              },
+            },
           },
         });
       },

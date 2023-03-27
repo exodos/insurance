@@ -1,7 +1,6 @@
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { getServerSession, unstable_getServerSession } from "next-auth";
-import { SessionProvider, useSession } from "next-auth/react";
-import Head from "next/head";
+import { getServerSession } from "next-auth";
+import { useSession } from "next-auth/react";
 import { initializeApollo } from "../../../lib/apollo";
 import { gql } from "@apollo/client";
 import { authOptions } from "../../api/auth/[...nextauth]";
@@ -10,9 +9,7 @@ import {
   BsFillArrowUpCircleFill,
   BsFillArrowDownCircleFill,
 } from "react-icons/bs";
-import { useState } from "react";
 import ListCertificate from "@/certificate/list-certificate";
-import AddCertificateModal from "@/certificate/add-certificate";
 import { useRouter } from "next/router";
 import SiteHeader from "@/components/layout/header";
 import Link from "next/link";
@@ -35,6 +32,7 @@ const FeedCertificate = gql`
       certificate {
         id
         certificateNumber
+        status
         issuedDate
         premiumTarif
         updatedAt
@@ -66,8 +64,8 @@ const FeedCertificate = gql`
 `;
 
 const AdminCertificatePage = ({
-      data,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  data,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const { pathname, asPath } = useRouter();
 

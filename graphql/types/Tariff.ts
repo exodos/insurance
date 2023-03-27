@@ -212,19 +212,38 @@ export const createTariffMutation = extendType({
             memberships: true,
           },
         });
-        if (!user || user.memberships.role !== "SUPERADMIN") {
+        if (!user || user?.memberships?.role !== "SUPERADMIN") {
           throw new Error(`You do not have permission to perform action`);
         }
+        const newValue = {
+          vehicleType: args.input.vehicleType,
+          vehicleSubType: args.input.vehicleSubType,
+          vehicleDetail: args.input.vehicleDetail,
+          vehicleUsage: args.input.vehicleUsage,
+          vehicleCategory: args.input.vehicleCategory,
+          premiumTarif: args.input.premiumTarif,
+        };
         return await ctx.prisma.tariff.create({
           data: {
-            // ...args.input,
-            // tariffCode: args.input.tariffCode,
             vehicleType: args.input.vehicleType,
             vehicleSubType: args.input.vehicleSubType,
             vehicleDetail: args.input.vehicleDetail,
             vehicleUsage: args.input.vehicleUsage,
             vehicleCategory: args.input.vehicleCategory,
             premiumTarif: args.input.premiumTarif,
+            thirdPartyLogs: {
+              create: {
+                userEmail: user.email,
+                action: "Create",
+                mode: "Tariff",
+                newValue: newValue,
+                branchCon: {
+                  connect: {
+                    id: user?.memberships?.branchId,
+                  },
+                },
+              },
+            },
           },
         });
       },
@@ -253,10 +272,49 @@ export const updateTariffMutation = extendType({
         if (!user || user.memberships.role !== "SUPERADMIN") {
           throw new Error(`You do not have permission to perform action`);
         }
+
+        const oldTariff = await ctx.prisma.tariff.findFirst({
+          where: {
+            id: args.id,
+          },
+        });
+
+        const oldValue = {
+          vehicleType: oldTariff?.vehicleType,
+          vehicleSubType: oldTariff?.vehicleSubType,
+          vehicleDetail: oldTariff?.vehicleDetail,
+          vehicleUsage: oldTariff?.vehicleUsage,
+          vehicleCategory: oldTariff?.vehicleCategory,
+          premiumTarif: oldTariff?.premiumTarif,
+        };
+
+        const newValue = {
+          vehicleType: args.input.vehicleType,
+          vehicleSubType: args.input.vehicleSubType,
+          vehicleDetail: args.input.vehicleDetail,
+          vehicleUsage: args.input.vehicleUsage,
+          vehicleCategory: args.input.vehicleCategory,
+          premiumTarif: args.input.premiumTarif,
+        };
+
         return await ctx.prisma.tariff.update({
           where: { id: args.id },
           data: {
             ...args.input,
+            thirdPartyLogs: {
+              create: {
+                userEmail: user.email,
+                action: "Edit",
+                mode: "Tariff",
+                oldValue: oldValue,
+                newValue: newValue,
+                branchCon: {
+                  connect: {
+                    id: user?.memberships.branchId,
+                  },
+                },
+              },
+            },
           },
         });
       },
@@ -282,14 +340,41 @@ export const updatePremiumTariffMutation = extendType({
             memberships: true,
           },
         });
-        if (!user || user.memberships.role !== "SUPERADMIN") {
+        if (!user || user?.memberships?.role !== "SUPERADMIN") {
           throw new Error(`You do not have permission to perform action`);
         }
+        const oldTariff = await ctx.prisma.tariff.findFirst({
+          where: {
+            id: args.id,
+          },
+        });
+
+        const oldValue = {
+          premiumTarif: oldTariff?.premiumTarif,
+        };
+
+        const newValue = {
+          premiumTarif: oldTariff?.premiumTarif,
+        };
+
         return await ctx.prisma.tariff.update({
           where: { id: args.id },
           data: {
-            // ...args.input,
             premiumTarif: args.premiumTariff,
+            thirdPartyLogs: {
+              create: {
+                userEmail: user.email,
+                action: "Edit",
+                mode: "Tariff",
+                oldValue: oldValue,
+                newValue: newValue,
+                branchCon: {
+                  connect: {
+                    id: user?.memberships.branchId,
+                  },
+                },
+              },
+            },
           },
         });
       },
@@ -316,6 +401,43 @@ export const deleteTariffMutation = extendType({
         if (!user || user.memberships.role !== "SUPERADMIN") {
           throw new Error(`You do not have permission to perform action`);
         }
+
+        // const oldTariff = await ctx.prisma.tariff.findFirst({
+        //   where: {
+        //     id: args.id,
+        //   },
+        // });
+        // const oldValue = {
+        //   vehicleType: oldTariff?.vehicleType,
+        //   vehicleSubType: oldTariff?.vehicleSubType,
+        //   vehicleDetail: oldTariff?.vehicleDetail,
+        //   vehicleUsage: oldTariff?.vehicleUsage,
+        //   vehicleCategory: oldTariff?.vehicleCategory,
+        //   premiumTarif: oldTariff?.premiumTarif,
+        // };
+
+        // return await ctx.prisma.$transaction(async (tx) => {
+        //   const tariffdata = await tx.tariff.delete({
+        //     where: {
+        //       id: args.id,
+        //     },
+        //   });
+        //   const logger = await tx.thirdPartyLog.create({
+        //     data: {
+        //       userEmail: user.email,
+        //       action: "Delete",
+        //       mode: "Tariff",
+        //       oldValue: oldValue,
+        //       branchCon: {
+        //         connect: {
+        //           id: user?.memberships.branchId,
+        //         },
+        //       },
+        //     },
+        //   });
+        //   return logger;
+        // });
+
         return await ctx.prisma.tariff.delete({
           where: {
             id: args.id,

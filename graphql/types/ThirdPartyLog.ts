@@ -24,6 +24,16 @@ export const ThirdPartyLog = objectType({
     t.json("oldValue");
     t.json("newValue");
     t.date("timeStamp");
+    t.field("branchCon", {
+      type: "Branch",
+      async resolve(_parent, _args, ctx) {
+        return await ctx.prisma.thirdPartyLog
+          .findUnique({
+            where: { id: _parent.id },
+          })
+          .branchCon();
+      },
+    });
     t.list.field("certificates", {
       type: "Certificate",
       async resolve(_parent, _args, ctx) {

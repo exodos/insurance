@@ -469,7 +469,7 @@ const ProposalDetails = () => {
               <button
                 type="submit"
                 onClick={onSubmit}
-                className="inline-flex justify-center rounded-md border border-transparent bg-lightBlue py-2 px-8 text-sm font-medium text-white shadow-sm hover:bg-deepBlue focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                className="inline-flex justify-center rounded-md border border-transparent bg-lightGreen py-2 px-8 text-sm font-medium text-white shadow-sm hover:bg-deepGreen focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >
                 Create
               </button>

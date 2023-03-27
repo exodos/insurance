@@ -408,10 +408,23 @@ export const createUserMutation = extendType({
           !user ||
           (user.memberships.role !== "SUPERADMIN" &&
             user.memberships.role !== "INSURER" &&
+            user.memberships.role !== "BRANCHADMIN" &&
             user.memberships.role !== "TRAFFICPOLICEADMIN")
         ) {
           throw new Error(`You do not have permission to perform this action`);
         }
+
+        const newValue = {
+          firstName: args.input.firstName,
+          lastName: args.input.lastName,
+          region: args.input.region ?? null,
+          city: args.input.city ?? null,
+          email: args.input.email,
+          mobileNumber: changePhone(args.input.mobileNumber),
+          // password: await hashPassword(args.input.password),
+          role: args.input.memberships.role,
+          branchId: args.input.memberships.branchs.id,
+        };
         return await ctx.prisma.user.create({
           data: {
             firstName: args.input.firstName,
@@ -425,6 +438,19 @@ export const createUserMutation = extendType({
               create: {
                 role: args.input.memberships.role,
                 branchs: {
+                  connect: {
+                    id: args.input.memberships.branchs.id,
+                  },
+                },
+              },
+            },
+            thirdPartyLogs: {
+              create: {
+                userEmail: user.email,
+                action: "Create",
+                mode: "User",
+                newValue: newValue,
+                branchCon: {
                   connect: {
                     id: args.input.memberships.branchs.id,
                   },
@@ -464,6 +490,34 @@ export const updateUserMutation = extendType({
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
+
+        const oldUser = await ctx.prisma.user.findFirst({
+          where: { id: args.userId },
+          include: {
+            memberships: true,
+          },
+        });
+
+        const oldValue = {
+          firstName: oldUser?.firstName,
+          lastName: oldUser?.lastName,
+          region: oldUser?.region ?? null,
+          city: oldUser?.city ?? null,
+          email: oldUser?.email,
+          mobileNumber: changePhone(oldUser?.mobileNumber),
+          role: oldUser?.memberships.role,
+          branchId: oldUser?.memberships?.branchId,
+        };
+        const newValue = {
+          firstName: args.input.firstName,
+          lastName: args.input.lastName,
+          region: args.input.region ?? null,
+          city: args.input.city ?? null,
+          email: args.input.email,
+          mobileNumber: changePhone(args.input.mobileNumber),
+          role: args.input.memberships.role,
+          branchId: oldUser.memberships.branchId,
+        };
         return ctx.prisma.user.update({
           where: { id: args.userId },
           data: {
@@ -471,6 +525,20 @@ export const updateUserMutation = extendType({
             memberships: {
               update: {
                 role: args.input.memberships.role,
+              },
+            },
+            thirdPartyLogs: {
+              create: {
+                userEmail: user.email,
+                action: "Edit",
+                mode: "User",
+                oldValue: oldValue,
+                newValue: newValue,
+                branchCon: {
+                  connect: {
+                    id: oldUser?.memberships.branchId,
+                  },
+                },
               },
             },
           },
@@ -501,14 +569,49 @@ export const deleteUserMutation = extendType({
           !user ||
           (user.memberships.role !== "SUPERADMIN" &&
             user.memberships.role !== "INSURER" &&
+            user.memberships.role !== "BRANCHADMIN" &&
             user.memberships.role !== "TRAFFICPOLICEADMIN")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
-        return await ctx.prisma.user.delete({
-          where: {
-            id: args.id,
+        const oldUser = await ctx.prisma.user.findFirst({
+          where: { id: args.id },
+          include: {
+            memberships: true,
           },
+        });
+
+        const oldValue = {
+          firstName: oldUser?.firstName,
+          lastName: oldUser?.lastName,
+          region: oldUser?.region ?? null,
+          city: oldUser?.city ?? null,
+          email: oldUser?.email,
+          mobileNumber: changePhone(oldUser?.mobileNumber),
+          role: oldUser?.memberships.role,
+          branchId: oldUser?.memberships?.branchId,
+        };
+
+        return await ctx.prisma.$transaction(async (tx) => {
+          const userData = await tx.user.delete({
+            where: {
+              id: args.id,
+            },
+          });
+          const logger = await tx.thirdPartyLog.create({
+            data: {
+              userEmail: user.email,
+              action: "Delete",
+              mode: "User",
+              oldValue: oldValue,
+              branchCon: {
+                connect: {
+                  id: oldUser?.memberships.branchId,
+                },
+              },
+            },
+          });
+          return logger;
         });
       },
     });

@@ -94,18 +94,20 @@ const ListBranch = ({ branchData, href }) => {
                       >
                         Updated At
                       </th>
-                      {session.user.memberships.role === "INSURER" ||
-                        (session.user.memberships.role ===
-                          "TRAFFICPOLICEADMIN" && (
-                          <>
-                            <th scope="col" className="relative py-3.5 sm:pr-1">
-                              <span className="sr-only">Edit</span>
-                            </th>
-                            <th scope="col" className="relative py-3.5 sm:pr-1">
-                              <span className="sr-only">Delete</span>
-                            </th>
-                          </>
-                        ))}
+                      {(session.user.memberships.role === "SUPERADMIN" ||
+                        session.user.memberships.role === "INSURER" ||
+                        session.user.memberships.role === "BRANCHADMIN" ||
+                        session.user.memberships.role ===
+                          "TRAFFICPOLICEADMIN") && (
+                        <>
+                          <th scope="col" className="relative py-3.5 sm:pr-1">
+                            <span className="sr-only">Edit</span>
+                          </th>
+                          <th scope="col" className="relative py-3.5 sm:pr-1">
+                            <span className="sr-only">Delete</span>
+                          </th>
+                        </>
+                      )}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
@@ -136,58 +138,60 @@ const ListBranch = ({ branchData, href }) => {
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {format(new Date(item.updatedAt), "MMM-dd-yyyy")}
                           </td>
-                          {session.user.memberships.role === "INSURER" ||
-                            (session.user.memberships.role ===
-                              "TRAFFICPOLICEADMIN" && (
-                              <>
-                                <td className="relative whitespace-nowrap py-4 text-right text-sm font-medium sm:pr-1">
-                                  <>
-                                    <button
-                                      onClick={() => handleEdit(item)}
-                                      className="text-indigo-600 hover:text-indigo-900"
-                                      data-tip
-                                      data-type="warning"
-                                      data-for="editBranch"
-                                    >
-                                      <AiFillEdit
-                                        className="flex-shrink-0 h-5 w-5 text-gray-400"
-                                        aria-hidden="true"
-                                      />
-                                    </button>
-                                    <ReactTooltip
-                                      id="editBranch"
-                                      place="top"
-                                      effect="solid"
-                                    >
-                                      Edit Branch
-                                    </ReactTooltip>
-                                  </>
-                                </td>
-                                <td className="relative whitespace-nowrap py-4 text-right text-sm font-medium sm:pr-4">
-                                  <>
-                                    <button
-                                      onClick={() => handleDelete(item)}
-                                      className="text-indigo-600 hover:text-indigo-900"
-                                      data-tip
-                                      data-type="error"
-                                      data-for="deleteBranch"
-                                    >
-                                      <AiFillDelete
-                                        className="flex-shrink-0 h-5 w-5 text-gray-400"
-                                        aria-hidden="true"
-                                      />
-                                    </button>
-                                    <ReactTooltip
-                                      id="deleteBranch"
-                                      place="top"
-                                      effect="solid"
-                                    >
-                                      Delete Branch
-                                    </ReactTooltip>
-                                  </>
-                                </td>
-                              </>
-                            ))}
+                          {(session.user.memberships.role === "SUPERADMIN" ||
+                            session.user.memberships.role === "INSURER" ||
+                            session.user.memberships.role === "BRANCHADMIN" ||
+                            session.user.memberships.role ===
+                              "TRAFFICPOLICEADMIN") && (
+                            <>
+                              <td className="relative whitespace-nowrap py-4 text-right text-sm font-medium sm:pr-1">
+                                <>
+                                  <button
+                                    onClick={() => handleEdit(item)}
+                                    className="text-indigo-600 hover:text-indigo-900"
+                                    data-tip
+                                    data-type="warning"
+                                    data-for="editBranch"
+                                  >
+                                    <AiFillEdit
+                                      className="flex-shrink-0 h-5 w-5 text-gray-400"
+                                      aria-hidden="true"
+                                    />
+                                  </button>
+                                  <ReactTooltip
+                                    id="editBranch"
+                                    place="top"
+                                    effect="solid"
+                                  >
+                                    Edit Branch
+                                  </ReactTooltip>
+                                </>
+                              </td>
+                              <td className="relative whitespace-nowrap py-4 text-right text-sm font-medium sm:pr-4">
+                                <>
+                                  <button
+                                    onClick={() => handleDelete(item)}
+                                    className="text-indigo-600 hover:text-indigo-900"
+                                    data-tip
+                                    data-type="error"
+                                    data-for="deleteBranch"
+                                  >
+                                    <AiFillDelete
+                                      className="flex-shrink-0 h-5 w-5 text-gray-400"
+                                      aria-hidden="true"
+                                    />
+                                  </button>
+                                  <ReactTooltip
+                                    id="deleteBranch"
+                                    place="top"
+                                    effect="solid"
+                                  >
+                                    Delete Branch
+                                  </ReactTooltip>
+                                </>
+                              </td>
+                            </>
+                          )}
                         </tr>
                       ))}
                   </tbody>

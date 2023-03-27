@@ -111,6 +111,23 @@ export const listAllOrganization = extendType({
   },
 });
 
+export const listInsuranceOrganizationQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.list.field("listInsuranceOrganization", {
+      type: Organization,
+      args: { description: nonNull(OrgDesc) },
+      resolve: async (_parent, args, ctx) => {
+        return await ctx.prisma.organization.findMany({
+          where: {
+            description: args.description,
+          },
+        });
+      },
+    });
+  },
+});
+
 export const exportOrganizationQuery = extendType({
   type: "Query",
   definition(t) {
@@ -169,14 +186,34 @@ export const createOrganizationMutation = extendType({
           throw new Error(`You do not have permission to perform this action`);
         }
 
+        const newValue = {
+          orgName: args.input.orgName,
+          region: args.input.region ?? null,
+          city: args.input.city ?? null,
+          mobileNumber: args.input.mobileNumber,
+          description: args.input.description,
+        };
+
         return await ctx.prisma.organization.create({
           data: {
-            // ...args.input,
             orgName: args.input.orgName,
             region: args.input.region ?? null,
             city: args.input.city ?? null,
             mobileNumber: args.input.mobileNumber,
             description: args.input.description,
+            thirdPartyLogs: {
+              create: {
+                userEmail: user.email,
+                action: "Create",
+                mode: "Organization",
+                newValue: newValue,
+                branchCon: {
+                  connect: {
+                    id: user?.memberships.branchId,
+                  },
+                },
+              },
+            },
           },
         });
       },
@@ -194,18 +231,52 @@ export const updateOrganizationMutation = extendType({
         input: nonNull(organizationUpdateInput),
       },
       resolve: async (_parent, args, ctx) => {
-        // const user = await ctx.prisma.user.findUnique({
-        //   where: {
-        //     email: ctx.session.user.email,
-        //   },
-        // });
-        // if (!user || user.role !== "SUPERADMIN") {
-        //   throw new Error(`You do not have permission to perform action`);
-        // }
+        const user = await ctx.prisma.user.findUnique({
+          where: {
+            email: ctx.session.user.email,
+          },
+          include: {
+            memberships: true,
+          },
+        });
+        if (!user || user?.memberships?.role !== "SUPERADMIN") {
+          throw new Error(`You do not have permission to perform action`);
+        }
+        const oldOrg = await ctx.prisma.organization.findFirst({
+          where: {
+            id: args.id,
+          },
+        });
+        const oldValue = {
+          orgName: oldOrg.orgName,
+          region: oldOrg.region ?? null,
+          city: oldOrg.city ?? null,
+          mobileNumber: oldOrg.mobileNumber,
+        };
+        const newValue = {
+          orgName: args.input.orgName,
+          region: args.input.region ?? null,
+          city: args.input.city ?? null,
+          mobileNumber: args.input.mobileNumber,
+        };
         return ctx.prisma.organization.update({
           where: { id: args.id },
           data: {
             ...args.input,
+            thirdPartyLogs: {
+              create: {
+                userEmail: user.email,
+                action: "Update",
+                mode: "Organization",
+                oldValue: oldValue,
+                newValue: newValue,
+                branchCon: {
+                  connect: {
+                    id: user?.memberships.branchId,
+                  },
+                },
+              },
+            },
           },
         });
       },
@@ -222,18 +293,48 @@ export const deleteOrganizationMutation = extendType({
         orgId: nonNull(stringArg()),
       },
       resolve: async (_parent, args, ctx) => {
-        // const user = await ctx.prisma.user.findUnique({
-        //   where: {
-        //     email: ctx.session.user.email,
-        //   },
-        // });
-        // if (!user || user.role !== "SUPERADMIN") {
-        //   throw new Error(`You do not have permission to perform action`);
-        // }
-        return await ctx.prisma.organization.delete({
+        const user = await ctx.prisma.user.findUnique({
+          where: {
+            email: ctx.session.user.email,
+          },
+          include: {
+            memberships: true,
+          },
+        });
+        if (!user || user?.memberships?.role !== "SUPERADMIN") {
+          throw new Error(`You do not have permission to perform action`);
+        }
+        const oldOrg = await ctx.prisma.organization.findFirst({
           where: {
             id: args.orgId,
           },
+        });
+        const oldValue = {
+          orgName: oldOrg.orgName,
+          region: oldOrg.region ?? null,
+          city: oldOrg.city ?? null,
+          mobileNumber: oldOrg.mobileNumber,
+        };
+        return await ctx.prisma.$transaction(async (tx) => {
+          const orgData = tx.organization.delete({
+            where: {
+              id: args.orgId,
+            },
+          });
+          const logger = await tx.thirdPartyLog.create({
+            data: {
+              userEmail: user.email,
+              action: "Delete",
+              mode: "Organization",
+              oldValue: oldValue,
+              branchCon: {
+                connect: {
+                  id: user?.memberships.branchId,
+                },
+              },
+            },
+          });
+          return logger;
         });
       },
     });

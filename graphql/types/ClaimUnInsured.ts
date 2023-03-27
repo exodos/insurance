@@ -1,8 +1,6 @@
-import { organizationConnectInput } from "./Organization";
 import { Prisma } from "@prisma/client";
 import {
   arg,
-  enumType,
   extendType,
   floatArg,
   inputObjectType,
@@ -198,15 +196,40 @@ export const updateUnInsuredClaimMutation = extendType({
         if (
           !user ||
           (user.memberships.role !== "SUPERADMIN" &&
-            user.memberships.role !== "TRAFFICPOLICEADMIN" &&
-            user.memberships.role !== "TRAFFICPOLICEMEMBER")
+            user.memberships.role !== "TRAFFICPOLICEADMIN")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
+        const oldClaim = await ctx.prisma.claimUnInsured.findFirst({
+          where: {
+            claimNumber: args.id,
+          },
+        });
+
+        const oldValue = {
+          damageEstimate: oldClaim?.damageEstimate ?? null,
+        };
+        const newValue = {
+          damageEstimate: args?.damageEstimate ?? null,
+        };
         return await ctx.prisma.claimUnInsured.update({
           where: { id: args.id },
           data: {
             damageEstimate: args.damageEstimate,
+            thirdPartyLogs: {
+              create: {
+                userEmail: user.email,
+                action: "Edit",
+                mode: "ClaimUnInsured",
+                oldValue: oldValue,
+                newValue: newValue,
+                branchCon: {
+                  connect: {
+                    id: oldClaim?.branchId,
+                  },
+                },
+              },
+            },
           },
         });
       },

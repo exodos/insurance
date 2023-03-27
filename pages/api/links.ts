@@ -1,7 +1,6 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./auth/[...nextauth]";
 import { NextApiRequest, NextApiResponse } from "next";
-import { FaFileInvoiceDollar, FaHome } from "react-icons/fa";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const session = await getServerSession(req, res, authOptions);
@@ -67,7 +66,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         },
         {
           name: "Payment",
-          icon: "FaPaypal",
+          icon: "FaMoneyCheckAlt",
           current: false,
           children: [
             { name: "Payed", href: "/admin/payments" },
@@ -78,7 +77,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         {
           name: "Tariff",
           href: "/admin/tariff",
-          icon: "FaCcAmazonPay",
+          icon: "FaExchangeAlt",
           current: false,
         },
       ];
@@ -126,7 +125,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         },
         {
           name: "Payment",
-          icon: "FaPaypal",
+          icon: "FaMoneyCheckAlt",
           current: false,
           children: [
             { name: "Payed", href: "/insurer/payments" },
@@ -178,10 +177,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           },
           {
             name: "Payment",
-            icon: "FaPaypal",
+            icon: "FaMoneyCheckAlt",
             current: false,
             children: [
-              { name: "Payed", href: "/insurer/payments" },
+              { name: "Payed", href: "/branch/payments" },
               { name: "Pending Payment", href: "/branch/payments/payment" },
               { name: "Pending Approval", href: "/branch/payments/approval" },
             ],
@@ -225,7 +224,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           },
           {
             name: "Payment",
-            icon: "FaPaypal",
+            icon: "FaMoneyCheckAlt",
             current: false,
             children: [
               { name: "Payed", href: "/insurer/payments" },

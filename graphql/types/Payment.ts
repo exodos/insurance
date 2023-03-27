@@ -1,4 +1,4 @@
-import { sendSmsMessage } from "./../../lib/config";
+import { sendMultiSmsMessage, sendSmsMessage } from "./../../lib/config";
 import { Prisma } from "@prisma/client";
 import {
   arg,
@@ -304,7 +304,7 @@ export const updatePaymentStatusMutation = extendType({
   type: "Mutation",
   definition(t) {
     t.nonNull.field("updatePaymentStatus", {
-      type: Payment,
+      type: UpdatePaymentStatus,
       args: {
         refNumber: nonNull(stringArg()),
       },
@@ -326,7 +326,7 @@ export const updatePaymentStatusMutation = extendType({
           throw new Error(`You do not have permission to perform action`);
         }
 
-        const certData = await ctx.prisma.payment.findFirst({
+        const firstData = await ctx.prisma.payment.findFirst({
           where: {
             refNumber: args.refNumber,
           },
@@ -336,36 +336,29 @@ export const updatePaymentStatusMutation = extendType({
           },
         });
 
-        const paymentData = await ctx.prisma.payment.update({
-          where: { refNumber: args.refNumber },
-          data: {
-            paymentStatus: "PendingPayment",
-            certificates: {
-              updateMany: {
-                where: {
-                  certificateNumber: {
-                    in: certData.certificates.map(
-                      (cId) => cId.certificateNumber
-                    ),
-                  },
-                },
-                data: {
-                  status: "PendingPayment",
-                },
+        const response = await ctx.prisma.$transaction(async (tx) => {
+          const paymentData = await tx.payment.update({
+            where: { refNumber: args.refNumber },
+            data: {
+              paymentStatus: "PendingPayment",
+            },
+          });
+
+          const certData = await tx.certificate.updateMany({
+            where: {
+              certificateNumber: {
+                in: firstData.certificates.map((c) => c.certificateNumber),
               },
             },
-          },
-        });
-
-        if (paymentData) {
-          let mobileNumber = certData.insureds.mobileNumber;
-          let message = `Your reference number Is: ${args.refNumber}, Please pay with Telebirr using this reference number`;
-
-          await ctx.prisma.vehicle.updateMany({
+            data: {
+              status: "PendingPayment",
+            },
+          });
+          const vehicleData = await tx.vehicle.updateMany({
             where: {
               certificates: {
                 certificateNumber: {
-                  in: certData.certificates.map((cId) => cId.certificateNumber),
+                  in: firstData.certificates.map((c) => c.certificateNumber),
                 },
               },
             },
@@ -374,10 +367,16 @@ export const updatePaymentStatusMutation = extendType({
             },
           });
 
+          return vehicleData;
+        });
+
+        if (response) {
+          let mobileNumber = firstData.insureds.mobileNumber;
+          let message = `Dear ${firstData.insureds.firstName}, Your reference number is: ${args.refNumber}, Please pay with Telebirr using this reference number`;
           await sendSmsMessage(mobileNumber, message);
         }
 
-        return paymentData;
+        return response;
       },
     });
   },
@@ -409,7 +408,7 @@ export const bulkUpdatePaymentStatusMutation = extendType({
           throw new Error(`You do not have permission to perform action`);
         }
 
-        const cert = await ctx.prisma.payment.findFirst({
+        const firstData = await ctx.prisma.payment.findMany({
           where: {
             refNumber: {
               in: args.paymentRefNumber.map((cId) => cId),
@@ -421,10 +420,8 @@ export const bulkUpdatePaymentStatusMutation = extendType({
           },
         });
 
-        // let mobileNumber=cert.insureds.mobileNumber;
-        // let message=`Your Payement reference Number Is: ${}`
-
-        return await ctx.prisma.$transaction(async (tx) => {
+        // let paymentData: Prisma.BatchPayload, certData: Prisma.BatchPayload;
+        const response = await ctx.prisma.$transaction(async (tx) => {
           const paymentData = await tx.payment.updateMany({
             where: {
               refNumber: {
@@ -438,8 +435,12 @@ export const bulkUpdatePaymentStatusMutation = extendType({
 
           const certData = await tx.certificate.updateMany({
             where: {
-              certificateNumber: {
-                in: cert.certificates.map((cN) => cN.certificateNumber),
+              payments: {
+                some: {
+                  refNumber: {
+                    in: args.paymentRefNumber.map((cId) => cId),
+                  },
+                },
               },
             },
             data: {
@@ -447,10 +448,141 @@ export const bulkUpdatePaymentStatusMutation = extendType({
             },
           });
 
-          // if (paymentData && certData) {
-          //   sendSmsMessage()
-          // }
-          return certData;
+          const vehicleData = await tx.vehicle.updateMany({
+            where: {
+              certificates: {
+                payments: {
+                  some: {
+                    refNumber: {
+                      in: args.paymentRefNumber.map((cId) => cId),
+                    },
+                  },
+                },
+              },
+            },
+            data: {
+              isInsured: "PENDING",
+            },
+          });
+
+          return vehicleData;
+        });
+
+        let smsMessage = [];
+
+        if (response) {
+          args.paymentRefNumber.map(async (v) => {
+            let value = await ctx.prisma.payment.findFirst({
+              where: {
+                refNumber: v,
+              },
+              include: {
+                insureds: true,
+              },
+            });
+
+            if (value) {
+              smsMessage.push({
+                mobileNumber: value.insureds.mobileNumber,
+                message: `Dear ${value.insureds.firstName}, Your reference number Is: ${v}, Please pay with Telebirr using this reference number`,
+              });
+            }
+          });
+
+          await sendMultiSmsMessage(smsMessage);
+        }
+
+        return response;
+      },
+    });
+  },
+});
+
+export const exportAdminPaymentQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.list.nonNull.field("exportAdminPayment", {
+      type: Payment,
+      args: {
+        dateFrom: nonNull(stringArg()),
+        dateTo: nonNull(stringArg()),
+        paymentStatus: nonNull(PaymentStatus),
+      },
+      resolve: async (_parent, args, ctx) => {
+        return await ctx.prisma.payment.findMany({
+          where: {
+            updatedAt: {
+              lte: new Date(args.dateTo),
+              gte: new Date(args.dateFrom),
+            },
+            paymentStatus: args.paymentStatus,
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
+        });
+      },
+    });
+  },
+});
+
+export const exportInsurerPaymentQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.list.nonNull.field("exportInsurerPayment", {
+      type: Payment,
+      args: {
+        dateFrom: nonNull(stringArg()),
+        dateTo: nonNull(stringArg()),
+        paymentStatus: nonNull(PaymentStatus),
+        orgId: nonNull(stringArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        return await ctx.prisma.payment.findMany({
+          where: {
+            updatedAt: {
+              lte: new Date(args.dateTo),
+              gte: new Date(args.dateFrom),
+            },
+            paymentStatus: args.paymentStatus,
+            branchs: {
+              orgId: args.orgId,
+            },
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
+        });
+      },
+    });
+  },
+});
+export const exportBranchPaymentQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.list.nonNull.field("exportBranchPayment", {
+      type: Payment,
+      args: {
+        dateFrom: nonNull(stringArg()),
+        dateTo: nonNull(stringArg()),
+        paymentStatus: nonNull(PaymentStatus),
+        branchId: nonNull(stringArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        return await ctx.prisma.payment.findMany({
+          where: {
+            updatedAt: {
+              lte: new Date(args.dateTo),
+              gte: new Date(args.dateFrom),
+            },
+            paymentStatus: args.paymentStatus,
+            branchs: {
+              id: args.branchId,
+            },
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
         });
       },
     });
@@ -536,6 +668,13 @@ export const CommissioningStatus = enumType({
 
 export const BulkUpdateStatus = objectType({
   name: "BulkUpdateStatus",
+  definition(t) {
+    t.nonNull.int("count");
+  },
+});
+
+export const UpdatePaymentStatus = objectType({
+  name: "UpdatePaymentStatus",
   definition(t) {
     t.nonNull.int("count");
   },

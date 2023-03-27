@@ -489,9 +489,23 @@ export const createInsuredMutation = extendType({
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
+        const regN = `REG-${format(new Date(), "yyMMiHms")}`;
+        const newValue = {
+          regNumber: regN,
+          firstName: args.input.firstName,
+          lastName: args.input.lastName,
+          occupation: args.input.occupation,
+          region: args.input.region,
+          city: args.input.city,
+          subCity: args.input.subCity,
+          wereda: args.input.wereda,
+          kebelle: args.input.kebelle,
+          houseNumber: args.input.houseNumber,
+          mobileNumber: changePhone(args.input.mobileNumber),
+        };
         return await ctx.prisma.insured.create({
           data: {
-            regNumber: `REG-${format(new Date(), "yyMMiHms")}`,
+            regNumber: regN,
             firstName: args.input.firstName,
             lastName: args.input.lastName,
             occupation: args.input.occupation,
@@ -505,6 +519,19 @@ export const createInsuredMutation = extendType({
             branchs: {
               connect: {
                 id: args.input.branchs.id,
+              },
+            },
+            thirdPartyLogs: {
+              create: {
+                userEmail: user.email,
+                action: "Create",
+                mode: "Insured",
+                newValue: newValue,
+                branchCon: {
+                  connect: {
+                    id: args.input.branchs.id,
+                  },
+                },
               },
             },
           },
@@ -541,16 +568,54 @@ export const updateInsuredMutation = extendType({
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
+        const oldInsured = await ctx.prisma.insured.findFirst({
+          where: {
+            id: args.id,
+          },
+        });
+        const oldValue = {
+          firstName: oldInsured?.firstName,
+          lastName: oldInsured?.lastName,
+          occupation: oldInsured?.occupation,
+          region: oldInsured?.region,
+          city: oldInsured?.city,
+          subCity: oldInsured?.subCity,
+          wereda: oldInsured?.wereda,
+          kebelle: oldInsured?.kebelle,
+          houseNumber: oldInsured?.houseNumber,
+          mobileNumber: oldInsured?.mobileNumber,
+        };
+        const newValue = {
+          firstName: args.input.firstName,
+          lastName: args.input.lastName,
+          occupation: args.input.occupation,
+          region: args.input.region,
+          city: args.input.city,
+          subCity: args.input.subCity,
+          wereda: args.input.wereda,
+          kebelle: args.input.kebelle,
+          houseNumber: args.input.houseNumber,
+          mobileNumber: changePhone(args.input.mobileNumber),
+        };
         return await ctx.prisma.insured.update({
           where: { id: args.id },
           data: {
             ...args.input,
             mobileNumber: changePhone(args.input.mobileNumber),
-            // branchs: {
-            //   connect: {
-            //     id: args.input.branchs.id,
-            //   },
-            // },
+            thirdPartyLogs: {
+              create: {
+                userEmail: user.email,
+                action: "Edit",
+                mode: "Insured",
+                oldValue: oldValue,
+                newValue: newValue,
+                branchCon: {
+                  connect: {
+                    id: oldInsured?.branchId,
+                  },
+                },
+              },
+            },
           },
         });
       },
@@ -584,10 +649,44 @@ export const deleteInsuredMutation = extendType({
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
-        return await ctx.prisma.insured.delete({
+        const oldInsured = await ctx.prisma.insured.findFirst({
           where: {
             id: args.id,
           },
+        });
+        const oldValue = {
+          firstName: oldInsured?.firstName,
+          lastName: oldInsured?.lastName,
+          occupation: oldInsured?.occupation,
+          region: oldInsured?.region,
+          city: oldInsured?.city,
+          subCity: oldInsured?.subCity,
+          wereda: oldInsured?.wereda,
+          kebelle: oldInsured?.kebelle,
+          houseNumber: oldInsured?.houseNumber,
+          mobileNumber: oldInsured?.mobileNumber,
+        };
+
+        return await ctx.prisma.$transaction(async (tx) => {
+          const insuredData = tx.insured.delete({
+            where: {
+              id: args.id,
+            },
+          });
+          const logger = await tx.thirdPartyLog.create({
+            data: {
+              userEmail: user.email,
+              action: "Delete",
+              mode: "Insured",
+              oldValue: oldValue,
+              branchCon: {
+                connect: {
+                  id: oldInsured?.branchId,
+                },
+              },
+            },
+          });
+          return logger;
         });
       },
     });

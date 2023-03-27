@@ -34,8 +34,9 @@ const FeedCertificateBranch = gql`
       certificate {
         id
         certificateNumber
-        issuedDate
         premiumTarif
+        status
+        issuedDate
         updatedAt
         policies {
           id

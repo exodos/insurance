@@ -11,6 +11,8 @@ import AddUserModal from "@/users/add-user";
 import { useRouter } from "next/router";
 import SiteHeader from "@/layout/header";
 import Link from "next/link";
+import Report from "@/report/fly-out";
+import ReactTooltip from "react-tooltip";
 
 const FeedUser = gql`
   query FeedUser(
@@ -59,9 +61,9 @@ const FeedRoleBranch = gql`
 `;
 
 const AdminUserPage = ({
-      userData,
-      roleBranchData,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  userData,
+  roleBranchData,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -77,7 +79,7 @@ const AdminUserPage = ({
         content={"Third Party Insurance Users Page"}
       />
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-2">
-        <div className="px-4 sm:px-6 lg:px-8">
+        <div className="px-14 sm:px-2 lg:px-20">
           <div className="sm:flex sm:items-center">
             <div className="sm:flex-auto">
               <h1 className="text-xl font-semibold text-gray-50">Users</h1>
@@ -85,6 +87,12 @@ const AdminUserPage = ({
                 List Of All Users
               </p>
             </div>
+            <div className="sm:flex sm:items-center">
+              <div className="sm:flex-auto">
+                <Report />
+              </div>
+            </div>
+
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
                 {session.user.memberships.role === "SUPERADMIN" && (

@@ -8,9 +8,15 @@ import { Dialog, Transition } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import NotificationContext from "@/store/notification-context";
 
-const UpdateClaim = gql`
-  mutation UpdateClaim($updateClaimId: String!, $input: ClaimUpdateInput!) {
-    updateClaim(id: $updateClaimId, input: $input) {
+const UpdateDamageEstimate = gql`
+  mutation UpdateDamageEstimate(
+    $claimNumber: String!
+    $damageEstimate: Float!
+  ) {
+    updateDamageEstimate(
+      claimNumber: $claimNumber
+      damageEstimate: $damageEstimate
+    ) {
       id
       damageEstimate
     }
@@ -21,7 +27,8 @@ const EditInsuredClaim = ({ claims, href }) => {
   const notificationCtx = useContext(NotificationContext);
   const [open, setOpen] = useState<boolean>(true);
 
-  const [updateClaim, { data, error, loading }] = useMutation(UpdateClaim);
+  const [updateDamageEstimate, { data, error, loading }] =
+    useMutation(UpdateDamageEstimate);
   if (error) {
     console.log(error);
   }
@@ -39,14 +46,10 @@ const EditInsuredClaim = ({ claims, href }) => {
   const router = useRouter();
 
   const onSubmit = async (values: any) => {
-    const input = {
-      damageEstimate: values.damageEstimate,
-    };
-
-    await updateClaim({
+    await updateDamageEstimate({
       variables: {
-        updateClaimId: claims.id,
-        input,
+        claimNumber: claims.claimNumber,
+        damageEstimate: values.damageEstimate,
       },
       onError: (error) => {
         setOpen(false);

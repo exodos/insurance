@@ -202,27 +202,53 @@ export const updateClaimHitAndRunMutation = extendType({
         if (
           !user ||
           (user.memberships.role !== "SUPERADMIN" &&
-            user.memberships.role !== "TRAFFICPOLICEADMIN" &&
-            user.memberships.role !== "TRAFFICPOLICEMEMBER")
+            user.memberships.role !== "TRAFFICPOLICEADMIN")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
+        const oldClaim = await ctx.prisma.claimHitAndRun.findFirst({
+          where: {
+            claimNumber: args.id,
+          },
+        });
+
+        const oldValue = {
+          damageEstimate: oldClaim?.damageEstimate ?? null,
+          claimerFullName: oldClaim?.claimerFullName ?? null,
+          claimerRegion: oldClaim?.claimerRegion ?? null,
+          claimerCity: oldClaim?.claimerCity ?? null,
+          claimerPhoneNumber: oldClaim?.claimerPhoneNumber ?? null,
+        };
+        const newValue = {
+          damageEstimate: args.input.damageEstimate ?? null,
+          claimerFullName: args.input.claimerFullName ?? null,
+          claimerRegion: args.input.claimerRegion ?? null,
+          claimerCity: args.input.claimerCity ?? null,
+          claimerPhoneNumber: args.input.claimerPhoneNumber ?? null,
+        };
 
         return await ctx.prisma.claimHitAndRun.update({
           where: { id: args.id },
           data: {
-            // ...args.input,
             damageEstimate: args.input.damageEstimate,
             claimerFullName: args.input.claimerFullName,
             claimerRegion: args.input.claimerRegion,
             claimerCity: args.input.claimerCity,
             claimerPhoneNumber: args.input.claimerPhoneNumber,
-            // hitAndRunPoliceReports: {
-            //   connect: {
-            //     incidentNumber:
-            //       args.input.hitAndRunPoliceReports.incidentNumber,
-            //   },
-            // },
+            thirdPartyLogs: {
+              create: {
+                userEmail: user.email,
+                action: "Edit",
+                mode: "ClaimHitAndRun",
+                oldValue: oldValue,
+                newValue: newValue,
+                branchCon: {
+                  connect: {
+                    id: oldClaim?.branchId,
+                  },
+                },
+              },
+            },
           },
         });
       },
@@ -256,10 +282,38 @@ export const updateClaimHitAndRunDamageEstimateMutation = extendType({
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
+        const oldClaim = await ctx.prisma.claimHitAndRun.findFirst({
+          where: {
+            claimNumber: args.id,
+          },
+        });
+
+        const oldValue = {
+          claimNumber: oldClaim?.claimNumber ?? null,
+          damageEstimate: oldClaim?.damageEstimate ?? null,
+        };
+        const newValue = {
+          claimNumber: oldClaim?.claimNumber ?? null,
+          damageEstimate: args?.damageEstimate ?? null,
+        };
         return await ctx.prisma.claimHitAndRun.update({
           where: { id: args.id },
           data: {
             damageEstimate: args.damageEstimate,
+            thirdPartyLogs: {
+              create: {
+                userEmail: user.email,
+                action: "Edit",
+                mode: "ClaimHitAndRun",
+                oldValue: oldValue,
+                newValue: newValue,
+                branchCon: {
+                  connect: {
+                    id: oldClaim?.branchId,
+                  },
+                },
+              },
+            },
           },
         });
       },

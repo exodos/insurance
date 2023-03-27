@@ -1,6 +1,6 @@
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { getServerSession, unstable_getServerSession } from "next-auth";
-import { SessionProvider, useSession } from "next-auth/react";
+import { getServerSession } from "next-auth";
+import { useSession } from "next-auth/react";
 import { initializeApollo } from "../../../lib/apollo";
 import { gql } from "@apollo/client";
 import { authOptions } from "../../api/auth/[...nextauth]";

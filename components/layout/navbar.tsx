@@ -366,8 +366,8 @@ const NavBar = ({ navigation, children }) => {
                 <div className="flex items-center lg:ml-12">
                   <div className="hidden lg:block">
                     <h1 className="ml-3 text-xl font-bold leading-7 text-gray-50 sm:truncate sm:leading-9 capitalize">
-                      {dayTime}, {session?.user?.firstName}{" "}
-                      {session?.user?.lastName}
+                      {dayTime}, {session?.user?.firstName}
+                      {/* {session?.user?.lastName} */}
                     </h1>
                   </div>
                 </div>

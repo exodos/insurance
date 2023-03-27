@@ -72,6 +72,10 @@ type Certificate {
   vehicles: Vehicle
 }
 
+type CertificateCountReport {
+  count: Int!
+}
+
 input CertificateCreateInput {
   branchs: branchConnectInput
   policies: policyCreateInput
@@ -213,6 +217,10 @@ type CodeList {
 enum CommissioningStatus {
   Commissioned
   NotCommissioned
+}
+
+type DailyReport {
+  count: Int!
 }
 
 """
@@ -628,6 +636,10 @@ enum InsuranceStatus {
   PendingPayment
 }
 
+input InsuranceStatusInput {
+  status: InsuranceStatus
+}
+
 type Insured {
   branchs: Branch
   city: String
@@ -790,6 +802,7 @@ type Mutation {
   deleteUser(id: String!): User!
   deleteVehicle(id: String!): Vehicle!
   deleteVictim(id: String!): Victim!
+  transferCertificate(input: CertificateCreateInput!, plateNumber: String!): Certificate!
   updateBranch(id: String!, input: branchUpdateInput!): Branch!
   updateCertificate(id: String!, input: CertificateUpdateInput!): Certificate!
   updateClaim(id: String!, input: ClaimUpdateInput!): Claim!
@@ -801,7 +814,7 @@ type Mutation {
   updateInsured(id: String!, input: insuredUpdateInput!): Insured!
   updateInsuredPoliceReport(id: String!, input: InsuredPoliceReportUpdateInput!): InsuredPoliceReport!
   updateOrganization(id: String!, input: organizationUpdateInput!): Organization!
-  updatePaymentStatus(refNumber: String!): Payment!
+  updatePaymentStatus(refNumber: String!): UpdatePaymentStatus!
   updatePolicy(id: String!, input: PolicyUpdateInput!): Policy!
   updatePremiumTariff(id: Int!, premiumTariff: Float!): Tariff!
   updateTariff(id: Int!, input: TariffUpdateInput!): Tariff!
@@ -919,8 +932,10 @@ type Query {
   claimHitAndRunByID(id: String!): ClaimHitAndRun!
   claimUnInsuredByClaimNumber(claimNumber: String!): ClaimUnInsured!
   claimUnInsuredByID(id: String!): ClaimUnInsured!
+  exportAdminPayment(dateFrom: String!, dateTo: String!, paymentStatus: PaymentStatus!): [Payment!]!
   exportBranch(dateFrom: String!, dateTo: String!): [Branch!]!
   exportBranchByInsurer(dateFrom: String!, dateTo: String!, orgId: String!): [Branch!]!
+  exportBranchPayment(branchId: String!, dateFrom: String!, dateTo: String!, paymentStatus: PaymentStatus!): [Payment!]!
   exportCertificate(dateFrom: String!, dateTo: String!): [Certificate!]!
   exportCertificateBranch(branchId: String!, dateFrom: String!, dateTo: String!): [Certificate!]!
   exportCertificateInsurer(dateFrom: String!, dateTo: String!, orgId: String!): [Certificate!]!
@@ -937,6 +952,7 @@ type Query {
   exportInsuredPoliceReport(dateFrom: String!, dateTo: String!): [InsuredPoliceReport!]!
   exportInsuredPoliceReportBranch(branchId: String!, dateFrom: String!, dateTo: String!): [InsuredPoliceReport!]!
   exportInsuredPoliceReportInsurer(dateFrom: String!, dateTo: String!, orgId: String!): [InsuredPoliceReport!]!
+  exportInsurerPayment(dateFrom: String!, dateTo: String!, orgId: String!, paymentStatus: PaymentStatus!): [Payment!]!
   exportOrganization(dateFrom: String!, dateTo: String!): [Organization!]!
   exportTariff(dateFrom: String!, dateTo: String!): [Tariff!]!
   exportThirdPartyLogLog(action: String!, dateFrom: String!, dateTo: String!, mode: String!): [ThirdPartyLog!]!
@@ -1018,8 +1034,10 @@ type Query {
   insuredInsurerByMobileNumber(mobileNumber: String!, orgId: String!): Insured
   insuredInsurerByRegNumber(orgId: String!, regNumber: String!): Insured
   insuredPoliceReportByIncidentNumber(incidentNumber: String!): InsuredPoliceReport!
+  insuredcertificateCountReport(filter: String!, insuranceType: String!, reportFor: String!, vehicleSearch: String!): CertificateCountReport!
   listAllBranch: [Branch]
   listAllOrganization: [Organization]
+  listInsuranceOrganization(description: OrgDesc!): [Organization]
   organizationByName(orgName: String!): Organization!
   paymentByID(id: String!): Payment!
   paymentByRef(refNumber: String!): Payment!
@@ -1043,6 +1061,7 @@ type Query {
   vehicleByPlateNumber(plateNumber: String!): Vehicle
   vehicleInsurerByPlateNumber(orgId: String!, plateNumber: String!): Vehicle
   victimByID(id: String!): Victim!
+  weeklyReport(filter: String!, insuranceType: String!, reportFor: String!, vehicleSearch: String!): WeeklyReport!
 }
 
 type RegionList {
@@ -1116,6 +1135,7 @@ input TariffUpdateInput {
 
 type ThirdPartyLog {
   action: String
+  branchCon: Branch
   branchs: [Branch]
   certificates: [Certificate]
   claims: [Claim]
@@ -1222,6 +1242,10 @@ input UnInsuredPoliceReportUpdateInput {
   victimWereda: String
 }
 
+type UpdatePaymentStatus {
+  count: Int!
+}
+
 type User {
   adminRestPassword: Boolean
   city: String
@@ -1314,6 +1338,10 @@ enum VictimedCondition {
   DRIVER
   PASSENGER
   PEDESTRIAN
+}
+
+type WeeklyReport {
+  count: Int
 }
 
 input accidentCreateInput {

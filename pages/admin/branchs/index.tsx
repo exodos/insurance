@@ -11,6 +11,8 @@ import ListBranchs from "@/branchs/list-branchs";
 import Link from "next/link";
 import { useState } from "react";
 import AdminAddBranch from "@/components/branchs/add-branchs";
+import ReactTooltip from "react-tooltip";
+import Report from "@/components/report/fly-out";
 
 const FeedBranch = gql`
   query FeedBranch(
@@ -63,28 +65,41 @@ const AdminBranchPage = ({
         content={"Third Party Insurance Branch Page"}
       />
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-2">
-        <div className="px-4 sm:px-6 lg:px-8">
+        <div className="px-14 sm:px-2 lg:px-20">
           <div className="sm:flex sm:items-center">
             <div className="sm:flex-auto">
               <h1 className="text-xl font-semibold text-gray-50">Branch</h1>
               <p className="text-base font-medium text-gray-50 pt-1">
-                List Of All Branchs
+                List Of All Branch
               </p>
+            </div>
+            <div className="sm:flex sm:items-center">
+              <div className="sm:flex-auto">
+                <Report />
+              </div>
             </div>
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
                 {session.user.memberships.role === "SUPERADMIN" && (
                   <>
-                    <button
-                      type="button"
-                      className="inline-flex items-center"
-                      onClick={() => handleAdd()}
-                    >
-                      <BsPlusCircleFill
-                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
-                        aria-hidden="true"
-                      />
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        className="inline-flex items-center"
+                        data-tip
+                        data-type="light"
+                        data-for="addBranch"
+                        onClick={() => handleAdd()}
+                      >
+                        <BsPlusCircleFill
+                          className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                          aria-hidden="true"
+                        />
+                      </button>
+                      <ReactTooltip id="addBranch" place="top" effect="solid">
+                        Add Branch
+                      </ReactTooltip>
+                    </>
                     <Link
                       href={{
                         pathname: "/admin/branchs/export-branchs",
@@ -95,15 +110,27 @@ const AdminBranchPage = ({
                       passHref
                       legacyBehavior
                     >
-                      <button
-                        type="button"
-                        className="inline-flex items-center"
-                      >
-                        <BsFillArrowUpCircleFill
-                          className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
-                          aria-hidden="true"
-                        />
-                      </button>
+                      <>
+                        <button
+                          type="button"
+                          className="inline-flex items-center"
+                          data-tip
+                          data-type="light"
+                          data-for="exportBranch"
+                        >
+                          <BsFillArrowUpCircleFill
+                            className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                            aria-hidden="true"
+                          />
+                        </button>
+                        <ReactTooltip
+                          id="exportBranch"
+                          place="top"
+                          effect="solid"
+                        >
+                          Export Branch
+                        </ReactTooltip>
+                      </>
                     </Link>
                   </>
                 )}

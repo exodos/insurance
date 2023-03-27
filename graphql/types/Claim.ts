@@ -246,12 +246,11 @@ export const ClaimPolicePagination = extendType({
         filter: stringArg(),
         skip: intArg(),
         take: intArg(),
-        orderBy: arg({ type: list(nonNull(ClaimOrderByInput)) }), // 1
+        orderBy: arg({ type: list(nonNull(ClaimOrderByInput)) }),
       },
       async resolve(parent, args, ctx) {
         const where = args.filter
           ? {
-              // deleted: false,
               insuredPoliceReports: {
                 policeBranch: {
                   id: args.branchId,
@@ -260,7 +259,6 @@ export const ClaimPolicePagination = extendType({
               claimNumber: args.filter,
             }
           : {
-              // deleted: false,
               insuredPoliceReports: {
                 policeBranch: {
                   id: args.branchId,
@@ -302,7 +300,6 @@ export const claimByIDQuery = extendType({
         return ctx.prisma.claim.findFirst({
           where: {
             id: args.id,
-            // deleted: false,
           },
         });
       },
@@ -415,10 +412,41 @@ export const updateDamageEstimateMutation = extendType({
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
+        const oldClaim = await ctx.prisma.claim.findFirst({
+          where: {
+            claimNumber: args.claimNumber,
+          },
+        });
+
+        const oldValue = {
+          claimNumber: oldClaim?.claimNumber ?? null,
+          damageEstimate: oldClaim?.damageEstimate ?? null,
+        };
+        const newValue = {
+          claimNumber: oldClaim?.claimNumber ?? null,
+          damageEstimate: args?.damageEstimate ?? null,
+        };
+
         return await ctx.prisma.claim.update({
-          where: { claimNumber: args.claimNumber },
+          where: {
+            claimNumber: args.claimNumber,
+          },
           data: {
             damageEstimate: args.damageEstimate,
+            thirdPartyLogs: {
+              create: {
+                userEmail: user.email,
+                action: "Edit",
+                mode: "Claim",
+                oldValue: oldValue,
+                newValue: newValue,
+                branchCon: {
+                  connect: {
+                    id: oldClaim?.branchId,
+                  },
+                },
+              },
+            },
           },
         });
       },

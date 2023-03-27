@@ -6,11 +6,10 @@ import { BiShow } from "react-icons/bi";
 import { useSession } from "next-auth/react";
 import { useContext, useState } from "react";
 import ReactTooltip from "react-tooltip";
-import { gql, useLazyQuery, useMutation } from "@apollo/client";
+import { gql, useLazyQuery } from "@apollo/client";
 import VehicleDetails from "./detail-vehicle";
 import DeleteVehicleModal from "./delete-vehicle";
 import EditVehicleModal from "./edit-vehicle";
-import { BsFillCheckCircleFill } from "react-icons/bs";
 import NotificationContext from "@/store/notification-context";
 
 const VehicleByPlateNumber = gql`

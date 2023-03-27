@@ -31,5 +31,16 @@ export const checkPolicy = (policyExpireDate: string | number | Date) => {
 export const sendSmsMessage = async (mobileNumber: string, message: string) => {
   let url = `${process.env.TEMP_SMS_URL}?receiver=${mobileNumber}&message=${message}`;
 
-  axios.get(url);
+  let response = await axios.get(url);
+  console.log(response.data);
+
+  // return response.data;
+};
+
+export const sendMultiSmsMessage = async (smsMessage) => {
+  smsMessage.map(async (sms) => {
+    let url = `${process.env.TEMP_SMS_URL}?receiver=${sms.mobileNumber}&message=${sms.message}`;
+    let response = await axios.get(url);
+    console.log(response.data);
+  });
 };

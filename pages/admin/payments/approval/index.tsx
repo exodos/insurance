@@ -5,12 +5,12 @@ import { gql } from "@apollo/client";
 import { BsFillArrowUpCircleFill } from "react-icons/bs";
 import { useRouter } from "next/router";
 import SiteHeader from "@/components/layout/header";
-import ListBranchs from "@/branchs/list-branchs";
 import Link from "next/link";
-import ListPayment from "@/components/payments/list-payment";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { initializeApollo } from "@/lib/apollo";
 import ListPendingApprovalPayment from "@/components/payments/list-pending-approval";
+import Report from "@/components/report/fly-out";
+import ReactTooltip from "react-tooltip";
 
 const FeedPaymentByStatus = gql`
   query FeedPaymentByStatus(
@@ -54,8 +54,8 @@ const FeedPaymentByStatus = gql`
 `;
 
 const AdminPendingApprovalPage = ({
-      data,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  data,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const { asPath } = useRouter();
 
@@ -66,7 +66,7 @@ const AdminPendingApprovalPage = ({
         content={"Third Party Insurance Pending Approval Page"}
       />
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-2">
-        <div className="px-4 sm:px-6 lg:px-8">
+        <div className="px-14 sm:px-2 lg:px-20">
           <div className="sm:flex sm:items-center">
             <div className="sm:flex-auto">
               <h1 className="text-xl font-semibold text-gray-50">Payment</h1>
@@ -74,25 +74,45 @@ const AdminPendingApprovalPage = ({
                 List Of All Pending Approval
               </p>
             </div>
+            <div className="sm:flex sm:items-center">
+              <div className="sm:flex-auto">
+                <Report />
+              </div>
+            </div>
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
                 {session.user.memberships.role === "SUPERADMIN" && (
                   <Link
                     href={{
-                      pathname: "/admin/branchs/export-branchs",
+                      pathname: "/admin/payments/export-payment",
                       query: {
-                        returnPage: asPath,
+                        paymentStatus: "PendingApproval",
                       },
                     }}
                     passHref
                     legacyBehavior
                   >
-                    <button type="button" className="inline-flex items-center">
-                      <BsFillArrowUpCircleFill
-                        className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
-                        aria-hidden="true"
-                      />
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        className="inline-flex items-center"
+                        data-tip
+                        data-type="light"
+                        data-for="exportPendingApproval"
+                      >
+                        <BsFillArrowUpCircleFill
+                          className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                          aria-hidden="true"
+                        />
+                      </button>
+                      <ReactTooltip
+                        id="exportPendingApproval"
+                        place="top"
+                        effect="solid"
+                      >
+                        Export Pending Approval
+                      </ReactTooltip>
+                    </>
                   </Link>
                 )}
               </div>
@@ -101,7 +121,7 @@ const AdminPendingApprovalPage = ({
         </div>
         <ListPendingApprovalPayment
           paymentData={data.feedPaymentByStatus}
-          href={asPath}
+          href={"/admin/payments"}
         />
       </div>
     </>

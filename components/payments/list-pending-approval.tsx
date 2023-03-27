@@ -40,8 +40,7 @@ const PaymentByRef = gql`
 const UpdatePaymentStatus = gql`
   mutation UpdatePaymentStatus($refNumber: String!) {
     updatePaymentStatus(refNumber: $refNumber) {
-      id
-      refNumber
+      count
     }
   }
 `;
@@ -151,7 +150,7 @@ const ListPendingApprovalPayment = ({ paymentData, href }) => {
           },
         });
       },
-    }).then(() => router.push("/admin/payments/payment"));
+    }).then(() => router.push(href));
   };
 
   const handleBulkApprove = async () => {
@@ -184,7 +183,7 @@ const ListPendingApprovalPayment = ({ paymentData, href }) => {
           },
         });
       },
-    }).then(() => router.push("/admin/payments/payment"));
+    }).then(() => router.push("href"));
   };
 
   return (

@@ -77,12 +77,12 @@ const InsurerPayedPaymentPage = ({
             </div>
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
-                {session.user.memberships.role === "SUPERADMIN" && (
+                {session.user.memberships.role === "INSURER" && (
                   <Link
                     href={{
-                      pathname: "/admin/branchs/export-branchs",
+                      pathname: "/insurer/payments/insurer-export-payment",
                       query: {
-                        returnPage: asPath,
+                        paymentStatus: "Payed",
                       },
                     }}
                     passHref

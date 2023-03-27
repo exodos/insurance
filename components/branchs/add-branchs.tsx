@@ -39,6 +39,7 @@ const AdminAddBranch = ({ orgData }) => {
 
   const initialValues = {
     branchName: "",
+    branchCode: "",
     region: "",
     city: "",
     mobileNumber: "",
@@ -59,6 +60,7 @@ const AdminAddBranch = ({ orgData }) => {
   const onSubmit = async (values: any) => {
     const input = {
       branchName: values.branchName,
+      branchCode: values.branchCode,
       region: values.region,
       city: values.city,
       mobileNumber: changePhone(values.mobileNumber),
@@ -154,7 +156,6 @@ const AdminAddBranch = ({ orgData }) => {
                             </p>
                           </div>
                         </div>
-
                         <div className="space-y-4 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0 mt-4">
                           <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
                             <div>
@@ -175,6 +176,24 @@ const AdminAddBranch = ({ orgData }) => {
                               <div className="text-eRed text-sm italic mt-2">
                                 <ErrorMessage name="branchName" />
                               </div>
+                            </div>
+                          </div>
+                          <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
+                            <div>
+                              <label
+                                htmlFor="branchCode"
+                                className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                              >
+                                Branch Code
+                              </label>
+                            </div>
+                            <div className="sm:col-span-2">
+                              <Field
+                                type="text"
+                                name="branchCode"
+                                placeholder="Enter Branch Code"
+                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                              />
                             </div>
                           </div>
                           <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">

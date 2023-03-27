@@ -55,8 +55,9 @@ model Branch {
   unInsuredPoliceReports UnInsuredPoliceReport[] @relation(name: "unInsuredBranch")
   policeReport           UnInsuredPoliceReport[] @relation(name: "unInsuredPoliceReporter")
   certificateRecords     CertificateRecord[]
-  // insurances             Insurance[]
-  payments               Payment[]
+  thirdPartyLog          ThirdPartyLog[]         @relation(name: "branchConnection")
+
+  payments Payment[]
 }
 
 model Organization {
@@ -92,19 +93,19 @@ model Certificate {
   id                 String              @id @default(uuid())
   certificateNumber  String              @unique
   status             InsuranceStatus     @default(PendingApproval)
-  issuedDate         DateTime            @default(now())
   policies           Policy              @relation(fields: [policyNumber], references: [policyNumber])
   policyNumber       String              @unique
-  vehicles           Vehicle             @relation(fields: [vehiclePlateNumber], references: [plateNumber], onUpdate: Cascade, onDelete: Cascade)
-  vehiclePlateNumber String              @unique
+  vehicles           Vehicle?            @relation(fields: [vehiclePlateNumber], references: [plateNumber], onUpdate: Cascade, onDelete: SetNull)
+  vehiclePlateNumber String?             @unique
   branchs            Branch              @relation(fields: [branchId], references: [id])
   branchId           String
   premiumTarif       Float
-  updatedAt          DateTime            @updatedAt
   claims             Claim[]
   thirdPartyLogs     ThirdPartyLog[]
   certificateRecords CertificateRecord[]
   payments           Payment[]
+  issuedDate         DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
   // claimPayments      ClaimPayment[]
 }
 
@@ -276,6 +277,7 @@ model ClaimHitAndRun {
   hitAndRunPoliceReports HitAndRunPoliceReport @relation(fields: [incidentNumber], references: [incidentNumber])
   incidentNumber         String                @unique
   updatedAt              DateTime              @updatedAt
+  thirdPartyLogs         ThirdPartyLog[]
 }
 
 model InsuredPoliceReport {
@@ -311,8 +313,6 @@ model InsuredPoliceReport {
   thirdPartyLogs                          ThirdPartyLog[]
   trafficPolices                          User            @relation(fields: [trafficPoliceId], references: [id])
   trafficPoliceId                         String
-  // accidentRecords                         AccidentRecord? @relation(fields: [accidentRecordId], references: [id])
-  // accidentRecordId                        String?
 }
 
 model UnInsuredPoliceReport {
@@ -345,6 +345,7 @@ model UnInsuredPoliceReport {
   claimUnInsureds               ClaimUnInsured?
   trafficPolices                User            @relation(fields: [trafficPoliceId], references: [id])
   trafficPoliceId               String
+  thirdPartyLogs                ThirdPartyLog[]
 }
 
 model HitAndRunPoliceReport {
@@ -363,6 +364,7 @@ model HitAndRunPoliceReport {
   policeBranchId  String
   trafficPolices  User            @relation(fields: [trafficPoliceId], references: [id])
   trafficPoliceId String
+  thirdPartyLogs  ThirdPartyLog[]
 }
 
 model Victim {
@@ -391,7 +393,6 @@ model Tariff {
   premiumTarif    Float
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
-  // certificates   Certificate[]
   thirdPartyLogs  ThirdPartyLog[]
 }
 
@@ -422,26 +423,33 @@ model TariffDetails {
 }
 
 model ThirdPartyLog {
-  id                   String                @id @default(uuid())
-  userEmail            String
-  orgName              String
-  action               String
-  mode                 String
-  oldValue             Json?
-  newValue             Json?
-  certificates         Certificate[]
-  claims               Claim[]
-  insureds             Insured[]
-  insuredPoliceReports InsuredPoliceReport[]
-  memberships          Membership[]
-  organizations        Organization[]
-  users                User[]
-  vehicles             Vehicle[]
-  tariffs              Tariff[]
-  timeStamp            DateTime              @default(now())
-  ClaimUnInsured       ClaimUnInsured?       @relation(fields: [claimUnInsuredId], references: [id])
-  claimUnInsuredId     String?
-  branchs              Branch[]
+  id                      String                 @id @default(uuid())
+  userEmail               String
+  action                  String
+  mode                    String
+  oldValue                Json?
+  newValue                Json?
+  branchCon               Branch?                @relation(name: "branchConnection", fields: [branchId], references: [id])
+  branchId                String?
+  certificates            Certificate[]
+  claims                  Claim[]
+  insureds                Insured[]
+  insuredPoliceReports    InsuredPoliceReport[]
+  memberships             Membership[]
+  organizations           Organization[]
+  users                   User[]
+  vehicles                Vehicle[]
+  tariffs                 Tariff[]
+  timeStamp               DateTime               @default(now())
+  ClaimUnInsured          ClaimUnInsured?        @relation(fields: [claimUnInsuredId], references: [id])
+  claimUnInsuredId        String?
+  branchs                 Branch[]
+  ClaimHitAndRun          ClaimHitAndRun?        @relation(fields: [claimHitAndRunId], references: [id])
+  claimHitAndRunId        String?
+  HitAndRunPoliceReport   HitAndRunPoliceReport? @relation(fields: [hitAndRunPoliceReportId], references: [id])
+  hitAndRunPoliceReportId String?
+  UnInsuredPoliceReport   UnInsuredPoliceReport? @relation(fields: [unInsuredPoliceReportId], references: [id])
+  unInsuredPoliceReportId String?
 }
 
 // model AccidentRecord {

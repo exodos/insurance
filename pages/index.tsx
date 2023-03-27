@@ -10,8 +10,6 @@ import SiteHeader from "../components/layout/header";
 const Home = (
   props: InferGetServerSidePropsType<typeof getServerSideProps>
 ) => {
-  // const { data: session, status } = useSession();
-
   return (
     <>
       <SiteHeader

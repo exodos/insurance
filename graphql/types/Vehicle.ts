@@ -335,7 +335,10 @@ export const getVehicleByPlateNumberQuery = extendType({
       resolve(_parent, args, ctx) {
         return ctx.prisma.vehicle.findFirst({
           where: {
-            plateNumber: args.plateNumber,
+            plateNumber: {
+              equals: args.plateNumber,
+              mode: "insensitive",
+            },
             isInsured: "NOTINSURED",
           },
         });
@@ -700,6 +703,31 @@ export const createVehicleMutation = extendType({
             40 * args.input.passengerNumber + tariffPremium.premiumTarif;
         }
 
+        const newValue = {
+          plateNumber: args.input.plateNumber,
+          engineNumber: args.input.engineNumber,
+          chassisNumber: args.input.chassisNumber,
+          vehicleModel: args.input.vehicleModel,
+          bodyType: args.input.bodyType,
+          horsePower: args.input.horsePower,
+          manufacturedYear: Number(args.input.manufacturedYear),
+          vehicleType: args.input.vehicleType,
+          vehicleSubType: args.input.vehicleSubType,
+          vehicleDetails: args.input.vehicleDetails,
+          vehicleUsage: args.input.vehicleUsage,
+          vehicleCategory: args.input.vehicleCategory,
+          premiumTarif: Number(calPremiumTarif),
+          passengerNumber: args.input.passengerNumber,
+          carryingCapacityInGoods: args.input.carryingCapacityInGoods,
+          purchasedYear: Number(args.input.purchasedYear),
+          dutyFreeValue: Number(args.input.dutyFreeValue),
+          dutyPaidValue: Number(args.input.dutyPaidValue),
+          vehicleStatus: args.input.vehicleStatus,
+          insureds: {
+            id: args.input.insureds.id,
+          },
+        };
+
         return await ctx.prisma.vehicle.create({
           data: {
             plateNumber: args.input.plateNumber,
@@ -729,6 +757,19 @@ export const createVehicleMutation = extendType({
             branchs: {
               connect: {
                 id: args.input.branchs.id,
+              },
+            },
+            thirdPartyLogs: {
+              create: {
+                userEmail: user.email,
+                action: "Create",
+                mode: "Vehicle",
+                newValue: newValue,
+                branchCon: {
+                  connect: {
+                    id: args.input.branchs.id,
+                  },
+                },
               },
             },
           },
@@ -787,6 +828,49 @@ export const updateVehicleMutation = extendType({
           calPremiumTarif =
             40 * args.input.passengerNumber + tariffPremium.premiumTarif;
         }
+
+        const oldV = await ctx.prisma.vehicle.findFirst({
+          where: { id: args.id },
+        });
+
+        const oldValue = {
+          plateNumber: oldV?.plateNumber,
+          vehicleModel: oldV?.vehicleModel,
+          bodyType: oldV?.bodyType,
+          horsePower: oldV?.horsePower,
+          manufacturedYear: Number(oldV?.manufacturedYear),
+          vehicleType: oldV?.vehicleType,
+          vehicleSubType: oldV?.vehicleSubType,
+          vehicleDetails: oldV?.vehicleDetails,
+          vehicleUsage: oldV?.vehicleUsage,
+          vehicleCategory: oldV?.vehicleCategory,
+          premiumTarif: Number(oldV?.premiumTarif),
+          passengerNumber: oldV?.passengerNumber,
+          carryingCapacityInGoods: oldV?.carryingCapacityInGoods,
+          purchasedYear: Number(oldV?.purchasedYear),
+          dutyFreeValue: Number(oldV?.dutyFreeValue),
+          dutyPaidValue: Number(oldV?.dutyPaidValue),
+          vehicleStatus: oldV?.vehicleStatus,
+        };
+        const newValue = {
+          plateNumber: args.input.plateNumber,
+          vehicleModel: args.input.vehicleModel,
+          bodyType: args.input.bodyType,
+          horsePower: args.input.horsePower,
+          manufacturedYear: Number(args.input.manufacturedYear),
+          vehicleType: args.input.vehicleType,
+          vehicleSubType: args.input.vehicleSubType,
+          vehicleDetails: args.input.vehicleDetails,
+          vehicleUsage: args.input.vehicleUsage,
+          vehicleCategory: args.input.vehicleCategory,
+          premiumTarif: Number(calPremiumTarif),
+          passengerNumber: args.input.passengerNumber,
+          carryingCapacityInGoods: args.input.carryingCapacityInGoods,
+          purchasedYear: Number(args.input.purchasedYear),
+          dutyFreeValue: Number(args.input.dutyFreeValue),
+          dutyPaidValue: Number(args.input.dutyPaidValue),
+          vehicleStatus: args.input.vehicleStatus,
+        };
         return await ctx.prisma.vehicle.update({
           where: { id: args.id },
           data: {
@@ -807,6 +891,20 @@ export const updateVehicleMutation = extendType({
             dutyFreeValue: args.input.dutyFreeValue,
             dutyPaidValue: args.input.dutyPaidValue,
             vehicleStatus: args.input.vehicleStatus,
+            thirdPartyLogs: {
+              create: {
+                userEmail: user.email,
+                action: "Edit",
+                mode: "Vehicle",
+                oldValue: oldValue,
+                newValue: newValue,
+                branchCon: {
+                  connect: {
+                    id: oldV.branchId,
+                  },
+                },
+              },
+            },
           },
         });
       },
@@ -841,10 +939,51 @@ export const deleteVehicleMutation = extendType({
           throw new Error(`You do not have permission to perform action`);
         }
 
-        return await ctx.prisma.vehicle.delete({
-          where: {
-            id: args.id,
-          },
+        const oldV = await ctx.prisma.vehicle.findFirst({
+          where: { id: args.id },
+        });
+
+        const oldValue = {
+          plateNumber: oldV?.plateNumber,
+          vehicleModel: oldV?.vehicleModel,
+          bodyType: oldV?.bodyType,
+          horsePower: oldV?.horsePower,
+          manufacturedYear: Number(oldV?.manufacturedYear),
+          vehicleType: oldV?.vehicleType,
+          vehicleSubType: oldV?.vehicleSubType,
+          vehicleDetails: oldV?.vehicleDetails,
+          vehicleUsage: oldV?.vehicleUsage,
+          vehicleCategory: oldV?.vehicleCategory,
+          premiumTarif: Number(oldV?.premiumTarif),
+          passengerNumber: oldV?.passengerNumber,
+          carryingCapacityInGoods: oldV?.carryingCapacityInGoods,
+          purchasedYear: Number(oldV?.purchasedYear),
+          dutyFreeValue: Number(oldV?.dutyFreeValue),
+          dutyPaidValue: Number(oldV?.dutyPaidValue),
+          vehicleStatus: oldV?.vehicleStatus,
+        };
+
+        return await ctx.prisma.$transaction(async (tx) => {
+          const vehicleData = tx.vehicle.delete({
+            where: {
+              id: args.id,
+            },
+          });
+
+          const logger = await tx.thirdPartyLog.create({
+            data: {
+              userEmail: user.email,
+              action: "Delete",
+              mode: "Vehicle",
+              oldValue: oldValue,
+              branchCon: {
+                connect: {
+                  id: oldV.branchId,
+                },
+              },
+            },
+          });
+          return logger;
         });
       },
     });
