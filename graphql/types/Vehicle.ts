@@ -586,6 +586,24 @@ export const exportVehicleQuery = extendType({
   },
 });
 
+export const groupVehicleByRegionQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.list.nonNull.field("groupVehicleByRegion", {
+      type: Vehicle,
+      resolve: async (_parent, _args, ctx) => {
+        const vv = "vehicleType";
+        return await ctx.prisma.$queryRaw`
+               SELECT COUNT ("vehicleType")
+               FROM "Vehicle"
+               GROUP BY "vehicleType"
+                     
+        `;
+      },
+    });
+  },
+});
+
 export const exportVehicleByInsurerQuery = extendType({
   type: "Query",
   definition(t) {
@@ -1007,6 +1025,7 @@ export const FeedVehicleByStatus = objectType({
     t.int("maxPage");
   },
 });
+
 export const FeedVehicleBranchByStatus = objectType({
   name: "FeedVehicleBranchByStatus",
   definition(t) {

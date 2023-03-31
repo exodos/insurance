@@ -17,6 +17,7 @@ export const Organization = objectType({
   definition(t) {
     t.string("id");
     t.string("orgName");
+    t.string("orgCode");
     t.string("region");
     t.string("city");
     t.string("mobileNumber");
@@ -31,6 +32,16 @@ export const Organization = objectType({
             where: { id: _parent.id },
           })
           .branchs();
+      },
+    });
+    t.nonNull.list.nonNull.field("users", {
+      type: "User",
+      async resolve(_parent, _args, ctx) {
+        return await ctx.prisma.organization
+          .findUnique({
+            where: { id: _parent.id },
+          })
+          .users();
       },
     });
   },
@@ -197,6 +208,7 @@ export const createOrganizationMutation = extendType({
         return await ctx.prisma.organization.create({
           data: {
             orgName: args.input.orgName,
+            orgCode: args.input.orgCode,
             region: args.input.region ?? null,
             city: args.input.city ?? null,
             mobileNumber: args.input.mobileNumber,
@@ -345,6 +357,7 @@ export const organizationCreateInput = inputObjectType({
   name: "organizationCreateInput",
   definition(t) {
     t.string("orgName");
+    t.string("orgCode");
     t.nullable.string("region");
     t.nullable.string("city");
     t.string("mobileNumber");

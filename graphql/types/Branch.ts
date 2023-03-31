@@ -12,6 +12,7 @@ import {
 import { Sort } from "./User";
 import { Prisma } from "@prisma/client";
 import { OrgDesc, organizationConnectInput } from "./Organization";
+import { subDays } from "date-fns";
 
 export const Branch = objectType({
   name: "Branch",
@@ -373,6 +374,25 @@ export const listAllBranch = extendType({
   },
 });
 
+export const groupBranchByRegionQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.field("branchGroupByRegion", {
+      type: BranchGroupByRegion,
+      resolve: async (_parent, _args, ctx) => {
+        const branchCount = await ctx.prisma.branch.groupBy({
+          by: ["branchName"],
+          _count: {
+            branchName: true,
+          },
+        });
+
+        return { branchCount };
+      },
+    });
+  },
+});
+
 export const exportBranchQuery = extendType({
   type: "Query",
   definition(t) {
@@ -680,6 +700,20 @@ export const branchUpdateInput = inputObjectType({
     t.string("region");
     t.string("city");
     t.string("mobileNumber");
+  },
+});
+
+export const BranchGroupByRegion = objectType({
+  name: "BranchGroupByRegion",
+  definition(t) {
+    t.list.field("branchCount", { type: BranchRegion });
+  },
+});
+
+export const BranchRegion = objectType({
+  name: "BranchRegion",
+  definition(t) {
+    t.string("branchName");
   },
 });
 

@@ -12,7 +12,7 @@ import { useRouter } from "next/router";
 import SiteHeader from "@/layout/header";
 import Link from "next/link";
 import Report from "@/report/fly-out";
-import ReactTooltip from "react-tooltip";
+
 
 const FeedUser = gql`
   query FeedUser(
@@ -61,9 +61,9 @@ const FeedRoleBranch = gql`
 `;
 
 const AdminUserPage = ({
-      userData,
-      roleBranchData,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+          userData,
+          roleBranchData,
+        }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
 

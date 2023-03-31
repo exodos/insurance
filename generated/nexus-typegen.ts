@@ -472,6 +472,7 @@ export interface NexusGenInputs {
     city?: string | null; // String
     description?: NexusGenEnums['OrgDesc'] | null; // OrgDesc
     mobileNumber?: string | null; // String
+    orgCode?: string | null; // String
     orgName?: string | null; // String
     region?: string | null; // String
   }
@@ -536,6 +537,7 @@ export interface NexusGenInputs {
     lastName?: string | null; // String
     memberships?: NexusGenInputs['membershipCreateInput'] | null; // membershipCreateInput
     mobileNumber?: string | null; // String
+    organizations?: NexusGenInputs['organizationConnectInput'] | null; // organizationConnectInput
     password?: string | null; // String
     region?: string | null; // String
   }
@@ -674,6 +676,12 @@ export interface NexusGenObjects {
     mobileNumber?: string | null; // String
     region?: string | null; // String
     updatedAt?: NexusGenScalars['DateTime'] | null; // DateTime
+  }
+  BranchGroupByRegion: { // root type
+    branchCount?: Array<NexusGenRootTypes['BranchRegion'] | null> | null; // [BranchRegion]
+  }
+  BranchRegion: { // root type
+    branchName?: string | null; // String
   }
   BulkUpdateStatus: { // root type
     count: number; // Int!
@@ -1066,6 +1074,7 @@ export interface NexusGenObjects {
     description?: NexusGenEnums['OrgDesc'] | null; // OrgDesc
     id?: string | null; // String
     mobileNumber?: string | null; // String
+    orgCode?: string | null; // String
     orgName?: string | null; // String
     region?: string | null; // String
     updatedAt?: NexusGenScalars['DateTime'] | null; // DateTime
@@ -1255,6 +1264,12 @@ export interface NexusGenFieldTypes {
     unInsuredPoliceReports: NexusGenRootTypes['UnInsuredPoliceReport'][]; // [UnInsuredPoliceReport!]!
     updatedAt: NexusGenScalars['DateTime'] | null; // DateTime
     vehicles: Array<NexusGenRootTypes['Vehicle'] | null> | null; // [Vehicle]
+  }
+  BranchGroupByRegion: { // field return type
+    branchCount: Array<NexusGenRootTypes['BranchRegion'] | null> | null; // [BranchRegion]
+  }
+  BranchRegion: { // field return type
+    branchName: string | null; // String
   }
   BulkUpdateStatus: { // field return type
     count: number; // Int!
@@ -1739,9 +1754,11 @@ export interface NexusGenFieldTypes {
     description: NexusGenEnums['OrgDesc'] | null; // OrgDesc
     id: string | null; // String
     mobileNumber: string | null; // String
+    orgCode: string | null; // String
     orgName: string | null; // String
     region: string | null; // String
     updatedAt: NexusGenScalars['DateTime'] | null; // DateTime
+    users: NexusGenRootTypes['User'][]; // [User!]!
   }
   Payment: { // field return type
     branchs: NexusGenRootTypes['Branch'] | null; // Branch
@@ -1771,6 +1788,7 @@ export interface NexusGenFieldTypes {
   Query: { // field return type
     branchByCode: NexusGenRootTypes['Branch']; // Branch!
     branchByName: NexusGenRootTypes['Branch']; // Branch!
+    branchGroupByRegion: NexusGenRootTypes['BranchGroupByRegion'] | null; // BranchGroupByRegion
     branchRoleList: NexusGenRootTypes['Membership'][]; // [Membership!]!
     certificateByCertificateNumber: NexusGenRootTypes['Certificate']; // Certificate!
     claimByClaimNumber: NexusGenRootTypes['Claim']; // Claim!
@@ -1870,6 +1888,7 @@ export interface NexusGenFieldTypes {
     feedVehicleInsurerByMobile: NexusGenRootTypes['FeedVehicleInsurerByMobile']; // FeedVehicleInsurerByMobile!
     feedVictim: NexusGenRootTypes['FeedVictim']; // FeedVictim!
     getVehicleByPlateNumber: NexusGenRootTypes['Vehicle'] | null; // Vehicle
+    groupVehicleByRegion: NexusGenRootTypes['Vehicle'][]; // [Vehicle!]!
     hitAndRunByIncidentNumber: NexusGenRootTypes['HitAndRunPoliceReport']; // HitAndRunPoliceReport!
     incidentNumberToClaim: NexusGenRootTypes['InsuredPoliceReport']; // InsuredPoliceReport!
     insuredAdminByMobileNumber: NexusGenRootTypes['Insured'] | null; // Insured
@@ -2001,6 +2020,7 @@ export interface NexusGenFieldTypes {
     lastName: string | null; // String
     memberships: NexusGenRootTypes['Membership'] | null; // Membership
     mobileNumber: string | null; // String
+    organizations: NexusGenRootTypes['Organization'] | null; // Organization
     password: string | null; // String
     region: string | null; // String
     unInsuredPoliceReports: Array<NexusGenRootTypes['UnInsuredPoliceReport'] | null> | null; // [UnInsuredPoliceReport]
@@ -2089,6 +2109,12 @@ export interface NexusGenFieldTypeNames {
     unInsuredPoliceReports: 'UnInsuredPoliceReport'
     updatedAt: 'DateTime'
     vehicles: 'Vehicle'
+  }
+  BranchGroupByRegion: { // field return type name
+    branchCount: 'BranchRegion'
+  }
+  BranchRegion: { // field return type name
+    branchName: 'String'
   }
   BulkUpdateStatus: { // field return type name
     count: 'Int'
@@ -2573,9 +2599,11 @@ export interface NexusGenFieldTypeNames {
     description: 'OrgDesc'
     id: 'String'
     mobileNumber: 'String'
+    orgCode: 'String'
     orgName: 'String'
     region: 'String'
     updatedAt: 'DateTime'
+    users: 'User'
   }
   Payment: { // field return type name
     branchs: 'Branch'
@@ -2605,6 +2633,7 @@ export interface NexusGenFieldTypeNames {
   Query: { // field return type name
     branchByCode: 'Branch'
     branchByName: 'Branch'
+    branchGroupByRegion: 'BranchGroupByRegion'
     branchRoleList: 'Membership'
     certificateByCertificateNumber: 'Certificate'
     claimByClaimNumber: 'Claim'
@@ -2704,6 +2733,7 @@ export interface NexusGenFieldTypeNames {
     feedVehicleInsurerByMobile: 'FeedVehicleInsurerByMobile'
     feedVictim: 'FeedVictim'
     getVehicleByPlateNumber: 'Vehicle'
+    groupVehicleByRegion: 'Vehicle'
     hitAndRunByIncidentNumber: 'HitAndRunPoliceReport'
     incidentNumberToClaim: 'InsuredPoliceReport'
     insuredAdminByMobileNumber: 'Insured'
@@ -2835,6 +2865,7 @@ export interface NexusGenFieldTypeNames {
     lastName: 'String'
     memberships: 'Membership'
     mobileNumber: 'String'
+    organizations: 'Organization'
     password: 'String'
     region: 'String'
     unInsuredPoliceReports: 'UnInsuredPoliceReport'

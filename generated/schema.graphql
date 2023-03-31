@@ -48,9 +48,17 @@ type Branch {
   vehicles: [Vehicle]
 }
 
+type BranchGroupByRegion {
+  branchCount: [BranchRegion]
+}
+
 input BranchOrderByInput {
   createdAt: Sort
   updatedAt: Sort
+}
+
+type BranchRegion {
+  branchName: String
 }
 
 type BulkUpdateStatus {
@@ -838,9 +846,11 @@ type Organization {
   description: OrgDesc
   id: String
   mobileNumber: String
+  orgCode: String
   orgName: String
   region: String
   updatedAt: DateTime
+  users: [User!]!
 }
 
 input OrganizationOrderByInput {
@@ -924,6 +934,7 @@ input PolicyUpdateInput {
 type Query {
   branchByCode(branchCode: String!): Branch!
   branchByName(branchName: String!): Branch!
+  branchGroupByRegion: BranchGroupByRegion
   branchRoleList: [Membership!]!
   certificateByCertificateNumber(certificateNumber: String!): Certificate!
   claimByClaimNumber(claimNumber: String!): Claim!
@@ -1023,6 +1034,7 @@ type Query {
   feedVehicleInsurerByMobile(mobileNumber: String!, orgId: String!): FeedVehicleInsurerByMobile!
   feedVictim(filter: String, orderBy: [PolicyOrderByInput!], skip: Int, take: Int): FeedVictim!
   getVehicleByPlateNumber(plateNumber: String!): Vehicle
+  groupVehicleByRegion: [Vehicle!]!
   hitAndRunByIncidentNumber(incidentNumber: String!): HitAndRunPoliceReport!
   incidentNumberToClaim(incidentNumber: String!): InsuredPoliceReport!
   insuredAdminByMobileNumber(mobileNumber: String!): Insured
@@ -1258,6 +1270,7 @@ type User {
   lastName: String
   memberships: Membership
   mobileNumber: String
+  organizations: Organization
   password: String
   region: String
   unInsuredPoliceReports: [UnInsuredPoliceReport]
@@ -1516,6 +1529,7 @@ input organizationCreateInput {
   city: String
   description: OrgDesc
   mobileNumber: String
+  orgCode: String
   orgName: String
   region: String
 }
@@ -1594,6 +1608,7 @@ input userCreateInput {
   lastName: String
   memberships: membershipCreateInput
   mobileNumber: String
+  organizations: organizationConnectInput
   password: String
   region: String
 }

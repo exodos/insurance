@@ -15,6 +15,7 @@ import {
 } from "nexus";
 import { hashPassword, verifyPassword } from "../../lib/auth";
 import { membershipConnectInput, membershipCreateInput } from "./Membership";
+import { organizationConnectInput } from "./Organization";
 
 export const GQLDate = asNexusMethod(DateTimeResolver, "date");
 
@@ -70,6 +71,16 @@ export const User = objectType({
             where: { id: _parent.id },
           })
           .hitAndRunPoliceReports();
+      },
+    });
+    t.field("organizations", {
+      type: "Organization",
+      resolve: async (_parent, _args, ctx) => {
+        return await ctx.prisma.user
+          .findUnique({
+            where: { id: _parent.id },
+          })
+          .organizations();
       },
     });
   },
@@ -434,6 +445,11 @@ export const createUserMutation = extendType({
             email: args.input.email,
             mobileNumber: changePhone(args.input.mobileNumber),
             password: await hashPassword(args.input.password),
+            organizations: {
+              connect: {
+                id: args.input.organizations.id,
+              },
+            },
             memberships: {
               create: {
                 role: args.input.memberships.role,
@@ -707,6 +723,7 @@ export const userCreateInput = inputObjectType({
     t.string("mobileNumber");
     t.string("password");
     t.field("memberships", { type: membershipCreateInput });
+    t.field("organizations", { type: organizationConnectInput });
   },
 });
 
