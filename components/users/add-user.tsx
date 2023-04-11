@@ -45,6 +45,16 @@ const AddUserModal = ({ branchData, roleList, href }) => {
     console.log(error);
   }
 
+  const adminRole = [
+    { value: "SUPERADMIN", label: "SUPERADMIN" },
+    { value: "INSURER", label: "INSURER" },
+    { value: "BRANCHADMIN", label: "BRANCHADMIN" },
+    { value: "MEMBER", label: "MEMBER" },
+    { value: "TRAFFICPOLICEADMIN", label: "TRAFFICPOLICEADMIN" },
+    { value: "TRAFFICPOLICEMEMBER", label: "TRAFFICPOLICEMEMBER" },
+    { value: "USER", label: "USER" },
+  ];
+
   const initialValues = {
     firstName: "",
     lastName: "",
@@ -369,9 +379,12 @@ const AddUserModal = ({ branchData, roleList, href }) => {
                                 <option disabled value="">
                                   Select Role
                                 </option>
-                                {roleOptions.map((option: any) => (
-                                  <option key={option.id} value={option.role}>
-                                    {option.role}
+                                {adminRole.map((option: any) => (
+                                  <option
+                                    key={option.value}
+                                    value={option.value}
+                                  >
+                                    {option.label}
                                   </option>
                                 ))}
                               </Field>

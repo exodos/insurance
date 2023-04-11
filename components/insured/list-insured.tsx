@@ -199,6 +199,12 @@ const ListInsured = ({ insuredData }) => {
                             scope="col"
                             className="relative py-3.5 pl-3 pr-4 sm:pr-6"
                           >
+                            <span className="sr-only">Details</span>
+                          </th>
+                          <th
+                            scope="col"
+                            className="relative py-3.5 pl-3 pr-4 sm:pr-6"
+                          >
                             <span className="sr-only">Edit</span>
                           </th>
                           <th
@@ -206,12 +212,6 @@ const ListInsured = ({ insuredData }) => {
                             className="relative py-3.5 pl-3 pr-4 sm:pr-6"
                           >
                             <span className="sr-only">Delete</span>
-                          </th>
-                          <th
-                            scope="col"
-                            className="relative py-3.5 pl-3 pr-4 sm:pr-6"
-                          >
-                            <span className="sr-only">reset</span>
                           </th>
                         </>
                       )}

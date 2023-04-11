@@ -524,7 +524,6 @@ export interface NexusGenInputs {
     mode?: string | null; // String
     newValue?: NexusGenScalars['JSON'] | null; // JSON
     oldValue?: NexusGenScalars['JSON'] | null; // JSON
-    orgName?: string | null; // String
     userEmail?: string | null; // String
   }
   userConnectInput: { // input type
@@ -537,7 +536,6 @@ export interface NexusGenInputs {
     lastName?: string | null; // String
     memberships?: NexusGenInputs['membershipCreateInput'] | null; // membershipCreateInput
     mobileNumber?: string | null; // String
-    organizations?: NexusGenInputs['organizationConnectInput'] | null; // organizationConnectInput
     password?: string | null; // String
     region?: string | null; // String
   }
@@ -1134,7 +1132,6 @@ export interface NexusGenObjects {
     mode?: string | null; // String
     newValue?: NexusGenScalars['JSON'] | null; // JSON
     oldValue?: NexusGenScalars['JSON'] | null; // JSON
-    orgName?: string | null; // String
     timeStamp?: NexusGenScalars['DateTime'] | null; // DateTime
     userEmail?: string | null; // String
   }
@@ -1820,6 +1817,7 @@ export interface NexusGenFieldTypes {
     exportInsurerPayment: NexusGenRootTypes['Payment'][]; // [Payment!]!
     exportOrganization: NexusGenRootTypes['Organization'][]; // [Organization!]!
     exportTariff: NexusGenRootTypes['Tariff'][]; // [Tariff!]!
+    exportThirdPartyLog: NexusGenRootTypes['ThirdPartyLog'][]; // [ThirdPartyLog!]!
     exportThirdPartyLogLog: NexusGenRootTypes['ThirdPartyLog'][]; // [ThirdPartyLog!]!
     exportUnInsuredClaim: NexusGenRootTypes['ClaimUnInsured'][]; // [ClaimUnInsured!]!
     exportUnInsuredClaimBranch: NexusGenRootTypes['ClaimUnInsured'][]; // [ClaimUnInsured!]!
@@ -1919,6 +1917,7 @@ export interface NexusGenFieldTypes {
     tariffVehicleType: NexusGenRootTypes['TariffDetails'][]; // [TariffDetails!]!
     tariffVehicleUsage: NexusGenRootTypes['TariffDetails'][]; // [TariffDetails!]!
     thirdPartyLogsByEmail: Array<NexusGenRootTypes['ThirdPartyLog'] | null> | null; // [ThirdPartyLog]
+    thirdPartyLogsById: NexusGenRootTypes['ThirdPartyLog'] | null; // ThirdPartyLog
     unInsuredPoliceReportByIncidentNumber: NexusGenRootTypes['UnInsuredPoliceReport']; // UnInsuredPoliceReport!
     userByEmail: NexusGenRootTypes['User']; // User!
     usersByID: NexusGenRootTypes['User']; // User!
@@ -1969,7 +1968,6 @@ export interface NexusGenFieldTypes {
     mode: string | null; // String
     newValue: NexusGenScalars['JSON'] | null; // JSON
     oldValue: NexusGenScalars['JSON'] | null; // JSON
-    orgName: string | null; // String
     organizations: Array<NexusGenRootTypes['Organization'] | null> | null; // [Organization]
     tariffs: Array<NexusGenRootTypes['Tariff'] | null> | null; // [Tariff]
     timeStamp: NexusGenScalars['DateTime'] | null; // DateTime
@@ -2665,6 +2663,7 @@ export interface NexusGenFieldTypeNames {
     exportInsurerPayment: 'Payment'
     exportOrganization: 'Organization'
     exportTariff: 'Tariff'
+    exportThirdPartyLog: 'ThirdPartyLog'
     exportThirdPartyLogLog: 'ThirdPartyLog'
     exportUnInsuredClaim: 'ClaimUnInsured'
     exportUnInsuredClaimBranch: 'ClaimUnInsured'
@@ -2764,6 +2763,7 @@ export interface NexusGenFieldTypeNames {
     tariffVehicleType: 'TariffDetails'
     tariffVehicleUsage: 'TariffDetails'
     thirdPartyLogsByEmail: 'ThirdPartyLog'
+    thirdPartyLogsById: 'ThirdPartyLog'
     unInsuredPoliceReportByIncidentNumber: 'UnInsuredPoliceReport'
     userByEmail: 'User'
     usersByID: 'User'
@@ -2814,7 +2814,6 @@ export interface NexusGenFieldTypeNames {
     mode: 'String'
     newValue: 'JSON'
     oldValue: 'JSON'
-    orgName: 'String'
     organizations: 'Organization'
     tariffs: 'Tariff'
     timeStamp: 'DateTime'
@@ -3242,6 +3241,11 @@ export interface NexusGenArgTypes {
       dateTo: string; // String!
     }
     exportTariff: { // args
+      dateFrom: string; // String!
+      dateTo: string; // String!
+    }
+    exportThirdPartyLog: { // args
+      branchName?: string | null; // String
       dateFrom: string; // String!
       dateTo: string; // String!
     }
@@ -3702,6 +3706,9 @@ export interface NexusGenArgTypes {
     }
     thirdPartyLogsByEmail: { // args
       userEmail: string; // String!
+    }
+    thirdPartyLogsById: { // args
+      id: string; // String!
     }
     unInsuredPoliceReportByIncidentNumber: { // args
       incidentNumber: string; // String!

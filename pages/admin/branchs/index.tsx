@@ -118,7 +118,7 @@ const AdminBranchPage = ({
                           data-for="exportBranch"
                         >
                           <BsFillArrowUpCircleFill
-                            className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                            className="flex-shrink-0 mt-2 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
                             aria-hidden="true"
                           />
                         </button>

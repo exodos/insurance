@@ -4,9 +4,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const session = await getServerSession(req, res, authOptions);
-  // const session = await unstable_getServerSession(req, res, authOptions);
-  // const userToken = await getToken({ req, secret });
-  let navigation;
+  let navigation: any;
 
   try {
     if (!session) {
@@ -69,7 +67,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           icon: "FaMoneyCheckAlt",
           current: false,
           children: [
-            { name: "Payed", href: "/admin/payments" },
+            { name: "Paied", href: "/admin/payments" },
             { name: "Pending Payment", href: "/admin/payments/payment" },
             { name: "Pending Approval", href: "/admin/payments/approval" },
           ],
@@ -78,6 +76,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           name: "Tariff",
           href: "/admin/tariff",
           icon: "FaExchangeAlt",
+          current: false,
+        },
+        {
+          name: "Operation Logs",
+          href: "/admin/logs",
+          // icon: "Fa500Px",
+          icon: "FaHistory",
           current: false,
         },
       ];
@@ -128,7 +133,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           icon: "FaMoneyCheckAlt",
           current: false,
           children: [
-            { name: "Payed", href: "/insurer/payments" },
+            { name: "Paied", href: "/insurer/payments" },
             { name: "Pending Payment", href: "/insurer/payments/payment" },
             { name: "Pending Approval", href: "/insurer/payments/approval" },
           ],
@@ -180,7 +185,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             icon: "FaMoneyCheckAlt",
             current: false,
             children: [
-              { name: "Payed", href: "/branch/payments" },
+              { name: "Paied", href: "/branch/payments" },
               { name: "Pending Payment", href: "/branch/payments/payment" },
               { name: "Pending Approval", href: "/branch/payments/approval" },
             ],
@@ -227,7 +232,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             icon: "FaMoneyCheckAlt",
             current: false,
             children: [
-              { name: "Payed", href: "/insurer/payments" },
+              { name: "Paied", href: "/insurer/payments" },
               { name: "Pending Payment", href: "/branch/payments/payment" },
             ],
           },

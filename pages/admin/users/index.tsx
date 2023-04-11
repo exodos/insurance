@@ -13,7 +13,6 @@ import SiteHeader from "@/layout/header";
 import Link from "next/link";
 import Report from "@/report/fly-out";
 
-
 const FeedUser = gql`
   query FeedUser(
     $filter: String
@@ -61,9 +60,9 @@ const FeedRoleBranch = gql`
 `;
 
 const AdminUserPage = ({
-          userData,
-          roleBranchData,
-        }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      userData,
+      roleBranchData,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -120,7 +119,7 @@ const AdminUserPage = ({
                         className="inline-flex items-center"
                       >
                         <BsFillArrowUpCircleFill
-                          className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                          className="flex-shrink-0 h-8 w-8 mt-2 text-sm font-medium text-gray-50 hover:text-gray-300"
                           aria-hidden="true"
                         />
                       </button>

@@ -18,7 +18,6 @@ export const ThirdPartyLog = objectType({
   definition(t) {
     t.string("id");
     t.string("userEmail");
-    t.string("orgName");
     t.string("action");
     t.string("mode");
     t.json("oldValue");
@@ -168,6 +167,45 @@ export const exportThirdPartyLogLogQuery = extendType({
     });
   },
 });
+export const exportThirdPartyLogQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.list.nonNull.field("exportThirdPartyLog", {
+      type: ThirdPartyLog,
+      args: {
+        branchName: stringArg(),
+        dateFrom: nonNull(stringArg()),
+        dateTo: nonNull(stringArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        const dateTo = endOfDay(new Date(args.dateTo));
+        const dateFrom = startOfDay(new Date(dateTo));
+        const where = args.branchName
+          ? {
+              branchCon: {
+                branchName: args.branchName,
+              },
+              timeStamp: {
+                lte: new Date(dateTo),
+                gte: new Date(dateFrom),
+              },
+            }
+          : {
+              timeStamp: {
+                lte: new Date(dateTo),
+                gte: new Date(dateFrom),
+              },
+            };
+        return await ctx.prisma.thirdPartyLog.findMany({
+          where,
+          orderBy: {
+            timeStamp: "desc",
+          },
+        });
+      },
+    });
+  },
+});
 
 export const ThirdPartyLogPaginate = extendType({
   type: "Query",
@@ -189,7 +227,7 @@ export const ThirdPartyLogPaginate = extendType({
                     contains: args.filter,
                   },
                 },
-                { orgName: args.filter },
+                { branchName: args.filter },
               ],
             }
           : {};
@@ -218,15 +256,6 @@ export const ThirdPartyLogPaginate = extendType({
   },
 });
 
-export const FeedThirdPartyLogs = objectType({
-  name: "FeedThirdPartyLogs",
-  definition(t) {
-    t.nonNull.list.nonNull.field("thirdPartyLogs", { type: ThirdPartyLog });
-    t.nonNull.int("totalThirdPartyLogs");
-    t.int("maxPage");
-  },
-});
-
 export const thirdPartyLogsByEmailQuery = extendType({
   type: "Query",
   definition(t) {
@@ -244,11 +273,27 @@ export const thirdPartyLogsByEmailQuery = extendType({
   },
 });
 
+export const thirdPartyLogsByIdQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.field("thirdPartyLogsById", {
+      type: ThirdPartyLog,
+      args: { id: nonNull(stringArg()) },
+      resolve: async (_parent, args, ctx) => {
+        return await ctx.prisma.thirdPartyLog.findFirst({
+          where: {
+            id: args.id,
+          },
+        });
+      },
+    });
+  },
+});
+
 export const thirdPartyLogInput = inputObjectType({
   name: "thirdPartyLogInput",
   definition(t) {
     t.string("userEmail");
-    t.string("orgName");
     t.string("action");
     t.string("mode");
     t.json("oldValue");
@@ -291,5 +336,14 @@ export const ThirdPartyLogOrderByInput = inputObjectType({
   name: "LogOrderByInput",
   definition(t) {
     t.field("timeStamp", { type: Sort });
+  },
+});
+
+export const FeedThirdPartyLogs = objectType({
+  name: "FeedThirdPartyLogs",
+  definition(t) {
+    t.nonNull.list.nonNull.field("thirdPartyLogs", { type: ThirdPartyLog });
+    t.nonNull.int("totalThirdPartyLogs");
+    t.int("maxPage");
   },
 });

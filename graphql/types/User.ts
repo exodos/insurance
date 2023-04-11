@@ -397,7 +397,6 @@ export const FeedUserBranch = objectType({
 });
 
 // Mutation
-
 export const createUserMutation = extendType({
   type: "Mutation",
   definition(t) {
@@ -425,6 +424,12 @@ export const createUserMutation = extendType({
           throw new Error(`You do not have permission to perform this action`);
         }
 
+        const org = await ctx.prisma.branch.findUnique({
+          where: {
+            id: args.input.memberships.branchs.id,
+          },
+        });
+
         const newValue = {
           firstName: args.input.firstName,
           lastName: args.input.lastName,
@@ -432,10 +437,10 @@ export const createUserMutation = extendType({
           city: args.input.city ?? null,
           email: args.input.email,
           mobileNumber: changePhone(args.input.mobileNumber),
-          // password: await hashPassword(args.input.password),
           role: args.input.memberships.role,
           branchId: args.input.memberships.branchs.id,
         };
+
         return await ctx.prisma.user.create({
           data: {
             firstName: args.input.firstName,
@@ -447,7 +452,7 @@ export const createUserMutation = extendType({
             password: await hashPassword(args.input.password),
             organizations: {
               connect: {
-                id: args.input.organizations.id,
+                id: org.orgId,
               },
             },
             memberships: {
@@ -723,7 +728,7 @@ export const userCreateInput = inputObjectType({
     t.string("mobileNumber");
     t.string("password");
     t.field("memberships", { type: membershipCreateInput });
-    t.field("organizations", { type: organizationConnectInput });
+    // t.field("organizations", { type: organizationConnectInput });
   },
 });
 

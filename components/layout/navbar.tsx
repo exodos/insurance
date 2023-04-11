@@ -33,6 +33,7 @@ const NavBar = ({ navigation, children }) => {
 
   const now = new Date();
   const router = useRouter();
+  const { pathname } = useRouter();
 
   useEffect(() => {
     getDayTime();
@@ -137,8 +138,8 @@ const NavBar = ({ navigation, children }) => {
                               <MyLink href={item.href}>
                                 <a
                                   className={classNames(
-                                    item.current
-                                      ? "bg-gray-200 text-gray-500"
+                                    item.href == pathname
+                                      ? "bg-lightGreen text-white"
                                       : "text-gray-800 hover:text-white hover:bg-gray-300",
                                     "group flex items-center px-2 py-2 text-base font-medium rounded-md"
                                   )}
@@ -265,8 +266,8 @@ const NavBar = ({ navigation, children }) => {
                         <MyLink href={item.href}>
                           <a
                             className={classNames(
-                              item.current
-                                ? "bg-gray-200 text-gray-500"
+                              item.href == pathname
+                                ? "bg-lightGreen text-white"
                                 : "text-gray-800 hover:text-white hover:bg-gray-300",
                               "group flex items-center px-2 py-2 text-base font-medium rounded-md"
                             )}

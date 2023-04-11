@@ -43,8 +43,8 @@ const FeedOrganization = gql`
 `;
 
 const AdminOrganizationPage = ({
-  data,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -113,7 +113,7 @@ const AdminOrganizationPage = ({
                           data-for="exportInsurer"
                         >
                           <BsFillArrowUpCircleFill
-                            className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
+                            className="flex-shrink-0 mt-2 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"
                             aria-hidden="true"
                           />
                         </button>

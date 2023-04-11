@@ -434,8 +434,8 @@ model ThirdPartyLog {
   mode                    String
   oldValue                Json?                  @map("old_value")
   newValue                Json?                  @map("new_value")
-  branchCon               Branch?                @relation(name: "branchConnection", fields: [branchId], references: [id])
-  branchId                String?                @map("branch_id")
+  branchCon               Branch?                @relation(name: "branchConnection", fields: [branchName], references: [branchName])
+  branchName              String?                @map("branch_name")
   certificates            Certificate[]
   claims                  Claim[]
   insureds                Insured[]

@@ -966,6 +966,7 @@ type Query {
   exportInsurerPayment(dateFrom: String!, dateTo: String!, orgId: String!, paymentStatus: PaymentStatus!): [Payment!]!
   exportOrganization(dateFrom: String!, dateTo: String!): [Organization!]!
   exportTariff(dateFrom: String!, dateTo: String!): [Tariff!]!
+  exportThirdPartyLog(branchName: String, dateFrom: String!, dateTo: String!): [ThirdPartyLog!]!
   exportThirdPartyLogLog(action: String!, dateFrom: String!, dateTo: String!, mode: String!): [ThirdPartyLog!]!
   exportUnInsuredClaim(dateFrom: String!, dateTo: String!): [ClaimUnInsured!]!
   exportUnInsuredClaimBranch(branchId: String!, dateFrom: String!, dateTo: String!): [ClaimUnInsured!]!
@@ -1065,6 +1066,7 @@ type Query {
   tariffVehicleType: [TariffDetails!]!
   tariffVehicleUsage(vehicleSubType: String!, vehicleType: String!): [TariffDetails!]!
   thirdPartyLogsByEmail(userEmail: String!): [ThirdPartyLog]
+  thirdPartyLogsById(id: String!): ThirdPartyLog
   unInsuredPoliceReportByIncidentNumber(incidentNumber: String!): UnInsuredPoliceReport!
   userByEmail(email: String!): User!
   usersByID(userId: String!): User!
@@ -1158,7 +1160,6 @@ type ThirdPartyLog {
   mode: String
   newValue: JSON
   oldValue: JSON
-  orgName: String
   organizations: [Organization]
   tariffs: [Tariff]
   timeStamp: DateTime
@@ -1593,7 +1594,6 @@ input thirdPartyLogInput {
   mode: String
   newValue: JSON
   oldValue: JSON
-  orgName: String
   userEmail: String
 }
 
@@ -1608,7 +1608,6 @@ input userCreateInput {
   lastName: String
   memberships: membershipCreateInput
   mobileNumber: String
-  organizations: organizationConnectInput
   password: String
   region: String
 }
