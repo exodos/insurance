@@ -23,6 +23,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const result = await prisma.payment.findFirst({
       where: {
         refNumber: BillRefNumber,
+        paymentStatus: "PendingPayment",
       },
       include: {
         insureds: true,
@@ -43,7 +44,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
          <CustomerName>${result.insureds.firstName}</CustomerName> 
          <Amount>${result.premiumTarif}</Amount>
          <BranchCode>${result.branchCode}</BranchCode>
-         <PlateNumber>OR-55395</PlateNumber>
        </c2b:C2BPaymentQueryResult> 
     </soapenv:Body>
     </soapenv:Envelope>`;
@@ -114,33 +114,28 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
 
       if (response) {
-        xmlResponse = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:c2b="http://cps.huawei.com/cpsinterface/c2bpayment"> 
-         <soapenv:Header/> 
-         <soapenv:Body> 
-            <c2bC2BPaymentConfirmationResult>0</c2bC2BPaymentConfirmationResult> 
+        xmlResponse = `
+        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:c2b="http://cps.huawei.com/cpsinterface/c2bpayment"> 
+        <soapenv:Header/> 
+        <soapenv:Body>
+        <c2b:C2BPaymentConfirmationResult>0</c2b:C2BPaymentConfirmationResult> 
         </soapenv:Body> 
         </soapenv:Envelope> `;
 
-        res.status(200).send(xmlResponse);
+        // res.status(200).send(xmlResponse);
       } else {
-        xmlResponse = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:c2b="http://cps.huawei.com/cpsinterface/c2bpayment"> 
-         <soapenv:Header/> 
-         <soapenv:Body> 
-            <c2b:C2BPaymentConfirmationResult>1</c2b:C2BPaymentConfirmationResult> 
+        xmlResponse = `
+        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:c2b="http://cps.huawei.com/cpsinterface/c2bpayment"> 
+        <soapenv:Header/> 
+        <soapenv:Body>
+        <c2b:C2BPaymentConfirmationResult>1</c2b:C2BPaymentConfirmationResult> 
         </soapenv:Body> 
         </soapenv:Envelope> `;
 
-        res.status(200).send(xmlResponse);
+        // res.status(200).send(xmlResponse);
       }
     }
   }
-
-  xmlResponse = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:c2b="http://cps.huawei.com/cpsinterface/c2bpayment"> 
-  <soapenv:Header/> 
-  <soapenv:Body> 
-     <c2b:C2BPaymentConfirmationResult>1</c2b:C2BPaymentConfirmationResult> 
- </soapenv:Body> 
- </soapenv:Envelope> `;
 
   res.status(200).send(xmlResponse);
 };
