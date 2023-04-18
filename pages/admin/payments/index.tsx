@@ -169,7 +169,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         },
       ],
       input: {
-        paymentStatus: "Payed",
+        paymentStatus: "Paid",
       },
     },
   });

@@ -638,7 +638,7 @@ export interface NexusGenEnums {
   IsInsured: "INSURED" | "NOTINSURED" | "PENDING"
   MembershipRole: "BRANCHADMIN" | "INSURER" | "MEMBER" | "SUPERADMIN" | "TRAFFICPOLICEADMIN" | "TRAFFICPOLICEMEMBER" | "USER"
   OrgDesc: "INSURANCE" | "MINISTRY" | "TRAFFICPOLICE"
-  PaymentStatus: "Payed" | "PendingApproval" | "PendingPayment"
+  PaymentStatus: "Paid" | "PendingApproval" | "PendingPayment"
   STATUS: "APPROVED" | "SUSPENDED" | "TRANSFERABLE"
   Sort: "asc" | "desc"
   VehicleCategory: "BUSINESSUSE" | "PRIVATEUSE"

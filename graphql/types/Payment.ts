@@ -658,7 +658,7 @@ export const PaymentUpdateInput = inputObjectType({
 
 export const PaymentStatus = enumType({
   name: "PaymentStatus",
-  members: ["Payed", "PendingPayment", "PendingApproval"],
+  members: ["Paid", "PendingPayment", "PendingApproval"],
 });
 
 export const CommissioningStatus = enumType({

@@ -499,13 +499,13 @@ enum InsuranceStatus {
 }
 
 enum PaymentStatus {
-  Payed
+  Paid
   PendingPayment
   PendingApproval
 }
 
 enum ClaimPaymentStatus {
-  Payed
+  Paid
   Pending
 }
 

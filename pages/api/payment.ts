@@ -4,7 +4,7 @@ import { prisma } from "../../lib/prisma";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const xmlRequest = req.body;
-  let xmlResponse;
+  let xmlResponse: any;
   const options = {
     parseTagValue: true,
   };
@@ -16,13 +16,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   if (soapAction === "c2b:C2BPaymentQueryRequest") {
     const jsonValue = jsonObj["soapenv:Envelope"]["c2b:C2BPaymentQueryRequest"];
-    const RefNumber = jsonValue.RefNumber;
+    // const RefNumber = jsonValue.RefNumber;
     const TransID = jsonValue.TransID;
     const BillRefNumber = jsonValue.BillRefNumber;
 
     const result = await prisma.payment.findFirst({
       where: {
-        refNumber: RefNumber,
+        refNumber: BillRefNumber,
       },
       include: {
         insureds: true,
@@ -47,8 +47,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
        </c2b:C2BPaymentQueryResult> 
     </soapenv:Body>
     </soapenv:Envelope>`;
-
-      // res.status(200).send(xmlResponse);
     } else {
       xmlResponse = `
       <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:c2b="http://cps.huawei.com/cpsinterface/c2bpayment">
@@ -67,13 +65,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   } else if (soapAction === "c2b:C2BPaymentConfirmationRequest") {
     const jsonValue =
       jsonObj["soapenv:Envelope"]["c2b:C2BPaymentConfirmationRequest"];
-    const RefNumber = jsonValue.RefNumber;
     const TransID = jsonValue.TransID;
     const BillRefNumber = jsonValue.BillRefNumber;
 
     const result = await prisma.payment.findFirst({
       where: {
-        refNumber: RefNumber,
+        refNumber: BillRefNumber,
       },
       include: {
         insureds: true,
@@ -84,9 +81,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (result) {
       const response = await prisma.$transaction(async (tx) => {
         const paymentData = await tx.payment.update({
-          where: { refNumber: RefNumber },
+          where: { refNumber: BillRefNumber },
           data: {
-            paymentStatus: "Payed",
+            paymentStatus: "Paid",
           },
         });
 

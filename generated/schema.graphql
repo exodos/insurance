@@ -885,7 +885,7 @@ input PaymentOrderByInput {
 }
 
 enum PaymentStatus {
-  Payed
+  Paid
   PendingApproval
   PendingPayment
 }
