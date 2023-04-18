@@ -22,7 +22,6 @@ module.exports = {
         texaRed: "#e92028",
         darkGray: "#333333",
         fireYellow: "#FDA50F",
-        cyan: colors.cyan,
         granySmithDeepOne: "#58D05E",
         granySmithDeepTwo: "#7BDA74",
         granySmithLightOne: "#A9E69F",
