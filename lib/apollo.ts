@@ -9,11 +9,11 @@ import {
 let apolloClient: ApolloClient<NormalizedCacheObject>;
 const link = new HttpLink({
   uri: "http://localhost:3000/api/graphql",
+  credentials: "same-origin",
 });
 
 function createApolloClient() {
   return new ApolloClient({
-    // ssrMode: typeof window === "undefined",
     ssrMode: true,
     link,
     cache: new InMemoryCache({

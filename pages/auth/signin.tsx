@@ -1,7 +1,7 @@
 import { MdEmail } from "react-icons/md";
 import { InferGetServerSidePropsType } from "next";
 import Image from "next/image";
-import { RiLockPasswordLine } from "react-icons/ri";
+import { RiLockPasswordFill, RiLockPasswordLine } from "react-icons/ri";
 import { Formik, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useState } from "react";
@@ -9,10 +9,11 @@ import { signIn, getCsrfToken } from "next-auth/react";
 import { useRouter } from "next/router";
 import { CtxOrReq } from "next-auth/client/_utils";
 import SignInError from "./signin-error";
+import SiteHeader from "@/components/layout/header";
 
 const SignIn = ({
-      csrfToken,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  csrfToken,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const router = useRouter();
   const [error, setError] = useState(null);
 
@@ -25,26 +26,30 @@ const SignIn = ({
   });
   return (
     <>
+      <SiteHeader
+        title={"Third Party Insurance | Login Page"}
+        content={"Third Party Insurance | Login Page"}
+      />
       <div className="h-screen">
         <div className="flex h-screen">
-          <div className="relative hidden lg:block bg-lightGreen lg:w-3/4 ">
-            <div className="mt-28 pt-10 mx-40 w-full">
+          <div className="relative hidden lg:block bg-lightGreen lg:w-2/4 ">
+            <div className="mt-32 pt-20 px-20 items-center justify-center">
               <Image
                 src={"/new-logos/3rd-party-insurance-logo.png"}
-                alt="Insurance Pic"
-                className="h-500 w-auto object-cover"
+                alt="Third Party Insurance Pic"
+                className="h-200 w-auto"
                 width={750}
-                height={350}
+                height={250}
                 priority
               />
             </div>
           </div>
-          <div className="flex py-10 px-10 sm:px-8 lg:flex-none lg:px-40 xl:px-44">
-            <div className="mx-auto w-full max-w-lg">
-              <div className="sm:flex sm:items-center">
-                <div className="sm:flex-initial">
+          <div className="relative lg:w-2/4">
+            <div className="mt-10">
+              <div className="sm:flex sm:ml-5 sm:items-center">
+                <div className="sm:flex-initial sm:ml-8 ml-8">
                   <Image
-                    className="h-36 w-auto"
+                    className="h-20 w-auto"
                     src={"/logos/ethio-logo.svg"}
                     alt="Ethiotelecom logo"
                     width={350}
@@ -52,8 +57,17 @@ const SignIn = ({
                   />
                 </div>
                 <div className="sm:flex-auto">
+                  {/* <Image
+                    className="h-20 w-auto"
+                    src={"/logos/ethio-logo.svg"}
+                    alt="Ethiotelecom logo"
+                    width={350}
+                    height={120}
+                  /> */}
+                </div>
+                <div className="sm:mt-0 sm:mr-8 ml-12 sm:flex-none">
                   <Image
-                    className="h-28 w-auto"
+                    className="h-16 w-auto"
                     src={"/logos/telebirr-logo.svg"}
                     alt="TeleBirr logo"
                     width={350}
@@ -61,15 +75,14 @@ const SignIn = ({
                   />
                 </div>
               </div>
-              <div className="mt-20">
-                <div className="mt-1 pb-10">
-                  <h1 className="text-deepGreen font-bold text-3xl">
-                    Third Party Insurance System
-                  </h1>
-                </div>
-              </div>
-
-              <div className="mt-10">
+            </div>
+            <div className="flex justify-center py-10 px-10 sm:px-6 lg:px-8 lg:flex-none">
+              <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
+                Sign in to your account
+              </h2>
+            </div>
+            <div className="mt-1 sm:mx-auto sm:w-full sm:max-w-md justify-center items-center">
+              <div className="bg-white px-10 py-8 shadow sm:rounded-lg sm:px-10">
                 <Formik
                   initialValues={{ email: "", password: "" }}
                   validationSchema={validate}
@@ -91,7 +104,7 @@ const SignIn = ({
                   }}
                 >
                   {(formik) => (
-                    <form onSubmit={formik.handleSubmit} className="space-y-0">
+                    <form onSubmit={formik.handleSubmit} className="space-y-6">
                       <div>
                         <label
                           htmlFor="email"
@@ -102,7 +115,7 @@ const SignIn = ({
                         <div className="relative">
                           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                             <MdEmail
-                              className="h-6 w-6 text-gray-400"
+                              className="h-6 w-6 text-lightGreen"
                               aria-hidden="true"
                             />
                           </div>
@@ -110,9 +123,7 @@ const SignIn = ({
                             name="email"
                             type="email"
                             autoComplete="email"
-                            className="block w-full rounded-md  border-gray-300 p-4 pl-10 focus:shadow-xl focus:border-darkGrayHv ring-1 ring-gray-400 sm:text-sm"
-                            // className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-
+                            className="block w-full rounded-md border-gray-300 p-4 pl-10 focus:shadow-xl focus:border-darkGrayHv ring-1 ring-gray-400 sm:text-sm"
                             placeholder="Email Address"
                           />
                           <div className="text-red-600  text-sm italic mt-1">
@@ -120,7 +131,9 @@ const SignIn = ({
                           </div>
                         </div>
                       </div>
-                      <div className="space-y-1">
+                      {/* <div className="space-y-3"> */}
+
+                      <div>
                         <label
                           htmlFor="password"
                           className="hidden text-sm font-medium text-gray-700"
@@ -129,8 +142,8 @@ const SignIn = ({
                         </label>
                         <div className="relative">
                           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                            <RiLockPasswordLine
-                              className="h-6 w-6 text-gray-400"
+                            <RiLockPasswordFill
+                              className="h-6 w-6 text-lightGreen"
                               aria-hidden="true"
                             />
                           </div>
@@ -138,8 +151,8 @@ const SignIn = ({
                             name="password"
                             type="password"
                             autoComplete="current-password"
-                            className="block w-full rounded-md  border-gray-300 p-4 pl-10 focus:shadow-xl focus:border-darkGrayHv ring-1 ring-gray-400 sm:text-sm"
-                            placeholder="Passwords"
+                            className="block w-full rounded-md  border-gray-50 p-4 pl-10 focus:shadow-xl focus:border-darkGrayHv ring-1 ring-gray-400 sm:text-sm"
+                            placeholder="Password"
                           />
                           <div className="text-red-600  text-sm italic mt-1">
                             <ErrorMessage name="password" />
@@ -152,31 +165,15 @@ const SignIn = ({
                           type="hidden"
                           defaultValue={csrfToken}
                         />
-                        <div className="text-red-400 text-md text-center rounded p-2">
-                          {/* {error} */}
+                        <div className="text-red-400 text-md text-center rounded p-1">
                           {error && <SignInError error={error} />}
                         </div>
                       </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center"></div>
-
-                        {/* <div className="text-sm">
-                          <a
-                            href="#"
-                            className="font-semibold text-lightGreen hover:text-deepGreen"
-                          >
-                            Forgot your password?
-                          </a>
-                        </div> */}
-                      </div>
-
                       <div className="pt-4">
                         <button
                           type="submit"
-                          className="flex w-full justify-center rounded-lg border border-transparent bg-lightGreen py-3 px-2 text-base font-semibold text-white shadow-sm hover:bg-deepGreen focus:outline-none focus:ring-2 focus:ring-darkGrayHv focus:ring-offset-2"
+                          className="flex w-full justify-center rounded-3xl border border-transparent bg-lightGreen py-3 px-2 text-base font-semibold text-white shadow-sm hover:bg-deepGreen focus:outline-none focus:ring-2 focus:ring-darkGrayHv focus:ring-offset-2"
                         >
-                          {/* Sign in */}
                           {formik.isSubmitting ? "Please wait..." : "Sign In"}
                         </button>
                       </div>

@@ -4,10 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../api/auth/[...nextauth]";
 import { useState } from "react";
 import { useRouter } from "next/router";
-import { gql } from "apollo-server-micro";
-import ImportVehicleByRegNumber from "@/components/common/import-vehicle-by-reg";
 import ImportVehicleByMobile from "@/components/common/import-vehicle-mobile";
-import { initializeApollo } from "@/lib/apollo";
 import ImportVehicleByReg from "@/components/common/import-vehicle-reg";
 
 const AdminImportCertificateByInsureds = ({

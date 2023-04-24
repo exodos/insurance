@@ -99,8 +99,6 @@ const AddVehicle = ({
     },
   ] = useLazyQuery(InsuredByMobileNumber);
 
-  // console.log(insuredByMobileNumberData?.insuredByMobileNumber);
-
   const handleAdd = (value: any) => {
     setShowCreateModal((prev) => !prev);
     setCreateList(value);

@@ -23,12 +23,12 @@ export default function App({
   const router = useRouter();
 
   return (
-    <ApolloProvider client={apolloClient}>
-      <SessionProvider
-        session={session}
-        refetchInterval={5 * 60}
-        refetchOnWindowFocus={true}
-      >
+    <SessionProvider
+      session={session}
+      refetchInterval={5 * 60}
+      refetchOnWindowFocus={true}
+    >
+      <ApolloProvider client={apolloClient}>
         <NotificationContextProvider>
           {router.pathname.startsWith("/auth/signin") ||
           router.pathname.startsWith("/auth/force-reset") ? (
@@ -63,7 +63,7 @@ export default function App({
             </MainLayout>
           )}
         </NotificationContextProvider>
-      </SessionProvider>
-    </ApolloProvider>
+      </ApolloProvider>
+    </SessionProvider>
   );
 }

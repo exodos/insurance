@@ -3,8 +3,7 @@ import { useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import ReactTooltip from "react-tooltip";
-import { changePhone, checkPolicy } from "@/lib/config";
-import AddOrUpdateCertificateModal from "../certificate/add-update-certificate";
+import { changePhone } from "@/lib/config";
 import Link from "next/link";
 import { CgImport } from "react-icons/cg";
 

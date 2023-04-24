@@ -362,7 +362,7 @@ const VehicleByRegNumber = ({ branchId, path }) => {
                                         className="inline-flex items-center"
                                         data-tip
                                         data-type="success"
-                                        data-for="addVehicle"
+                                        data-for="addCertificate"
                                       >
                                         <IoIosAddCircle
                                           className="flex-shrink-0 h-6 w-6 text-lightGreen"
@@ -370,11 +370,11 @@ const VehicleByRegNumber = ({ branchId, path }) => {
                                         />
                                       </button>
                                       <ReactTooltip
-                                        id="addVehicle"
+                                        id="addCertificate"
                                         place="top"
                                         effect="solid"
                                       >
-                                        Add Vehicle
+                                        Add Certificate
                                       </ReactTooltip>
                                     </>
                                   </td>
