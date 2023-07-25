@@ -14,8 +14,8 @@ const ROLES_ALLOWED_TO_AUTH = new Set<MembershipRole>([
 export default withAuth(
   function middleware(req) {
     if (
-      req.nextUrl.pathname.startsWith("/admin") &&
-      req.nextauth.token?.memberships.role !== MembershipRole.SUPERADMIN
+      req?.nextUrl?.pathname?.startsWith("/admin") &&
+      req?.nextauth?.token?.memberships?.role !== MembershipRole.SUPERADMIN
     ) {
       return NextResponse.redirect(new URL("/", req.url));
     }
@@ -60,7 +60,8 @@ export const config = {
     "/admin/:path*",
     "/insurer/:path*",
     "/branch/:path*",
-    "/police/admin/:path*",
-    "/police/user/:path*",
+    "/police/:path*",
+    // "/police/admin/:path*",
+    // "/police/user/:path*",
   ],
 };

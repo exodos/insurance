@@ -5,12 +5,23 @@ import {
   InMemoryCache,
   NormalizedCacheObject,
 } from "@apollo/client";
+import { createPersistedQueryLink } from "@apollo/client/link/persisted-queries";
+import { sha256 } from "crypto-hash";
 
 let apolloClient: ApolloClient<NormalizedCacheObject>;
-const link = new HttpLink({
-  uri: "http://localhost:3000/api/graphql",
-  credentials: "same-origin",
-});
+// const link = new HttpLink({
+//   uri: "http://localhost:3000/api/graphql",
+//   credentials: "same-origin",
+// });
+
+const link = createPersistedQueryLink({
+  sha256,
+  useGETForHashedQueries: true,
+}).concat(
+  new HttpLink({
+    uri: "http://localhost:3000/api/graphql",
+  })
+);
 
 function createApolloClient() {
   return new ApolloClient({
@@ -124,7 +135,7 @@ export function initializeApollo(initialState = null) {
   return _apolloClient;
 }
 
-export function useApollo(initialState: unknown) {
+export function useApollo(initialState: any) {
   const store = useMemo(() => initializeApollo(initialState), [initialState]);
   return store;
 }
