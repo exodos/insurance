@@ -46,14 +46,15 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/auth/signin",
   },
-  secret: process.env.NEXTAUTH_SECRET,
 
+  secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
     redirect: async ({ url, baseUrl }) => {
       if (url.startsWith("/")) return `${baseUrl}${url}`;
       else if (new URL(url).origin === baseUrl) return url;
       return baseUrl;
     },
+
     jwt: async ({ token, user }) => {
       return { ...token, ...user };
     },

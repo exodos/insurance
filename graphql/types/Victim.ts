@@ -118,7 +118,7 @@ export const createVictimMutation = extendType({
       resolve: async (_parent, args, ctx) => {
         const user = await ctx.prisma.user.findUnique({
           where: {
-            email: ctx.session.user.email,
+            email: ctx?.session?.user?.email,
           },
           include: {
             memberships: true,
@@ -155,7 +155,7 @@ export const updateVictimMutation = extendType({
       resolve: async (_parent, args, ctx) => {
         const user = await ctx.prisma.user.findUnique({
           where: {
-            email: ctx.session.user.email,
+            email: ctx?.session?.user?.email,
           },
           include: {
             memberships: true,
@@ -186,7 +186,7 @@ export const deleteVictimMutation = extendType({
       resolve: async (_parent, args, ctx) => {
         const user = await ctx.prisma.user.findUnique({
           where: {
-            email: ctx.session.user.email,
+            email: ctx?.session?.user?.email,
           },
           include: {
             memberships: true,

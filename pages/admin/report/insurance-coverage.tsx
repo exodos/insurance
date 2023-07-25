@@ -57,9 +57,9 @@ const InsuredcertificateCountReport = gql`
 `;
 
 const InsuranceCoverageReport = ({
-  insurancedata,
-  reportFor,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      insurancedata,
+      reportFor,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [orgOptions, setOrgOptions] = useState(
     insurancedata?.listInsuranceOrganization
   );
@@ -419,7 +419,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
       redirect: {
         permanent: false,
-        destination: "/auth/sign-in",
+        destination: "/auth/signin",
       },
     };
   } else if (session.user.memberships.role !== "SUPERADMIN") {

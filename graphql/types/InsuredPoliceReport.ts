@@ -420,7 +420,7 @@ export const createInsuredPoliceReportMutation = extendType({
       resolve: async (_parent, args, ctx) => {
         const user = await ctx.prisma.user.findUnique({
           where: {
-            email: ctx.session.user.email,
+            email: ctx?.session?.user?.email,
           },
           include: {
             memberships: true,
@@ -627,7 +627,7 @@ export const updateInsuredPoliceReportMutation = extendType({
       resolve: async (_parent, args, ctx) => {
         const user = await ctx.prisma.user.findUnique({
           where: {
-            email: ctx.session.user.email,
+            email: ctx?.session?.user?.email,
           },
           include: {
             memberships: true,
@@ -718,7 +718,7 @@ export const deleteInsuredPoliceReportMutation = extendType({
       resolve: async (_parent, args, ctx) => {
         const user = await ctx.prisma.user.findUnique({
           where: {
-            email: ctx.session.user.email,
+            email: ctx?.session?.user?.email,
           },
           include: {
             memberships: true,

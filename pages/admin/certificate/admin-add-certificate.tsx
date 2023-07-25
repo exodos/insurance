@@ -32,9 +32,9 @@ const FeedBranchByOrgDesc = gql`
 `;
 
 const AdminAddCertificate = ({
-      data,
-      branchId,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+          data,
+          branchId,
+        }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [showMobileForm, setShowMobileForm] = useState(false);
   const [showRegForm, setShowRegForm] = useState(false);
   const [showPlateForm, setShowPlateForm] = useState(false);
@@ -129,7 +129,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
       redirect: {
         permanent: false,
-        destination: "/auth/sign-in",
+        destination: "/auth/signin",
       },
     };
   } else if (session.user.memberships.role !== "SUPERADMIN") {

@@ -709,7 +709,7 @@ export const createCertificateMutation = extendType({
       resolve: async (_parent, args, ctx) => {
         const user = await ctx.prisma.user.findUnique({
           where: {
-            email: ctx.session.user.email,
+            email: ctx?.session?.user?.email,
           },
           include: {
             memberships: true,
@@ -1101,7 +1101,7 @@ export const createInsuranceByBranchMutation = extendType({
       resolve: async (_parent, args, ctx) => {
         const user = await ctx.prisma.user.findUnique({
           where: {
-            email: ctx.session.user.email,
+            email: ctx?.session?.user?.email,
           },
           include: {
             memberships: true,
@@ -1532,7 +1532,7 @@ export const createCertificateBranchMutation = extendType({
       resolve: async (_parent, args, ctx) => {
         const user = await ctx.prisma.user.findUnique({
           where: {
-            email: ctx.session.user.email,
+            email: ctx?.session?.user?.email,
           },
           include: {
             memberships: true,
@@ -1914,7 +1914,7 @@ export const createOrUpdateCertificateMutation = extendType({
       resolve: async (_parent, args, ctx) => {
         const user = await ctx.prisma.user.findUnique({
           where: {
-            email: ctx.session.user.email,
+            email: ctx?.session?.user?.email,
           },
           include: {
             memberships: true,
@@ -2461,7 +2461,7 @@ export const transferCertificateMutation = extendType({
       resolve: async (_parent, args, ctx) => {
         const user = await ctx.prisma.user.findUnique({
           where: {
-            email: ctx.session.user.email,
+            email: ctx?.session?.user?.email,
           },
           include: {
             memberships: true,
@@ -3003,7 +3003,7 @@ export const updateCertificateMutation = extendType({
       resolve: async (_parent, args, ctx) => {
         const user = await ctx.prisma.user.findUnique({
           where: {
-            email: ctx.session.user.email,
+            email: ctx?.session?.user?.email,
           },
           include: {
             memberships: true,
@@ -3327,7 +3327,7 @@ export const deleteCertificateMutation = extendType({
       resolve: async (_parent, args, ctx) => {
         const user = await ctx.prisma.user.findUnique({
           where: {
-            email: ctx.session.user.email,
+            email: ctx?.session?.user?.email,
           },
           include: {
             memberships: true,
@@ -3469,8 +3469,8 @@ export const FeedCertificateBranch = objectType({
 export const FeedCertificateInsurer = objectType({
   name: "FeedCertificateInsurer",
   definition(t) {
-    t.nonNull.list.nonNull.field("certificate", { type: Certificate }); // 1
-    t.nonNull.int("totalCertificate"); // 2
+    t.nonNull.list.nonNull.field("certificate", { type: Certificate });
+    t.nonNull.int("totalCertificate");
     t.int("maxPage");
   },
 });

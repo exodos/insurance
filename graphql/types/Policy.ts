@@ -123,7 +123,7 @@ export const createPolicyMutation = extendType({
       resolve: async (_parent, args, ctx) => {
         // const user = await ctx.prisma.user.findUnique({
         //   where: {
-        //     email: ctx.session.user.email,
+        //     email: ctx?.session?.user?.email,
         //   },
         // });
         // if (
@@ -159,7 +159,7 @@ export const updatePolicyMutation = extendType({
       resolve: async (_parent, args, ctx) => {
         // const user = await ctx.prisma.user.findUnique({
         //   where: {
-        //     email: ctx.session.user.email,
+        //     email: ctx?.session?.user?.email,
         //   },
         // });
         // if (
@@ -190,7 +190,7 @@ export const deletePolicyMutation = extendType({
       resolve: async (_parent, args, ctx) => {
         // const user = await ctx.prisma.user.findUnique({
         //   where: {
-        //     email: ctx.session.user.email,
+        //     email: ctx?.session?.user?.email,
         //   },
         // });
         // if (!user || user.roleName !== "SUPERADMIN") {

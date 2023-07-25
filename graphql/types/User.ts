@@ -408,7 +408,7 @@ export const createUserMutation = extendType({
       resolve: async (_parent, args, ctx) => {
         const user = await ctx.prisma.user.findUnique({
           where: {
-            email: ctx.session.user.email,
+            email: ctx?.session?.user?.email,
           },
           include: {
             memberships: true,
@@ -497,7 +497,7 @@ export const updateUserMutation = extendType({
       resolve: async (_parent, args, ctx) => {
         const user = await ctx.prisma.user.findUnique({
           where: {
-            email: ctx.session.user.email,
+            email: ctx?.session?.user?.email,
           },
           include: {
             memberships: true,
@@ -580,7 +580,7 @@ export const deleteUserMutation = extendType({
       resolve: async (_parent, args, ctx) => {
         const user = await ctx.prisma.user.findUnique({
           where: {
-            email: ctx.session.user.email,
+            email: ctx?.session?.user?.email,
           },
           include: {
             memberships: true,
@@ -689,7 +689,7 @@ export const adminChangeUserPasswordMutation = extendType({
       resolve: async (_parent, args, ctx) => {
         const user = await ctx.prisma.user.findUnique({
           where: {
-            email: ctx.session.user.email,
+            email: ctx?.session?.user?.email,
           },
           include: {
             memberships: true,

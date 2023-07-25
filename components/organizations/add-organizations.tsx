@@ -14,6 +14,7 @@ const CreateOrganization = gql`
     createOrganization(input: $input) {
       id
       orgName
+      orgCode
       region
       city
       mobileNumber
@@ -38,12 +39,14 @@ const AddOrganizationModal = () => {
 
   const [createOrganization, { data, error, loading }] =
     useMutation(CreateOrganization);
+
   if (error) {
     console.log(error);
   }
 
   const initialValues = {
     orgName: "",
+    orgCode: "",
     region: "",
     city: "",
     mobileNumber: "",
@@ -52,6 +55,7 @@ const AddOrganizationModal = () => {
 
   const validate = Yup.object().shape({
     orgName: Yup.string().required("Insurer Name Is Required"),
+    orgCode: Yup.string().required("Organization Code Is Required"),
     mobileNumber: Yup.string()
       .matches(phoneRegExp, "Mobile Number Is Not Valid")
       .required("Mobile Number Is Required"),
@@ -64,6 +68,7 @@ const AddOrganizationModal = () => {
   const onSubmit = async (values: any) => {
     const input = {
       orgName: values.orgName,
+      orgCode: values.orgCode,
       region: values.region,
       city: values.city,
       mobileNumber: changePhone(values.mobileNumber),
@@ -182,6 +187,27 @@ const AddOrganizationModal = () => {
                           <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
                             <div>
                               <label
+                                htmlFor="orgCode"
+                                className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
+                              >
+                                Organization Code
+                              </label>
+                            </div>
+                            <div className="sm:col-span-2">
+                              <Field
+                                type="text"
+                                name="orgCode"
+                                placeholder="Enter Organization Code"
+                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                              />
+                              <div className="text-eRed text-sm italic mt-2">
+                                <ErrorMessage name="orgCode" />
+                              </div>
+                            </div>
+                          </div>
+                          <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
+                            <div>
+                              <label
                                 htmlFor="region"
                                 className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2"
                               >
@@ -264,7 +290,7 @@ const AddOrganizationModal = () => {
                                 ))}
                               </Field>
                               <div className="text-eRed text-sm italic mt-2">
-                                <ErrorMessage name="mobileNumber" />
+                                <ErrorMessage name="description" />
                               </div>
                             </div>
                           </div>

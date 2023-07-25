@@ -327,7 +327,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // res.status(200).json(navigation);
     res.send(navigation);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    // res.status(500).json({ message: err.message });
+    res.status(500).end({ message: err.message });
   }
 };
 

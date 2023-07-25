@@ -14,24 +14,26 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   let c2b = jsonObj["soapenv:Envelope"];
   let soapAction = Object.keys(c2b)[0];
 
-  if (soapAction === "c2b:C2BPaymentQueryRequest") {
-    const jsonValue = jsonObj["soapenv:Envelope"]["c2b:C2BPaymentQueryRequest"];
-    // const RefNumber = jsonValue.RefNumber;
-    const TransID = jsonValue.TransID;
-    const BillRefNumber = jsonValue.BillRefNumber;
+  try {
+    if (soapAction === "c2b:C2BPaymentQueryRequest") {
+      const jsonValue =
+        jsonObj["soapenv:Envelope"]["c2b:C2BPaymentQueryRequest"];
+      // const RefNumber = jsonValue.RefNumber;
+      const TransID = jsonValue.TransID;
+      const BillRefNumber = jsonValue.BillRefNumber;
 
-    const result = await prisma.payment.findFirst({
-      where: {
-        refNumber: BillRefNumber,
-        paymentStatus: "PendingPayment",
-      },
-      include: {
-        insureds: true,
-      },
-    });
+      const result = await prisma.payment.findFirst({
+        where: {
+          refNumber: BillRefNumber,
+          paymentStatus: "PendingPayment",
+        },
+        include: {
+          insureds: true,
+        },
+      });
 
-    if (result) {
-      xmlResponse = `
+      if (result) {
+        xmlResponse = `
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:c2b="http://cps.huawei.com/cpsinterface/c2bpayment">
      <soapenv:Header/>
      <soapenv:Body>
@@ -47,8 +49,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
        </c2b:C2BPaymentQueryResult> 
     </soapenv:Body>
     </soapenv:Envelope>`;
-    } else {
-      xmlResponse = `
+      } else {
+        xmlResponse = `
       <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:c2b="http://cps.huawei.com/cpsinterface/c2bpayment">
        <soapenv:Header/>
        <soapenv:Body>
@@ -61,60 +63,60 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
          </c2b:C2BPaymentQueryResult> 
       </soapenv:Body>
       </soapenv:Envelope>`;
-    }
-  } else if (soapAction === "c2b:C2BPaymentConfirmationRequest") {
-    const jsonValue =
-      jsonObj["soapenv:Envelope"]["c2b:C2BPaymentConfirmationRequest"];
-    const TransID = jsonValue.TransID;
-    const BillRefNumber = jsonValue.BillRefNumber;
+      }
+    } else if (soapAction === "c2b:C2BPaymentConfirmationRequest") {
+      const jsonValue =
+        jsonObj["soapenv:Envelope"]["c2b:C2BPaymentConfirmationRequest"];
+      const TransID = jsonValue.TransID;
+      const BillRefNumber = jsonValue.BillRefNumber;
 
-    const result = await prisma.payment.findFirst({
-      where: {
-        refNumber: BillRefNumber,
-      },
-      include: {
-        insureds: true,
-        certificates: true,
-      },
-    });
+      const result = await prisma.payment.findFirst({
+        where: {
+          refNumber: BillRefNumber,
+        },
+        include: {
+          insureds: true,
+          certificates: true,
+        },
+      });
 
-    if (result) {
-      const response = await prisma.$transaction(async (tx) => {
-        const paymentData = await tx.payment.update({
-          where: { refNumber: BillRefNumber },
-          data: {
-            paymentStatus: "Paid",
-          },
-        });
-
-        const certData = await tx.certificate.updateMany({
-          where: {
-            certificateNumber: {
-              in: result.certificates.map((c) => c.certificateNumber),
+      if (result) {
+        const response = await prisma.$transaction(async (tx) => {
+          const paymentData = await tx.payment.update({
+            where: { refNumber: BillRefNumber },
+            data: {
+              paymentStatus: "Paid",
             },
-          },
-          data: {
-            status: "APPROVED",
-          },
-        });
-        const vehicleData = await tx.vehicle.updateMany({
-          where: {
-            certificates: {
+          });
+
+          const certData = await tx.certificate.updateMany({
+            where: {
               certificateNumber: {
                 in: result.certificates.map((c) => c.certificateNumber),
               },
             },
-          },
-          data: {
-            isInsured: "INSURED",
-          },
+            data: {
+              status: "APPROVED",
+            },
+          });
+          const vehicleData = await tx.vehicle.updateMany({
+            where: {
+              certificates: {
+                certificateNumber: {
+                  in: result.certificates.map((c) => c.certificateNumber),
+                },
+              },
+            },
+            data: {
+              isInsured: "INSURED",
+            },
+          });
+
+          return vehicleData;
         });
 
-        return vehicleData;
-      });
-
-      if (response) {
-        xmlResponse = `
+        if (response) {
+          xmlResponse = `
         <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:c2b="http://cps.huawei.com/cpsinterface/c2bpayment"> 
         <soapenv:Header/> 
         <soapenv:Body>
@@ -122,9 +124,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         </soapenv:Body> 
         </soapenv:Envelope> `;
 
-        // res.status(200).send(xmlResponse);
-      } else {
-        xmlResponse = `
+          // res.status(200).send(xmlResponse);
+        } else {
+          xmlResponse = `
         <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:c2b="http://cps.huawei.com/cpsinterface/c2bpayment"> 
         <soapenv:Header/> 
         <soapenv:Body>
@@ -132,12 +134,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         </soapenv:Body> 
         </soapenv:Envelope> `;
 
-        // res.status(200).send(xmlResponse);
+          // res.status(200).send(xmlResponse);
+        }
       }
     }
+    res.status(200).send(xmlResponse);
+  } catch (err) {
+    res.status(500).end(err);
   }
-
-  res.status(200).send(xmlResponse);
 };
 
 export default handler;

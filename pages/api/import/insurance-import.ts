@@ -1,33 +1,30 @@
 import { prisma } from "@/lib/prisma";
-import nc from "next-connect";
+import nc, { createRouter } from "next-connect";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]";
 import { NextApiRequest, NextApiResponse } from "next";
 import { addYears, format, subYears } from "date-fns";
 
-const handler = nc({
-  onError: (err, req: NextApiRequest, res: NextApiResponse, next) => {
-    console.error(err.stack);
-    res.status(500).end("Something broke!");
-  },
-  onNoMatch: (req, res) => {
-    res.status(404).end("Page is not found");
-  },
-})
+const router = createRouter<NextApiRequest, NextApiResponse>();
+
+router
   .use(async (req: NextApiRequest, res: NextApiResponse, next) => {
     const session = await getServerSession(req, res, authOptions);
 
     if (!session) {
-      res.status(401).json({ message: "Unauthenticated Request" });
+      // res.status(401).json({ message: "Unauthenticated Request" });
+
+      res.status(401).end("Unauthenticated Request");
     } else if (
       session.user.memberships.role !== "SUPERADMIN" &&
       session.user.memberships.role !== "INSURER" &&
       session.user.memberships.role !== "MEMBER" &&
       session.user.memberships.role !== "BRANCHADMIN"
     ) {
-      res
-        .status(401)
-        .json({ message: "You do not have permission to perform action" });
+      // res
+      //   .status(401)
+      //   .json({ message: "You do not have permission to perform action" });
+      res.status(401).end("You do not have permission to perform action");
     } else {
       next();
     }
@@ -57,7 +54,11 @@ const handler = nc({
           });
 
           if (checkVehicle) {
-            res.status(412).json({
+            // res.status(412).json({
+            //   message: `Vehicle With PlateNumber ${v.plateNumber} already exist!! Please Check the data and try again`,
+            // });
+
+            res.status(401).end({
               message: `Vehicle With PlateNumber ${v.plateNumber} already exist!! Please Check the data and try again`,
             });
           } else {
@@ -293,9 +294,13 @@ const handler = nc({
               },
             });
             if (!tariffPremium) {
-              res.status(412).json({
+              // res.status(412).json({
+              //   message: `We Could\'n find Premium Tariff with the provided data`,
+              // });
+              res.status(412).end({
                 message: `We Could\'n find Premium Tariff with the provided data`,
               });
+
               // throw new Error(
               //   `We Could\'n find Premium Tariff with the provided data`
               // );
@@ -411,10 +416,23 @@ const handler = nc({
       res.status(200).json(vehicleData);
     } catch (err) {
       console.log(err);
+      // res
+      //   .status(403)
+      //   .json({ message: "Error occured while importing insurance." });
+
       res
         .status(403)
-        .json({ message: "Error occured while importing insurance." });
+        .end({ message: "Error occured while importing insurance." });
     }
   });
 
-export default handler;
+export const config = {
+  runtime: "edge",
+};
+
+export default router.handler({
+  onError: (err, req, res) => {
+    // console.error(err.stack);
+    res.status(500).end(err);
+  },
+});

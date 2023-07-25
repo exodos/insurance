@@ -44,8 +44,8 @@ const getBranchName = gql`
 `;
 
 const ExportLogs = ({
-  data,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [formValues, setFormValues] = useState(null);
 
   const initialValues = {
@@ -232,7 +232,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
       redirect: {
         permanent: false,
-        destination: "/auth/sign-in",
+        destination: "/auth/signin",
       },
     };
   } else if (session.user.memberships.role !== "SUPERADMIN") {
