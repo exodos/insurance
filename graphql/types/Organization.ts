@@ -318,7 +318,7 @@ export const deleteOrganizationMutation = extendType({
           // mobileNumber: oldOrg.mobileNumber,
         };
         return await ctx.prisma.$transaction(async (tx) => {
-          const orgData = tx.organization.delete({
+          const orgData = await tx.organization.delete({
             where: {
               id: args.orgId,
             },

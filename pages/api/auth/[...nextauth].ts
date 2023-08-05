@@ -58,4 +58,10 @@ export const authOptions: NextAuthOptions = {
   },
 };
 
-export default NextAuth(authOptions);
+// export default NextAuth(authOptions);
+
+const authHandler = NextAuth(authOptions);
+
+export default async function handler(...params: any[]) {
+  await authHandler(...params);
+}
