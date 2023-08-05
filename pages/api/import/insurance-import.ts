@@ -426,12 +426,12 @@ router
     }
   });
 
-export const config = {
-  runtime: "edge",
-  unstable_allowDynamic: [
-    "/node_modules/next-auth/**", // use a glob to allow anything in the function-bind 3rd party module
-  ],
-};
+// export const config = {
+//   runtime: "edge",
+//   unstable_allowDynamic: [
+//     "/node_modules/next-auth/**", // use a glob to allow anything in the function-bind 3rd party module
+//   ],
+// };
 
 export default router.handler({
   onError: (err, req, res) => {

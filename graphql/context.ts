@@ -4,10 +4,15 @@ import { prisma } from "../lib/prisma";
 import { getSession } from "next-auth/react";
 import { Session } from "next-auth";
 
-export type Context = {
-  session: Session;
+// export type Context = {
+//   session: Session;
+//   prisma: PrismaClient;
+// };
+
+export interface Context {
   prisma: PrismaClient;
-};
+  session: Session;
+}
 
 export const createContext = async ({
   req,

@@ -48,38 +48,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         permanent: false,
       },
     };
-  } else if (session?.user?.memberships?.role === "INSURER") {
-    return {
-      redirect: {
-        permanent: false,
-        destination: "/insurer",
-      },
-    };
-  } else if (
-    session?.user?.memberships?.role === "MEMBER" ||
-    session?.user?.memberships?.role === "BRANCHADMIN" ||
-    session?.user?.memberships?.role === "USER"
-  ) {
-    return {
-      redirect: {
-        permanent: false,
-        destination: "/branch",
-      },
-    };
-  } else if (session?.user?.memberships?.role === "TRAFFICPOLICEADMIN") {
-    return {
-      redirect: {
-        permanent: false,
-        destination: "/police",
-      },
-    };
-  } else if (session?.user?.memberships?.role === "TRAFFICPOLICEMEMBER") {
-    return {
-      redirect: {
-        permanent: false,
-        destination: "/police/user",
-      },
-    };
   }
 
   return {
