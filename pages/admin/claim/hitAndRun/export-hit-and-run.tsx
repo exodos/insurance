@@ -1,6 +1,5 @@
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { getServerSession } from "next-auth";
-import { useSession } from "next-auth/react";
 import { gql, useLazyQuery } from "@apollo/client";
 import { useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
@@ -10,18 +9,18 @@ import SiteHeader from "@/layout/header";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import HitAndRunExport from "@/components/claim/hitrunclaim/hit-and-run-export";
 
-const UserQuery = gql`
-  query ListAllBranch {
-    listAllBranch {
-      id
-      branchName
-    }
-    roleList {
-      id
-      role
-    }
-  }
-`;
+// const UserQuery = gql`
+//   query ListAllBranch {
+//     listAllBranch {
+//       id
+//       branchName
+//     }
+//     roleList {
+//       id
+//       role
+//     }
+//   }
+// `;
 
 const ExportClaimQuery = gql`
   query ExportHitAndRun($dateFrom: String!, $dateTo: String!) {

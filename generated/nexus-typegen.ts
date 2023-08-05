@@ -471,14 +471,12 @@ export interface NexusGenInputs {
   organizationCreateInput: { // input type
     city?: string | null; // String
     description?: NexusGenEnums['OrgDesc'] | null; // OrgDesc
-    mobileNumber?: string | null; // String
     orgCode?: string | null; // String
     orgName?: string | null; // String
     region?: string | null; // String
   }
   organizationUpdateInput: { // input type
     city?: string | null; // String
-    mobileNumber?: string | null; // String
     orgName?: string | null; // String
     region?: string | null; // String
   }
@@ -641,6 +639,7 @@ export interface NexusGenEnums {
   PaymentStatus: "Paid" | "PendingApproval" | "PendingPayment"
   STATUS: "APPROVED" | "SUSPENDED" | "TRANSFERABLE"
   Sort: "asc" | "desc"
+  USER_TYPE: "ADMIN" | "BRANCH" | "INSURER" | "TRAFFICPOLICE" | "USER"
   VehicleCategory: "BUSINESSUSE" | "PRIVATEUSE"
   VehicleStatus: "ADDITIONAL" | "NEW" | "RENEWAL"
   VictimedCondition: "ASSISTANT" | "DRIVER" | "PASSENGER" | "PEDESTRIAN"
@@ -1071,7 +1070,6 @@ export interface NexusGenObjects {
     createdAt?: NexusGenScalars['DateTime'] | null; // DateTime
     description?: NexusGenEnums['OrgDesc'] | null; // OrgDesc
     id?: string | null; // String
-    mobileNumber?: string | null; // String
     orgCode?: string | null; // String
     orgName?: string | null; // String
     region?: string | null; // String
@@ -1172,6 +1170,7 @@ export interface NexusGenObjects {
     mobileNumber?: string | null; // String
     password?: string | null; // String
     region?: string | null; // String
+    role?: NexusGenEnums['USER_TYPE'] | null; // USER_TYPE
     updatedAt?: NexusGenScalars['DateTime'] | null; // DateTime
   }
   Vehicle: { // root type
@@ -1745,17 +1744,15 @@ export interface NexusGenFieldTypes {
     updateVictim: NexusGenRootTypes['Victim']; // Victim!
   }
   Organization: { // field return type
-    branchs: NexusGenRootTypes['Branch'][]; // [Branch!]!
+    branchs: Array<NexusGenRootTypes['Branch'] | null> | null; // [Branch]
     city: string | null; // String
     createdAt: NexusGenScalars['DateTime'] | null; // DateTime
     description: NexusGenEnums['OrgDesc'] | null; // OrgDesc
     id: string | null; // String
-    mobileNumber: string | null; // String
     orgCode: string | null; // String
     orgName: string | null; // String
     region: string | null; // String
     updatedAt: NexusGenScalars['DateTime'] | null; // DateTime
-    users: NexusGenRootTypes['User'][]; // [User!]!
   }
   Payment: { // field return type
     branchs: NexusGenRootTypes['Branch'] | null; // Branch
@@ -2018,9 +2015,9 @@ export interface NexusGenFieldTypes {
     lastName: string | null; // String
     memberships: NexusGenRootTypes['Membership'] | null; // Membership
     mobileNumber: string | null; // String
-    organizations: NexusGenRootTypes['Organization'] | null; // Organization
     password: string | null; // String
     region: string | null; // String
+    role: NexusGenEnums['USER_TYPE'] | null; // USER_TYPE
     unInsuredPoliceReports: Array<NexusGenRootTypes['UnInsuredPoliceReport'] | null> | null; // [UnInsuredPoliceReport]
     updatedAt: NexusGenScalars['DateTime'] | null; // DateTime
   }
@@ -2596,12 +2593,10 @@ export interface NexusGenFieldTypeNames {
     createdAt: 'DateTime'
     description: 'OrgDesc'
     id: 'String'
-    mobileNumber: 'String'
     orgCode: 'String'
     orgName: 'String'
     region: 'String'
     updatedAt: 'DateTime'
-    users: 'User'
   }
   Payment: { // field return type name
     branchs: 'Branch'
@@ -2864,9 +2859,9 @@ export interface NexusGenFieldTypeNames {
     lastName: 'String'
     memberships: 'Membership'
     mobileNumber: 'String'
-    organizations: 'Organization'
     password: 'String'
     region: 'String'
+    role: 'USER_TYPE'
     unInsuredPoliceReports: 'UnInsuredPoliceReport'
     updatedAt: 'DateTime'
   }

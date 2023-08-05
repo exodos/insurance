@@ -4,11 +4,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../api/auth/[...nextauth]";
 import { useState } from "react";
 import { useRouter } from "next/router";
-import VehicleByRegNumber from "@/components/common/vehicle-by-reg";
 import { gql } from "apollo-server-micro";
 import { initializeApollo } from "@/lib/apollo";
 import VehicleByPlateNumber from "@/components/common/vehicle-plate";
-import VehicleByMobileNumber from "@/components/common/vehicle-by-mobile";
 import AdminVehicleByMobileNumber from "@/components/common/admin-vehicle-by-mobile";
 import AdminVehicleByRegNumber from "@/components/common/admin-vehicle-by-reg";
 
@@ -32,9 +30,9 @@ const FeedBranchByOrgDesc = gql`
 `;
 
 const AdminAddCertificate = ({
-          data,
-          branchId,
-        }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+      data,
+      branchId,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [showMobileForm, setShowMobileForm] = useState(false);
   const [showRegForm, setShowRegForm] = useState(false);
   const [showPlateForm, setShowPlateForm] = useState(false);

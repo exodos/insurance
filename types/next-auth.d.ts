@@ -1,6 +1,6 @@
 import NextAuth from "next-auth";
 import { JWT } from "next-auth/jwt";
-import { MembershipRole, Membership } from "@prisma/client";
+import { MembershipRole, Membership, USER_TYPE } from "@prisma/client";
 
 declare module "next-auth/jwt" {
   interface JWT {
@@ -22,6 +22,7 @@ declare module "next-auth" {
       password: string;
       mobileNumber: string;
       adminRestPassword: boolean;
+      userType: USER_TYPE;
       memberships: {
         role: MembershipRole;
       };

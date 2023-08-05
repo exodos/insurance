@@ -12,7 +12,6 @@ import SiteHeader from "@/components/layout/header";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { BsArrowDownCircleFill } from "react-icons/bs";
-import { format } from "date-fns";
 
 const ImportInsurance = ({
       branchId,

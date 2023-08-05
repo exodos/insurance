@@ -15,16 +15,13 @@ Router.events.on("routeChangeStart", () => NProgress.start());
 Router.events.on("routeChangeComplete", () => NProgress.done());
 Router.events.on("routeChangeError", () => NProgress.done());
 
-export default function App({
-      Component,
-      pageProps: { session, ...pageProps },
-    }) {
+const MyApp = ({ Component, pageProps }) => {
   const apolloClient = useApollo(pageProps.initialApolloState);
   const router = useRouter();
 
   return (
     <SessionProvider
-      session={session}
+      session={pageProps}
       refetchInterval={5 * 60}
       refetchOnWindowFocus={true}
     >
@@ -66,4 +63,6 @@ export default function App({
       </ApolloProvider>
     </SessionProvider>
   );
-}
+};
+
+export default MyApp;

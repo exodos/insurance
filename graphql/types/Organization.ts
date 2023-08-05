@@ -20,11 +20,11 @@ export const Organization = objectType({
     t.string("orgCode");
     t.string("region");
     t.string("city");
-    t.string("mobileNumber");
+    // t.string("mobileNumber");
     t.field("description", { type: OrgDesc });
     t.date("createdAt");
     t.date("updatedAt");
-    t.nonNull.list.nonNull.field("branchs", {
+    t.list.field("branchs", {
       type: "Branch",
       async resolve(_parent, _args, ctx) {
         return await ctx.prisma.organization
@@ -32,16 +32,6 @@ export const Organization = objectType({
             where: { id: _parent.id },
           })
           .branchs();
-      },
-    });
-    t.nonNull.list.nonNull.field("users", {
-      type: "User",
-      async resolve(_parent, _args, ctx) {
-        return await ctx.prisma.organization
-          .findUnique({
-            where: { id: _parent.id },
-          })
-          .users();
       },
     });
   },
@@ -64,7 +54,7 @@ export const OrganizationPagination = extendType({
               OR: [
                 { id: args.filter },
                 { orgName: args.filter },
-                { mobileNumber: args.filter },
+                // { mobileNumber: args.filter },
               ],
             }
           : {};
@@ -201,7 +191,7 @@ export const createOrganizationMutation = extendType({
           orgName: args.input.orgName,
           region: args.input.region ?? null,
           city: args.input.city ?? null,
-          mobileNumber: args.input.mobileNumber,
+          // mobileNumber: args.input.mobileNumber,
           description: args.input.description,
         };
 
@@ -211,7 +201,7 @@ export const createOrganizationMutation = extendType({
             orgCode: args.input.orgCode,
             region: args.input.region ?? null,
             city: args.input.city ?? null,
-            mobileNumber: args.input.mobileNumber,
+            // mobileNumber: args.input.mobileNumber,
             description: args.input.description,
             thirdPartyLogs: {
               create: {
@@ -263,13 +253,13 @@ export const updateOrganizationMutation = extendType({
           orgName: oldOrg.orgName,
           region: oldOrg.region ?? null,
           city: oldOrg.city ?? null,
-          mobileNumber: oldOrg.mobileNumber,
+          // mobileNumber: oldOrg.mobileNumber,
         };
         const newValue = {
           orgName: args.input.orgName,
           region: args.input.region ?? null,
           city: args.input.city ?? null,
-          mobileNumber: args.input.mobileNumber,
+          // mobileNumber: args.input.mobileNumber,
         };
         return ctx.prisma.organization.update({
           where: { id: args.id },
@@ -325,7 +315,7 @@ export const deleteOrganizationMutation = extendType({
           orgName: oldOrg.orgName,
           region: oldOrg.region ?? null,
           city: oldOrg.city ?? null,
-          mobileNumber: oldOrg.mobileNumber,
+          // mobileNumber: oldOrg.mobileNumber,
         };
         return await ctx.prisma.$transaction(async (tx) => {
           const orgData = tx.organization.delete({
@@ -360,7 +350,7 @@ export const organizationCreateInput = inputObjectType({
     t.string("orgCode");
     t.nullable.string("region");
     t.nullable.string("city");
-    t.string("mobileNumber");
+    // t.string("mobileNumber");
     t.field("description", { type: OrgDesc });
   },
 });
@@ -371,7 +361,7 @@ export const organizationUpdateInput = inputObjectType({
     t.string("orgName");
     t.string("region");
     t.string("city");
-    t.string("mobileNumber");
+    // t.string("mobileNumber");
   },
 });
 

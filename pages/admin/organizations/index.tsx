@@ -32,7 +32,6 @@ const FeedOrganization = gql`
         orgName
         region
         city
-        mobileNumber
         createdAt
         updatedAt
       }

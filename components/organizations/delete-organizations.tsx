@@ -52,7 +52,7 @@ const AdminOrganizationsDelete = ({ organizations }) => {
           },
         });
       },
-    }).then(() => router.push("/admin/organization"));
+    }).then(() => router.push("/admin/organizations"));
   };
 
   return (

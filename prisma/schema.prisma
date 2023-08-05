@@ -12,34 +12,33 @@ datasource db {
 
 model User {
   id                     String                  @id @default(uuid())
-  firstName              String                  @map("first_name")
-  lastName               String                  @map("last_name")
+  firstName              String
+  lastName               String
+  userType               USER_TYPE               @default(USER)
   region                 String?
   city                   String?
   email                  String                  @unique
-  mobileNumber           String                  @unique @map("mobile_number")
+  mobileNumber           String                  @unique
   password               String
-  adminRestPassword      Boolean                 @default(true) @map("adminRest_password")
-  createdAt              DateTime                @default(now()) @map("created_at")
-  updatedAt              DateTime                @updatedAt @map("updated_at")
-  organizations          Organization            @relation(fields: [orgCode], references: [orgCode])
-  orgCode                String                  @map("org_code")
+  adminRestPassword      Boolean                 @default(true)
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  // organizations          Organization            @relation(fields: [orgId], references: [id])
+  // orgId                  String
   memberships            Membership?
   thirdPartyLogs         ThirdPartyLog[]
   insuredPoliceReports   InsuredPoliceReport[]
   unInsuredPoliceReports UnInsuredPoliceReport[]
   hitAndRunPoliceReports HitAndRunPoliceReport[]
-
-  @@map("user")
 }
 
 model Branch {
   id                     String                  @id @default(uuid())
-  branchName             String                  @unique @map("branch_name")
+  branchName             String                  @unique
   region                 String
   city                   String
-  mobileNumber           String                  @unique @map("mobile_number")
-  branchCode             String?                 @unique @map("branch_code")
+  mobileNumber           String                  @unique
+  branchCode             String?                 @unique
   memberships            Membership[]
   vehicles               Vehicle[]
   insuredPoliceReports   InsuredPoliceReport[]   @relation(name: "insuranceBranch")
@@ -52,71 +51,62 @@ model Branch {
   claimHitAndRuns        ClaimHitAndRun[]
   claimUnInsureds        ClaimUnInsured[]
   organizations          Organization            @relation(fields: [orgId], references: [id])
-  orgId                  String                  @map("org_id")
-  createdAt              DateTime                @default(now()) @map("created_at")
-  updatedAt              DateTime                @updatedAt @map("updated_at")
+  orgId                  String
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
   policeBranchs          InsuredPoliceReport[]   @relation(name: "ReporterPolice")
   unInsuredPoliceReports UnInsuredPoliceReport[] @relation(name: "unInsuredBranch")
   policeReport           UnInsuredPoliceReport[] @relation(name: "unInsuredPoliceReporter")
   certificateRecords     CertificateRecord[]
   thirdPartyLog          ThirdPartyLog[]         @relation(name: "branchConnection")
   payments               Payment[]
-
-  @@map("branch")
 }
 
 model Organization {
   id             String          @id @default(uuid())
-  orgName        String          @unique @map("org_name")
-  orgCode        String          @unique @map("org_code")
+  orgName        String          @unique
+  orgCode        String          @unique
   region         String
   city           String
-  mobileNumber   String          @unique @map("mobile_number")
   branchs        Branch[]
-  createdAt      DateTime        @default(now()) @map("created_at")
-  updatedAt      DateTime        @updatedAt @map("updated_at")
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
   thirdPartyLogs ThirdPartyLog[]
   description    OrgDesc
-  users          User[]
-
-  @@map("organization")
 }
 
 model Membership {
   id             String          @id @default(uuid())
   role           MembershipRole  @default(USER)
   users          User            @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId         String          @unique @map("user_id")
-  createdAt      DateTime        @default(now()) @map("created_at")
-  updatedAt      DateTime        @updatedAt @map("updated_at")
-  thirdPartyLogs ThirdPartyLog[]
+  userId         String          @unique
   branchs        Branch          @relation(fields: [branchId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  branchId       String          @map("branch_id")
+  branchId       String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  thirdPartyLogs ThirdPartyLog[]
 
   @@unique([userId, branchId])
-  @@map("membership")
 }
 
 model Certificate {
   id                 String              @id @default(uuid())
-  certificateNumber  String              @unique @map("certificate_number")
+  certificateNumber  String              @unique
   status             InsuranceStatus     @default(PendingApproval)
   policies           Policy              @relation(fields: [policyNumber], references: [policyNumber])
-  policyNumber       String              @unique @map("policy_number")
+  policyNumber       String              @unique
   vehicles           Vehicle?            @relation(fields: [vehiclePlateNumber], references: [plateNumber], onUpdate: Cascade, onDelete: SetNull)
-  vehiclePlateNumber String?             @unique @map("vehicle_plate_number")
+  vehiclePlateNumber String?             @unique
   branchs            Branch              @relation(fields: [branchId], references: [id])
-  branchId           String              @map("branch_id")
-  premiumTarif       Float               @map("premium_tarif")
+  branchId           String
+  premiumTarif       Float
   claims             Claim[]
   thirdPartyLogs     ThirdPartyLog[]
   certificateRecords CertificateRecord[]
   payments           Payment[]
-  issuedDate         DateTime            @default(now()) @map("issued_date")
-  updatedAt          DateTime            @updatedAt @map("updated_at")
+  issuedDate         DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
   // claimPayments      ClaimPayment[]
-
-  @@map("certificate")
 }
 
 model CertificateRecord {
@@ -125,64 +115,61 @@ model CertificateRecord {
   policies     Policy[]
   vehicles     Vehicle[]
   branchs      Branch[]
-  createdAt    DateTime      @default(now()) @map("created_at")
-  updatedAt    DateTime      @updatedAt @map("updated_at")
-
-  @@map("certificate_record")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
 model Insured {
   id             String          @id @default(uuid())
-  regNumber      String          @unique @map("reg_number")
-  firstName      String          @map("first_name")
-  lastName       String          @map("last_name")
+  regNumber      String          @unique
+  firstName      String
+  lastName       String
   occupation     String?
   region         String
   city           String
-  subCity        String          @map("sub_city")
+  subCity        String
   wereda         String
   kebelle        String
-  houseNumber    String          @map("house_number")
-  mobileNumber   String          @map("mobile_number")
+  houseNumber    String
+  mobileNumber   String
   vehicles       Vehicle[]
   claims         Claim[]
   branchs        Branch          @relation(fields: [branchId], references: [id])
-  branchId       String          @map("branch_id")
+  branchId       String
   payments       Payment[]
   thirdPartyLogs ThirdPartyLog[]
-  createdAt      DateTime        @default(now()) @map("created_at")
-  updatedAt      DateTime        @updatedAt @map("updated_at")
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 
   @@unique([mobileNumber, branchId])
-  @@map("insured")
 }
 
 model Vehicle {
   id                      String                @id @default(uuid())
-  plateNumber             String                @unique @map("plate_number")
-  engineNumber            String                @unique @map("engine_number")
-  chassisNumber           String                @unique @map("chassis_number")
-  vehicleModel            String                @map("vehicle_model")
-  bodyType                String                @map("body_type")
-  horsePower              String                @map("horse_power")
-  manufacturedYear        Int                   @map("manufactured_year")
-  vehicleType             String                @map("vehicle_type")
-  vehicleSubType          String                @map("vehicle_sub_type")
-  vehicleDetails          String                @map("vehicle_details")
-  vehicleUsage            String                @map("vehicle_usage")
-  vehicleCategory         VehicleCategory       @map("vehicle_category")
-  premiumTarif            Float                 @map("premium_tarif")
-  passengerNumber         Int                   @map("passenger_number")
-  carryingCapacityInGoods String?               @map("carrying_capacity_in_goods")
-  purchasedYear           Int                   @map("purchased_year")
-  dutyFreeValue           Float                 @map("duty_free_value")
-  dutyPaidValue           Float                 @map("duty_paid_value")
-  vehicleStatus           VEHICLESTATUS         @default(NEW) @map("vehicle_status")
-  isInsured               IsInsured             @default(NOTINSURED) @map("is_insured")
+  plateNumber             String                @unique
+  engineNumber            String                @unique
+  chassisNumber           String                @unique
+  vehicleModel            String
+  bodyType                String
+  horsePower              String
+  manufacturedYear        Int
+  vehicleType             String
+  vehicleSubType          String
+  vehicleDetails          String
+  vehicleUsage            String
+  vehicleCategory         VehicleCategory
+  premiumTarif            Float
+  passengerNumber         Int
+  carryingCapacityInGoods String?
+  purchasedYear           Int
+  dutyFreeValue           Float
+  dutyPaidValue           Float
+  vehicleStatus           VEHICLESTATUS         @default(NEW)
+  isInsured               IsInsured             @default(NOTINSURED)
   insureds                Insured               @relation(fields: [insuredId], references: [id])
-  insuredId               String                @map("insured_id")
+  insuredId               String
   branchs                 Branch                @relation(fields: [branchId], references: [id])
-  branchId                String                @map("branch_id")
+  branchId                String
   certificates            Certificate?
   responsibleVehicle      InsuredPoliceReport[] @relation("PoliceReport_responsibleVehicle")
   victimVehicle           InsuredPoliceReport[] @relation("PoliceReport_victimVehicle")
@@ -190,252 +177,226 @@ model Vehicle {
   accidentRecords         AccidentRecord[]
   certificateRecords      CertificateRecord[]
   thirdPartyLogs          ThirdPartyLog[]
-  createdAt               DateTime              @default(now()) @map("created_at")
-  updatedAt               DateTime              @updatedAt @map("updated_at")
-
-  @@map("vehicle")
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
 }
 
 model Policy {
   id                     String              @id @default(uuid())
-  policyNumber           String              @unique @map("policy_number")
-  policyStartDate        DateTime            @map("policy_start_date")
-  policyExpireDate       DateTime            @map("policy_expire_date")
-  policyIssuedConditions String?             @map("policy_issued_conditions")
-  personsEntitledToUse   String?             @map("persons_entitled_to_use")
+  policyNumber           String              @unique
+  policyStartDate        DateTime
+  policyExpireDate       DateTime
+  policyIssuedConditions String?
+  personsEntitledToUse   String?
   certificates           Certificate?
   certificateRecords     CertificateRecord[]
-  createdAt              DateTime            @default(now()) @map("created_at")
-  updatedAt              DateTime            @updatedAt @map("updated_at")
-
-  @@map("policy")
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
 }
 
 model Claim {
   id                   String              @id @default(uuid())
-  claimNumber          String              @unique @map("claim_number")
-  damageEstimate       Float               @map("damage_estimate")
-  claimedAt            DateTime            @default(now()) @map("claimed_at")
+  claimNumber          String              @unique
+  damageEstimate       Float
+  claimedAt            DateTime            @default(now())
   claimStatus          ClaimProgress       @default(OnProgress)
   insuredPoliceReports InsuredPoliceReport @relation(fields: [incidentNumber], references: [incidentNumber])
-  incidentNumber       String              @unique @map("incident_number")
+  incidentNumber       String              @unique
   insureds             Insured             @relation(fields: [claimantId], references: [id])
-  claimantId           String              @map("claimant_id")
+  claimantId           String
   vehicles             Vehicle             @relation(fields: [claimantPlateNumber], references: [plateNumber])
-  claimantPlateNumber  String              @map("claimant_plate_number")
+  claimantPlateNumber  String
   certificates         Certificate         @relation(fields: [certificateNumber], references: [certificateNumber])
-  certificateNumber    String              @map("certificate_number")
+  certificateNumber    String
   branchs              Branch              @relation(fields: [branchId], references: [id])
-  branchId             String              @map("branch_id")
-  updatedAt            DateTime            @updatedAt @map("updated_at")
+  branchId             String
+  updatedAt            DateTime            @updatedAt
   accidentRecords      AccidentRecord[]
   thirdPartyLogs       ThirdPartyLog[]
-
-  @@map("claim")
 }
 
 model ClaimUnInsured {
   id                     String                @id @default(uuid())
-  claimNumber            String                @unique @map("claim_number")
-  damageEstimate         Float                 @map("damage_estimate")
-  claimedAt              DateTime              @default(now()) @map("claimed_at")
+  claimNumber            String                @unique
+  damageEstimate         Float
+  claimedAt              DateTime              @default(now())
   unInsuredPoliceReports UnInsuredPoliceReport @relation(fields: [incidentNumber], references: [incidentNumber])
-  incidentNumber         String                @unique @map("incident_number")
-  vehiclePlateNumber     String                @map("vehicle_plate_number")
+  incidentNumber         String                @unique
+  vehiclePlateNumber     String
   branchs                Branch                @relation(fields: [branchId], references: [id])
-  branchId               String                @map("branch_id")
-  updatedAt              DateTime              @updatedAt @map("updated_at")
+  branchId               String
+  updatedAt              DateTime              @updatedAt
   thirdPartyLogs         ThirdPartyLog[]
-
-  @@map("claim_un_insured")
 }
 
 model ClaimHitAndRun {
   id                     String                @id @default(uuid())
-  claimNumber            String                @unique @map("claim_number")
-  damageEstimate         Float                 @map("damage_estimate")
-  claimerFullName        String                @map("claimer_full_name")
-  claimerRegion          String                @map("claimer_region")
-  claimerCity            String                @map("claimer_city")
-  claimerPhoneNumber     String                @map("claimer_phone_number")
-  claimedAt              DateTime              @default(now()) @map("claimed_at")
+  claimNumber            String                @unique
+  damageEstimate         Float
+  claimerFullName        String
+  claimerRegion          String
+  claimerCity            String
+  claimerPhoneNumber     String
+  claimedAt              DateTime              @default(now())
   branchs                Branch                @relation(fields: [branchId], references: [id])
-  branchId               String                @map("branch_id")
+  branchId               String
   hitAndRunPoliceReports HitAndRunPoliceReport @relation(fields: [incidentNumber], references: [incidentNumber])
-  incidentNumber         String                @unique @map("incident_number")
-  updatedAt              DateTime              @updatedAt @map("updated_at")
+  incidentNumber         String                @unique
+  updatedAt              DateTime              @updatedAt
   thirdPartyLogs         ThirdPartyLog[]
-
-  @@map("claim_hit_and_run")
 }
 
 model InsuredPoliceReport {
   id                                      String          @id @default(uuid())
-  incidentNumber                          String          @unique @map("incident_number")
-  victimDriverName                        String          @map("victim_driver_name")
-  victimLicenceNumber                     String          @map("victim_licence_number")
-  victimLevel                             String          @map("victim_level")
-  victimRegion                            String          @map("victim_region")
-  victimCity                              String          @map("victim_city")
-  victimSubCity                           String          @map("victim_sub_city")
-  victimWereda                            String          @map("victim_wereda")
-  victimKebelle                           String          @map("victim_kebelle")
-  victimHouseNo                           String          @map("victim_house_no")
-  victimPhoneNumber                       String          @map("victim_phone_number")
+  incidentNumber                          String          @unique
+  victimDriverName                        String
+  victimLicenceNumber                     String
+  victimLevel                             String
+  victimRegion                            String
+  victimCity                              String
+  victimSubCity                           String
+  victimWereda                            String
+  victimKebelle                           String
+  victimHouseNo                           String
+  victimPhoneNumber                       String
   vehicle_PoliceReport_victimVehicle      Vehicle         @relation("PoliceReport_victimVehicle", fields: [victimVehicle], references: [plateNumber], onDelete: NoAction, onUpdate: Cascade)
-  victimVehicle                           String          @map("victim_vehicle")
+  victimVehicle                           String
   branchs                                 Branch          @relation(name: "insuranceBranch", fields: [branchId], references: [id])
-  branchId                                String          @map("branch_id")
+  branchId                                String
   policeBranch                            Branch          @relation(name: "ReporterPolice", fields: [policeBranchId], references: [id])
-  policeBranchId                          String          @map("police_branch_id")
-  incidentCause                           String          @map("incident_cause")
-  incidentDate                            DateTime        @map("incident_date") @db.Date
-  incidentPlace                           String          @map("incident_place")
-  incidentTime                            String          @map("incident_time")
+  policeBranchId                          String
+  incidentCause                           String
+  incidentDate                            DateTime        @db.Date
+  incidentPlace                           String
+  incidentTime                            String
   victims                                 Victim[]
   vehicle_PoliceReport_responsibleVehicle Vehicle         @relation("PoliceReport_responsibleVehicle", fields: [responsibleVehicle], references: [plateNumber], onDelete: NoAction, onUpdate: Cascade)
-  responsibleVehicle                      String          @map("responsible_vehicle")
-  responsibleDriverName                   String          @map("responsible_driver_name")
-  responsiblePhoneNumber                  String          @map("responsible_phone_number")
-  reportDate                              DateTime        @default(now()) @map("report_date")
+  responsibleVehicle                      String
+  responsibleDriverName                   String
+  responsiblePhoneNumber                  String
+  reportDate                              DateTime        @default(now())
   claims                                  Claim?
   thirdPartyLogs                          ThirdPartyLog[]
   trafficPolices                          User            @relation(fields: [trafficPoliceId], references: [id])
-  trafficPoliceId                         String          @map("traffic_police_id")
-
-  @@map("insured_police_report")
+  trafficPoliceId                         String
 }
 
 model UnInsuredPoliceReport {
   id                            String          @id @default(uuid())
-  incidentNumber                String          @unique @map("incident_number")
-  victimDriverName              String          @map("victim_driver_name")
-  victimLicenceNumber           String          @map("victim_licence_number")
-  victimLevel                   String          @map("victim_level")
-  victimRegion                  String          @map("victim_region")
-  victimCity                    String          @map("victim_city")
-  victimSubCity                 String          @map("victim_sub_city")
-  victimWereda                  String          @map("victim_wereda")
-  victimKebelle                 String          @map("victim_kebelle")
-  victimHouseNo                 String          @map("victim_house_no")
-  victimPhoneNumber             String          @map("victim_phone_number")
-  victimVehiclePlateNumber      String          @map("victim_vehicle_plate_number")
+  incidentNumber                String          @unique
+  victimDriverName              String
+  victimLicenceNumber           String
+  victimLevel                   String
+  victimRegion                  String
+  victimCity                    String
+  victimSubCity                 String
+  victimWereda                  String
+  victimKebelle                 String
+  victimHouseNo                 String
+  victimPhoneNumber             String
+  victimVehiclePlateNumber      String
   branchs                       Branch          @relation(name: "unInsuredBranch", fields: [branchId], references: [id])
-  branchId                      String          @map("branch_id")
+  branchId                      String
   policeBranch                  Branch          @relation(name: "unInsuredPoliceReporter", fields: [policeBranchId], references: [id])
-  policeBranchId                String          @map("police_branch_id")
-  incidentCause                 String          @map("incident_cause")
-  incidentDate                  DateTime        @map("incident_date") @db.Date
-  incidentPlace                 String          @map("incident_place")
-  incidentTime                  String          @map("incident_time")
+  policeBranchId                String
+  incidentCause                 String
+  incidentDate                  DateTime        @db.Date
+  incidentPlace                 String
+  incidentTime                  String
   victims                       Victim[]
-  responsibleVehiclePlateNumber String          @map("responsible_vehicle_plate_number")
-  responsibleDriverName         String          @map("responsible_driver_name")
-  responsiblePhoneNumber        String          @map("responsible_phone_number")
-  reportDate                    DateTime        @default(now()) @map("report_date")
+  responsibleVehiclePlateNumber String
+  responsibleDriverName         String
+  responsiblePhoneNumber        String
+  reportDate                    DateTime        @default(now())
   claimUnInsureds               ClaimUnInsured?
   trafficPolices                User            @relation(fields: [trafficPoliceId], references: [id])
-  trafficPoliceId               String          @map("traffic_police_id")
+  trafficPoliceId               String
   thirdPartyLogs                ThirdPartyLog[]
-
-  @@map("un_insured_police_report")
 }
 
 model HitAndRunPoliceReport {
   id              String          @id @default(uuid())
-  incidentNumber  String          @unique @map("incident_number")
+  incidentNumber  String          @unique
   victims         Victim[]
-  incidentCause   String          @map("incident_cause")
-  incidentDate    DateTime        @map("incident_date")
-  incidentPlace   String          @map("incident_place")
-  incidentTime    String?         @map("incident_time")
-  reportDate      DateTime        @default(now()) @map("report_date")
+  incidentCause   String
+  incidentDate    DateTime
+  incidentPlace   String
+  incidentTime    String?
+  reportDate      DateTime        @default(now())
   claimHitAndRuns ClaimHitAndRun?
   branchs         Branch          @relation(name: "hitAndRunBranch", fields: [branchId], references: [id])
-  branchId        String          @map("branch_id")
+  branchId        String
   policeBranch    Branch          @relation(name: "ReporterPolice", fields: [policeBranchId], references: [id])
-  policeBranchId  String          @map("police_branch_id")
+  policeBranchId  String
   trafficPolices  User            @relation(fields: [trafficPoliceId], references: [id])
-  trafficPoliceId String          @map("traffic_police_id")
+  trafficPoliceId String
   thirdPartyLogs  ThirdPartyLog[]
-
-  @@map("hit_and_run_police_report")
 }
 
 model Victim {
   id                      String                  @id @default(uuid())
-  victimName              String                  @map("victim_name")
-  victimCondition         VictimedCondition       @map("victim_condition")
-  injuryType              InjuryType              @map("injury_type")
-  victimAddress           String?                 @map("victim_address")
-  victimFamilyPhoneNumber String?                 @map("victim_family_phone_number")
-  victimHospitalized      String?                 @map("victim_hospitalized")
+  victimName              String
+  victimCondition         VictimedCondition
+  injuryType              InjuryType
+  victimAddress           String?
+  victimFamilyPhoneNumber String?
+  victimHospitalized      String?
   hitAndRunPoliceReports  HitAndRunPoliceReport[]
   insuredPoliceReports    InsuredPoliceReport[]
   unInsuredPoliceReport   UnInsuredPoliceReport?  @relation(fields: [unsuredPoliceReportId], references: [id])
-  unsuredPoliceReportId   String?                 @map("unsured_police_report_id")
-  createdAt               DateTime                @default(now()) @map("created_at")
-  updatedAt               DateTime                @updatedAt @map("updated_at")
-
-  @@map("victim")
+  unsuredPoliceReportId   String?
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
 }
 
 model Tariff {
   id              Int             @id @default(autoincrement())
-  vehicleType     String          @map("vehicle_type")
-  vehicleSubType  String          @map("vehicle_sub_type")
-  vehicleDetail   String          @map("vehicle_detail")
-  vehicleUsage    String          @map("vehicle_usage")
-  vehicleCategory VehicleCategory @default(PRIVATEUSE) @map("vehicle_category")
-  premiumTarif    Float           @map("premium_tarif")
+  vehicleType     String
+  vehicleSubType  String
+  vehicleDetail   String
+  vehicleUsage    String
+  vehicleCategory VehicleCategory @default(PRIVATEUSE)
+  premiumTarif    Float
   thirdPartyLogs  ThirdPartyLog[]
-  createdAt       DateTime        @default(now()) @map("created_at")
-  updatedAt       DateTime        @updatedAt @map("updated_at")
-
-  @@map("tariff")
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 }
 
 model RegionList {
   id         Int      @id @default(autoincrement())
-  regionName String?  @map("region_name")
-  regionApp  String?  @map("region_app")
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
-
-  @@map("region_list")
+  regionName String?
+  regionApp  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model CodeList {
   id        Int      @id @default(autoincrement())
   code      String
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@map("code_list")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model TariffDetails {
   id             String   @id @default(uuid())
-  vehicleType    String   @map("vehicle_type")
-  vehicleSubType String   @map("vehicle_sub_type")
+  vehicleType    String
+  vehicleSubType String
   usage          String
-  vehicleDetail  String   @map("vehicle_detail")
+  vehicleDetail  String
   premium        Float
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-
-  @@map("tariff_details")
 }
 
 model ThirdPartyLog {
   id                      String                 @id @default(uuid())
-  userEmail               String                 @map("user_email")
+  userEmail               String
   action                  String
   mode                    String
-  oldValue                Json?                  @map("old_value")
-  newValue                Json?                  @map("new_value")
+  oldValue                Json?
+  newValue                Json?
   branchCon               Branch?                @relation(name: "branchConnection", fields: [branchName], references: [branchName])
-  branchName              String?                @map("branch_name")
+  branchName              String?
   certificates            Certificate[]
   claims                  Claim[]
   insureds                Insured[]
@@ -445,51 +406,45 @@ model ThirdPartyLog {
   users                   User[]
   vehicles                Vehicle[]
   tariffs                 Tariff[]
-  timeStamp               DateTime               @default(now()) @map("time_stamp")
+  timeStamp               DateTime               @default(now())
   ClaimUnInsured          ClaimUnInsured?        @relation(fields: [claimUnInsuredId], references: [id])
-  claimUnInsuredId        String?                @map("claim_un_insured_id")
+  claimUnInsuredId        String?
   branchs                 Branch[]
   ClaimHitAndRun          ClaimHitAndRun?        @relation(fields: [claimHitAndRunId], references: [id])
-  claimHitAndRunId        String?                @map("claim_hit_and_run_id")
+  claimHitAndRunId        String?
   HitAndRunPoliceReport   HitAndRunPoliceReport? @relation(fields: [hitAndRunPoliceReportId], references: [id])
-  hitAndRunPoliceReportId String?                @map("hit_and_run_police_report_id")
+  hitAndRunPoliceReportId String?
   UnInsuredPoliceReport   UnInsuredPoliceReport? @relation(fields: [unInsuredPoliceReportId], references: [id])
-  unInsuredPoliceReportId String?                @map("un_insured_police_report_id")
-
-  @@map("third_party_log")
+  unInsuredPoliceReportId String?
 }
 
 model AccidentRecord {
   id             String           @id @default(uuid())
-  bodilyInjury   ACCIDENTSUBTYPE? @map("bodily_injury")
-  propertyInjury Float?           @map("property_injury")
+  bodilyInjury   ACCIDENTSUBTYPE?
+  propertyInjury Float?
   vehicles       Vehicle          @relation(fields: [plateNumber], references: [plateNumber], onUpdate: Cascade)
-  plateNumber    String           @map("plate_number")
+  plateNumber    String
   claims         Claim            @relation(fields: [claimNumber], references: [claimNumber])
-  claimNumber    String           @map("claim_number")
-  createdAt      DateTime         @default(now()) @map("created_at")
-  updatedAt      DateTime         @updatedAt @map("updated_at")
-
-  @@map("accident_record")
+  claimNumber    String
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
 }
 
 model Payment {
   id               String              @id @default(uuid())
-  refNumber        String              @unique @map("ref_number")
-  premiumTarif     Float               @map("premium_tarif")
-  paymentStatus    PaymentStatus       @default(PendingApproval) @map("payment_status")
-  commissionStatus CommissioningStatus @default(NotCommissioned) @map("commission_status")
+  refNumber        String              @unique
+  premiumTarif     Float
+  paymentStatus    PaymentStatus       @default(PendingApproval)
+  commissionStatus CommissioningStatus @default(NotCommissioned)
   insureds         Insured             @relation(fields: [insuredId], references: [id])
-  insuredId        String              @map("insured_id")
+  insuredId        String
   certificates     Certificate[]
   branchs          Branch              @relation(fields: [branchCode], references: [branchCode])
-  branchCode       String              @map("branch_code")
-  deletedStatus    Boolean             @default(false) @map("deleted_status")
-  deletedAt        DateTime?           @map("deleted_at")
-  createdAt        DateTime            @default(now()) @map("created_at")
-  updatedAt        DateTime            @updatedAt @map("updated_at")
-
-  @@map("payment")
+  branchCode       String
+  deletedStatus    Boolean             @default(false)
+  deletedAt        DateTime?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
 }
 
 enum InsuranceStatus {
@@ -585,4 +540,12 @@ enum OrgDesc {
 enum CertificateStatus {
   CURRENT
   ARCHIEVED
+}
+
+enum USER_TYPE {
+  USER
+  ADMIN
+  INSURER
+  BRANCH
+  TRAFFICPOLICE
 }

@@ -1,15 +1,15 @@
-import { MdEmail } from "react-icons/md";
 import { InferGetServerSidePropsType } from "next";
 import Image from "next/image";
-import { RiLockPasswordFill, RiLockPasswordLine } from "react-icons/ri";
+import { RiLockPasswordFill } from "react-icons/ri";
 import { Formik, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useState } from "react";
 import { signIn, getCsrfToken } from "next-auth/react";
 import { useRouter } from "next/router";
-import { CtxOrReq } from "next-auth/client/_utils";
 import SignInError from "./signin-error";
 import SiteHeader from "@/components/layout/header";
+import { phoneRegExp } from "@/lib/config";
+import { FaMobileAlt } from "react-icons/fa";
 
 const SignIn = ({
   csrfToken,
@@ -18,10 +18,9 @@ const SignIn = ({
   const [error, setError] = useState(null);
 
   const validate = Yup.object().shape({
-    email: Yup.string()
-      .email("Must be a valid email")
-      .max(255)
-      .required("Email is required"),
+    mobileNumber: Yup.string()
+      .matches(phoneRegExp, "Phone Number Is Not Valid")
+      .required("Phone Number Is Required"),
     password: Yup.string().required("Password Is Required"),
   });
   return (
@@ -84,12 +83,12 @@ const SignIn = ({
             <div className="mt-1 sm:mx-auto sm:w-full sm:max-w-md justify-center items-center">
               <div className="bg-white px-10 py-8 shadow sm:rounded-lg sm:px-10">
                 <Formik
-                  initialValues={{ email: "", password: "" }}
+                  initialValues={{ mobileNumber: "", password: "" }}
                   validationSchema={validate}
                   onSubmit={async (values, { setSubmitting }) => {
                     const res = await signIn("credentials", {
                       redirect: false,
-                      email: values.email,
+                      mobileNumber: values.mobileNumber,
                       password: values.password,
                       callbackUrl: `${window.location.origin}`,
                     });
@@ -107,32 +106,30 @@ const SignIn = ({
                     <form onSubmit={formik.handleSubmit} className="space-y-6">
                       <div>
                         <label
-                          htmlFor="email"
+                          htmlFor="mobileNumber"
                           className="hidden text-sm font-medium text-gray-700"
                         >
-                          Email address
+                          Phone Number
                         </label>
                         <div className="relative">
                           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                            <MdEmail
+                            <FaMobileAlt
                               className="h-6 w-6 text-lightGreen"
                               aria-hidden="true"
                             />
                           </div>
                           <Field
-                            name="email"
-                            type="email"
-                            autoComplete="email"
+                            name="mobileNumber"
+                            type="text"
+                            autoComplete="off"
                             className="block w-full rounded-md border-gray-300 p-4 pl-10 focus:shadow-xl focus:border-darkGrayHv ring-1 ring-gray-400 sm:text-sm"
-                            placeholder="Email Address"
+                            placeholder="Mobile Number"
                           />
                           <div className="text-red-600  text-sm italic mt-1">
-                            <ErrorMessage name="email" />
+                            <ErrorMessage name="mobileNumber" />
                           </div>
                         </div>
                       </div>
-                      {/* <div className="space-y-3"> */}
-
                       <div>
                         <label
                           htmlFor="password"
@@ -150,7 +147,7 @@ const SignIn = ({
                           <Field
                             name="password"
                             type="password"
-                            autoComplete="current-password"
+                            autoComplete="off"
                             className="block w-full rounded-md  border-gray-50 p-4 pl-10 focus:shadow-xl focus:border-darkGrayHv ring-1 ring-gray-400 sm:text-sm"
                             placeholder="Password"
                           />
@@ -189,7 +186,7 @@ const SignIn = ({
   );
 };
 
-export const getServerSideProps = async (context: CtxOrReq) => {
+export const getServerSideProps = async (context) => {
   return {
     props: {
       csrfToken: await getCsrfToken(context),

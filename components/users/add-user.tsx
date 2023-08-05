@@ -14,6 +14,7 @@ const CreateUser = gql`
       id
       firstName
       lastName
+      role
       region
       city
       email

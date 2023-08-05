@@ -17,7 +17,6 @@ const CreateOrganization = gql`
       orgCode
       region
       city
-      mobileNumber
       description
       createdAt
       updatedAt
@@ -35,8 +34,6 @@ const AddOrganizationModal = () => {
     { value: "TRAFFICPOLICE", label: "TRAFFICPOLICE" },
   ];
 
-  const phoneRegExp = /^(^\+251|^251|^0)?9\d{8}$/;
-
   const [createOrganization, { data, error, loading }] =
     useMutation(CreateOrganization);
 
@@ -49,16 +46,16 @@ const AddOrganizationModal = () => {
     orgCode: "",
     region: "",
     city: "",
-    mobileNumber: "",
+    // mobileNumber: "",
     description: "",
   };
 
   const validate = Yup.object().shape({
     orgName: Yup.string().required("Insurer Name Is Required"),
     orgCode: Yup.string().required("Organization Code Is Required"),
-    mobileNumber: Yup.string()
-      .matches(phoneRegExp, "Mobile Number Is Not Valid")
-      .required("Mobile Number Is Required"),
+    // mobileNumber: Yup.string()
+    //   .matches(phoneRegExp, "Mobile Number Is Not Valid")
+    //   .required("Mobile Number Is Required"),
     description: Yup.string().required("Description Is Required"),
   });
   const [formValues, setFormValues] = useState(null);
@@ -71,7 +68,7 @@ const AddOrganizationModal = () => {
       orgCode: values.orgCode,
       region: values.region,
       city: values.city,
-      mobileNumber: changePhone(values.mobileNumber),
+      // mobileNumber: changePhone(values.mobileNumber),
       description: values.description,
     };
     // console.log(input);
@@ -241,7 +238,7 @@ const AddOrganizationModal = () => {
                               />
                             </div>
                           </div>
-                          <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
+                          {/* <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
                             <div>
                               <label
                                 htmlFor="mobileNumber"
@@ -261,7 +258,7 @@ const AddOrganizationModal = () => {
                                 <ErrorMessage name="mobileNumber" />
                               </div>
                             </div>
-                          </div>
+                          </div> */}
                           <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
                             <div>
                               <label

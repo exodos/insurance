@@ -1,44 +1,34 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
-import { prisma } from "../../../lib/prisma";
-import { verifyPassword } from "../../../lib/auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { baseUrl } from "@/lib/config";
 
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: { label: "email", type: "email" },
+        mobileNumber: { label: "mobileNumber", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
-        const user = await prisma.user.findFirst({
-          where: {
-            email: credentials.email,
-          },
-          include: {
-            memberships: {
-              include: {
-                branchs: true,
-              },
-            },
+      async authorize(credentials, _) {
+        if (!credentials?.mobileNumber || !credentials?.password) {
+          throw new Error("Wrong credentials!!");
+        }
+        const response = await fetch(baseUrl + `/api/user`, {
+          method: "POST",
+          body: JSON.stringify(credentials),
+          headers: {
+            "Content-Type": "application/json",
           },
         });
-        if (!user) {
-          return null;
-        } else if (!user?.memberships) {
-          return null;
-        }
-        const isValid = await verifyPassword(
-          credentials.password,
-          user.password
-        );
-        if (isValid) {
+
+        const user = await response.json();
+        console.log("🚀 ~ file: [...nextauth].ts:23 ~ authorize ~ user:", user);
+
+        if (response.ok && user) {
           return user;
-        } else {
-          console.log("Hash Not Matched To Logging In");
-          return null;
         }
+        return null;
       },
     }),
   ],
@@ -46,15 +36,12 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/auth/signin",
   },
-
   secret: process.env.NEXTAUTH_SECRET,
+
   callbacks: {
     redirect: async ({ url, baseUrl }) => {
-      if (url.startsWith("/")) return `${baseUrl}${url}`;
-      else if (new URL(url).origin === baseUrl) return url;
-      return baseUrl;
+      return url.startsWith(baseUrl) ? baseUrl : url;
     },
-
     jwt: async ({ token, user }) => {
       return { ...token, ...user };
     },

@@ -17,9 +17,10 @@ const UpdateOrganization = gql`
     updateOrganization(id: $updateOrganizationId, input: $input) {
       id
       orgName
+      orgCode
       region
       city
-      mobileNumber
+      description
       createdAt
       updatedAt
     }
@@ -37,19 +38,14 @@ const AdminEditOrganization = ({ organizations }) => {
     console.log(error);
   }
 
-  const phoneRegExp = /^(^\+251|^251|^0)?9\d{8}$/;
-
   const initialValues = {
     orgName: organizations.orgName,
     region: organizations.region,
     city: organizations.city,
-    mobileNumber: organizations.mobileNumber,
+    // mobileNumber: organizations.mobileNumber,
   };
   const validate = Yup.object().shape({
     orgName: Yup.string().required("Insurer Name Is Required"),
-    mobileNumber: Yup.string()
-      .matches(phoneRegExp, "Mobile Number Is Not Valid")
-      .required("Mobile Number Is Required"),
   });
 
   const [formValues, setFormValues] = useState(null);
@@ -61,7 +57,7 @@ const AdminEditOrganization = ({ organizations }) => {
       orgName: values.orgName,
       region: values.region,
       city: values.city,
-      mobileNumber: changePhone(values.mobileNumber),
+      // mobileNumber: changePhone(values.mobileNumber),
     };
 
     await updateOrganization({
@@ -204,7 +200,7 @@ const AdminEditOrganization = ({ organizations }) => {
                               />
                             </div>
                           </div>
-                          <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
+                          {/* <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-3">
                             <div>
                               <label
                                 htmlFor="mobileNumber"
@@ -224,7 +220,7 @@ const AdminEditOrganization = ({ organizations }) => {
                                 <ErrorMessage name="mobileNumber" />
                               </div>
                             </div>
-                          </div>
+                          </div> */}
                         </div>
                       </div>
                       <div className="flex-shrink-0 border-t border-gray-200 px-4 py-5 sm:px-6">

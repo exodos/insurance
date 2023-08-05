@@ -1,6 +1,6 @@
 import { MembershipRole } from "@prisma/client";
 import { NextResponse } from "next/server";
-import { withAuth } from "next-auth/middleware";
+import { NextRequestWithAuth, withAuth } from "next-auth/middleware";
 
 const ROLES_ALLOWED_TO_AUTH = new Set<MembershipRole>([
   MembershipRole.SUPERADMIN,
@@ -12,7 +12,7 @@ const ROLES_ALLOWED_TO_AUTH = new Set<MembershipRole>([
 ]);
 
 export default withAuth(
-  function middleware(req) {
+  function middleware(req: NextRequestWithAuth) {
     if (
       req?.nextUrl?.pathname?.startsWith("/admin") &&
       req?.nextauth?.token?.memberships?.role !== MembershipRole.SUPERADMIN

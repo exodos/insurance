@@ -15,7 +15,6 @@ import {
 } from "nexus";
 import { hashPassword, verifyPassword } from "../../lib/auth";
 import { membershipConnectInput, membershipCreateInput } from "./Membership";
-import { organizationConnectInput } from "./Organization";
 
 export const GQLDate = asNexusMethod(DateTimeResolver, "date");
 
@@ -25,6 +24,7 @@ export const User = objectType({
     t.string("id");
     t.string("firstName");
     t.string("lastName");
+    t.field("role", { type: USER_TYPE });
     t.nullable.string("region");
     t.nullable.string("city");
     t.string("email");
@@ -73,16 +73,16 @@ export const User = objectType({
           .hitAndRunPoliceReports();
       },
     });
-    t.field("organizations", {
-      type: "Organization",
-      resolve: async (_parent, _args, ctx) => {
-        return await ctx.prisma.user
-          .findUnique({
-            where: { id: _parent.id },
-          })
-          .organizations();
-      },
-    });
+    // t.field("organizations", {
+    //   type: "Organization",
+    //   resolve: async (_parent, _args, ctx) => {
+    //     return await ctx.prisma.user
+    //       .findUnique({
+    //         where: { id: _parent.id },
+    //       })
+    //       .organizations();
+    //   },
+    // });
   },
 });
 
@@ -450,11 +450,6 @@ export const createUserMutation = extendType({
             email: args.input.email,
             mobileNumber: changePhone(args.input.mobileNumber),
             password: await hashPassword(args.input.password),
-            organizations: {
-              connect: {
-                id: org.orgId,
-              },
-            },
             memberships: {
               create: {
                 role: args.input.memberships.role,
@@ -772,4 +767,9 @@ export const UserOrderByInput = inputObjectType({
     t.field("createdAt", { type: Sort });
     t.field("updatedAt", { type: Sort });
   },
+});
+
+export const USER_TYPE = enumType({
+  name: "USER_TYPE",
+  members: ["USER", "ADMIN", "INSURER", "BRANCH", "TRAFFICPOLICE"],
 });

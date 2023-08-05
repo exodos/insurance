@@ -20,6 +20,19 @@ export const changePhone = (phone: string) => {
 
   return validPhone;
 };
+export const changePhoneNew = (phone: string) => {
+  if (phone.startsWith("0")) {
+    return phone.slice(1);
+  } else if (phone.startsWith("9")) {
+    return phone;
+  } else if (phone.startsWith("+")) {
+    return phone.slice(4);
+  } else {
+    return phone;
+  }
+};
+
+export const phoneRegExp = /^(^\+251|^251|^0)?(9|7)\d{8}$/;
 
 export const checkPolicy = (policyExpireDate: string | number | Date) => {
   const pexpireDate = new Date(policyExpireDate);
@@ -44,3 +57,11 @@ export const sendMultiSmsMessage = async (smsMessage) => {
     console.log(response.data);
   });
 };
+
+export enum USERTYPE {
+  USER = "USER",
+  ADMIN = "ADMIN",
+  INSURER = "INSURER",
+  BRANCH = "BRANCH",
+  TRAFFICPOLICE = "TRAFFICPOLICE",
+}
