@@ -1,6 +1,6 @@
+import prisma from "@/lib/prisma";
 import type { NextApiRequest, NextApiResponse } from "next";
 const { XMLParser, XMLBuilder, XMLValidator } = require("fast-xml-parser");
-import { prisma } from "../../lib/prisma";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const xmlRequest = req.body;

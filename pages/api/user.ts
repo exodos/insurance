@@ -1,8 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/auth";
 import { applyMiddleware, getRateLimitMiddlewares } from "@/login-middleware";
 import { changePhone } from "@/lib/config";
+import prisma from "@/lib/prisma";
 
 const middlewares = getRateLimitMiddlewares({ limit: 10 }).map(applyMiddleware);
 

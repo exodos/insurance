@@ -1,9 +1,9 @@
-import { prisma } from "@/lib/prisma";
 import nc, { createRouter } from "next-connect";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]";
 import { NextApiRequest, NextApiResponse } from "next";
 import { addYears, format, subYears } from "date-fns";
+import prisma from "@/lib/prisma";
 
 const router = createRouter<NextApiRequest, NextApiResponse>();
 
