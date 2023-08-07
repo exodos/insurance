@@ -298,10 +298,10 @@ const ListVehicle = ({
                       >
                         Updated At
                       </th>
-                      {(session.user?.memberships?.role === "SUPERADMIN" ||
-                        session.user?.memberships?.role === "INSURER" ||
-                        session.user?.memberships?.role === "BRANCHADMIN" ||
-                        session.user?.memberships?.role === "MEMBER") && (
+                      {(session?.user?.memberships?.role === "SUPERADMIN" ||
+                        session?.user?.memberships?.role === "INSURER" ||
+                        session?.user?.memberships?.role === "BRANCHADMIN" ||
+                        session?.user?.memberships?.role === "MEMBER") && (
                         <th
                           scope="col"
                           className="relative py-3.5 pl-3 pr-4 sm:pr-6"
@@ -309,10 +309,10 @@ const ListVehicle = ({
                           <span className="sr-only">Detail</span>
                         </th>
                       )}
-                      {(session.user?.memberships?.role === "SUPERADMIN" ||
-                        session.user?.memberships?.role === "INSURER" ||
-                        session.user?.memberships?.role === "BRANCHADMIN" ||
-                        session.user?.memberships?.role === "MEMBER") && (
+                      {(session?.user?.memberships?.role === "SUPERADMIN" ||
+                        session?.user?.memberships?.role === "INSURER" ||
+                        session?.user?.memberships?.role === "BRANCHADMIN" ||
+                        session?.user?.memberships?.role === "MEMBER") && (
                         <>
                           <th
                             scope="col"
@@ -413,9 +413,9 @@ const ListVehicle = ({
                             {format(new Date(item.updatedAt), "MMM-dd-yyyy")}
                           </td>
 
-                          {(session.user?.memberships?.role === "SUPERADMIN" ||
-                            session.user?.memberships?.role === "INSURER" ||
-                            session.user?.memberships?.role === "MEMBER") && (
+                          {(session?.user?.memberships?.role === "SUPERADMIN" ||
+                            session?.user?.memberships?.role === "INSURER" ||
+                            session?.user?.memberships?.role === "MEMBER") && (
                             <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                               <>
                                 <button
@@ -442,10 +442,11 @@ const ListVehicle = ({
                               </>
                             </td>
                           )}
-                          {(session.user?.memberships?.role === "SUPERADMIN" ||
-                            session.user?.memberships?.role === "INSURER" ||
-                            session.user?.memberships?.role === "BRANCHADMIN" ||
-                            session.user?.memberships?.role === "MEMBER") && (
+                          {(session?.user?.memberships?.role === "SUPERADMIN" ||
+                            session?.user?.memberships?.role === "INSURER" ||
+                            session?.user?.memberships?.role ===
+                              "BRANCHADMIN" ||
+                            session?.user?.memberships?.role === "MEMBER") && (
                             <>
                               <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                 <>

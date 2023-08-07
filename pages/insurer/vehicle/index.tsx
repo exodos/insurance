@@ -122,7 +122,7 @@ const InsurerVehiclePage = ({
             </div>
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
-                {session.user?.memberships?.role === "INSURER" && (
+                {session?.user?.memberships?.role === "INSURER" && (
                   <Link
                     href={{
                       pathname: "/insurer/vehicle/insurer-add-vehicle",
@@ -141,7 +141,7 @@ const InsurerVehiclePage = ({
                     </button>
                   </Link>
                 )}
-                {session.user?.memberships?.role === "INSURER" && (
+                {session?.user?.memberships?.role === "INSURER" && (
                   <Link
                     href={{
                       pathname: "/insurer/vehicle/export-vehicle",

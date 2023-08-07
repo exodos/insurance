@@ -118,7 +118,7 @@ const UnInsuredPoliceReport = ({
             </div>
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
-                {session.user?.memberships?.role === "TRAFFICPOLICEMEMBER" && (
+                {session?.user?.memberships?.role === "TRAFFICPOLICEMEMBER" && (
                   <button
                     type="button"
                     className="inline-flex items-center"
@@ -130,7 +130,7 @@ const UnInsuredPoliceReport = ({
                     />
                   </button>
                 )}
-                {session.user?.memberships?.role === "TRAFFICPOLICEADMIN" && (
+                {session?.user?.memberships?.role === "TRAFFICPOLICEADMIN" && (
                   <button type="button" className="inline-flex items-center">
                     <BsFillArrowUpCircleFill
                       className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"

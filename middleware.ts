@@ -17,7 +17,6 @@ export default withAuth(
       req?.nextUrl?.pathname?.startsWith("/admin") &&
       req?.nextauth?.token?.memberships?.role !== MembershipRole.SUPERADMIN
     ) {
-      // return NextResponse.redirect(new URL("/", req.url));
       // return NextResponse.rewrite(new URL("/denied", req.url));
       return NextResponse.redirect(new URL("/denied", req.url));
     }

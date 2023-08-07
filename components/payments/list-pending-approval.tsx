@@ -192,9 +192,9 @@ const ListPendingApprovalPayment = ({ paymentData, href }) => {
         <div className="mt-5 flex flex-col">
           <div className="relative overflow-hidden mb-3">
             {selectedPayment.length > 0 &&
-              (session.user?.memberships?.role === "SUPERADMIN" ||
-                session.user?.memberships?.role === "INSURER" ||
-                session.user?.memberships?.role === "BRANCHADMIN") && (
+              (session?.user?.memberships?.role === "SUPERADMIN" ||
+                session?.user?.memberships?.role === "INSURER" ||
+                session?.user?.memberships?.role === "BRANCHADMIN") && (
                 <button
                   type="button"
                   className="mr-2 inline-flex items-center rounded-lg border border-gray-300 bg-lightBlue px-3 py-2 text-xs font-medium text-white shadow-sm hover:bg-deepBlue focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
@@ -270,9 +270,9 @@ const ListPendingApprovalPayment = ({ paymentData, href }) => {
                       >
                         Updated At
                       </th>
-                      {(session.user?.memberships?.role === "SUPERADMIN" ||
-                        session.user?.memberships?.role === "INSURER" ||
-                        session.user?.memberships?.role === "BRANCHADMIN") && (
+                      {(session?.user?.memberships?.role === "SUPERADMIN" ||
+                        session?.user?.memberships?.role === "INSURER" ||
+                        session?.user?.memberships?.role === "BRANCHADMIN") && (
                         <>
                           <th scope="col" className="relative py-3.5 sm:pr-1">
                             <span className="sr-only">Detail</span>
@@ -345,9 +345,9 @@ const ListPendingApprovalPayment = ({ paymentData, href }) => {
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {format(new Date(item.updatedAt), "MMM-dd-yyyy")}
                           </td>
-                          {(session.user?.memberships?.role === "SUPERADMIN" ||
-                            session.user?.memberships?.role === "INSURER" ||
-                            session.user?.memberships?.role ===
+                          {(session?.user?.memberships?.role === "SUPERADMIN" ||
+                            session?.user?.memberships?.role === "INSURER" ||
+                            session?.user?.memberships?.role ===
                               "BRANCHADMIN") && (
                             <>
                               <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">

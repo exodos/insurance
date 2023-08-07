@@ -200,10 +200,10 @@ const ListClaim = ({ claimData, href }) => {
                       >
                         Update At
                       </th>
-                      {(session.user?.memberships?.role === "SUPERADMIN" ||
-                        session.user?.memberships?.role ===
+                      {(session?.user?.memberships?.role === "SUPERADMIN" ||
+                        session?.user?.memberships?.role ===
                           "TRAFFICPOLICEADMIN" ||
-                        session.user?.memberships?.role ===
+                        session?.user?.memberships?.role ===
                           "TRAFFICPOLICEMEMBER") && (
                         <>
                           <th
@@ -220,10 +220,10 @@ const ListClaim = ({ claimData, href }) => {
                           </th>
                         </>
                       )}
-                      {(session.user?.memberships?.role === "SUPERADMIN" ||
-                        session.user?.memberships?.role === "INSURER" ||
-                        session.user?.memberships?.role === "BRANCHADMIN" ||
-                        session.user?.memberships?.role === "MEMBER") && (
+                      {(session?.user?.memberships?.role === "SUPERADMIN" ||
+                        session?.user?.memberships?.role === "INSURER" ||
+                        session?.user?.memberships?.role === "BRANCHADMIN" ||
+                        session?.user?.memberships?.role === "MEMBER") && (
                         <th
                           scope="col"
                           className="relative py-3.5 pl-3 pr-4 sm:pr-6"
@@ -270,10 +270,10 @@ const ListClaim = ({ claimData, href }) => {
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {format(new Date(item.updatedAt), "dd-MMM-yyyy")}
                           </td>
-                          {(session.user?.memberships?.role === "SUPERADMIN" ||
-                            session.user?.memberships?.role ===
+                          {(session?.user?.memberships?.role === "SUPERADMIN" ||
+                            session?.user?.memberships?.role ===
                               "TRAFFICPOLICEADMIN" ||
-                            session.user?.memberships?.role ===
+                            session?.user?.memberships?.role ===
                               "TRAFFICPOLICEMEMBER") && (
                             <>
                               <td className="relative whitespace-nowrap py-4 pl-2 pr-3 text-right text-sm font-medium sm:pr-6">
@@ -333,10 +333,11 @@ const ListClaim = ({ claimData, href }) => {
                             </>
                           )}
 
-                          {(session.user?.memberships?.role === "SUPERADMIN" ||
-                            session.user?.memberships?.role === "INSURER" ||
-                            session.user?.memberships?.role === "BRANCHADMIN" ||
-                            session.user?.memberships?.role === "MEMBER") && (
+                          {(session?.user?.memberships?.role === "SUPERADMIN" ||
+                            session?.user?.memberships?.role === "INSURER" ||
+                            session?.user?.memberships?.role ===
+                              "BRANCHADMIN" ||
+                            session?.user?.memberships?.role === "MEMBER") && (
                             <td className="relative whitespace-nowrap py-4 pl-2 pr-3 text-right text-sm font-medium sm:pr-6">
                               <>
                                 <button

@@ -234,7 +234,7 @@ const AdminListClaim = ({ claimData }) => {
                             {format(new Date(item.updatedAt), "dd-MMM-yyyy")}
                           </td>
                           <td className="relative whitespace-nowrap py-4 pl-2 pr-3 text-right text-sm font-medium sm:pr-6">
-                            {session.user?.memberships?.role ===
+                            {session?.user?.memberships?.role ===
                               "SUPERADMIN" && (
                               <>
                                 <button
@@ -268,7 +268,7 @@ const AdminListClaim = ({ claimData }) => {
                             )}
                           </td>
                           {/* <td className="relative whitespace-nowrap py-4 pl-2 pr-3 text-right text-sm font-medium sm:pr-6">
-                            {(session.user?.memberships?.role === "SUPERADMIN") && (
+                            {(session?.user?.memberships?.role === "SUPERADMIN") && (
                               <>
                                 <button
                                   onClick={() => handleEdit(item)}
@@ -293,7 +293,7 @@ const AdminListClaim = ({ claimData }) => {
                             )}
                           </td> */}
                           {/* <td className="relative whitespace-nowrap py-4 pl-2 pr-3 text-right text-sm font-medium sm:pr-6">
-                            {(session.user?.memberships?.role === "SUPERADMIN") && (
+                            {(session?.user?.memberships?.role === "SUPERADMIN") && (
                               <>
                                 <button
                                   onClick={() => handleDelete(item)}

@@ -513,7 +513,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         destination: "/auth/signin",
       },
     };
-  } else if (session.user?.memberships?.role !== "SUPERADMIN") {
+  } else if (session?.user?.memberships?.role !== "SUPERADMIN") {
     return {
       redirect: {
         destination: "/",

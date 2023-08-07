@@ -80,7 +80,7 @@ const InsurerInsuredPage = ({
             </div>
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
-                {(session.user?.memberships?.role === "INSURER" ||
+                {(session?.user?.memberships?.role === "INSURER" ||
                   session?.user?.memberships?.role === "MEMBER") && (
                   <button
                     type="button"
@@ -93,7 +93,7 @@ const InsurerInsuredPage = ({
                     />
                   </button>
                 )}
-                {session.user?.memberships?.role === "INSURER" && (
+                {session?.user?.memberships?.role === "INSURER" && (
                   <Link
                     href={{
                       pathname: "/insurer/insured/export-insured",

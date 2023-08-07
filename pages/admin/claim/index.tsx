@@ -83,7 +83,7 @@ const AdminClaimPage = ({
             </div>
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
-                {session.user?.memberships?.role === "SUPERADMIN" && (
+                {session?.user?.memberships?.role === "SUPERADMIN" && (
                   <Link
                     href={{
                       pathname: "/admin/claim/export-claim",
@@ -131,7 +131,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         destination: "/auth/signin",
       },
     };
-  } else if (session.user?.memberships?.role !== "SUPERADMIN") {
+  } else if (session?.user?.memberships?.role !== "SUPERADMIN") {
     return {
       redirect: {
         destination: "/",

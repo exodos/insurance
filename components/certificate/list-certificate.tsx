@@ -191,10 +191,10 @@ const ListCertificate = ({ certificateData }) => {
                       >
                         Updated At
                       </th>
-                      {(session.user?.memberships?.role === "SUPERADMIN" ||
-                        session.user?.memberships?.role === "INSURER" ||
-                        session.user?.memberships?.role === "MEMBER" ||
-                        session.user?.memberships?.role === "BRANCHADMIN") && (
+                      {(session?.user?.memberships?.role === "SUPERADMIN" ||
+                        session?.user?.memberships?.role === "INSURER" ||
+                        session?.user?.memberships?.role === "MEMBER" ||
+                        session?.user?.memberships?.role === "BRANCHADMIN") && (
                         <>
                           <th
                             scope="col"
@@ -265,10 +265,10 @@ const ListCertificate = ({ certificateData }) => {
                             {format(new Date(item.updatedAt), "MMM-dd-yyyy")}
                           </td>
 
-                          {(session.user?.memberships?.role === "SUPERADMIN" ||
-                            session.user?.memberships?.role === "INSURER" ||
-                            session.user?.memberships?.role === "MEMBER" ||
-                            session.user?.memberships?.role ===
+                          {(session?.user?.memberships?.role === "SUPERADMIN" ||
+                            session?.user?.memberships?.role === "INSURER" ||
+                            session?.user?.memberships?.role === "MEMBER" ||
+                            session?.user?.memberships?.role ===
                               "BRANCHADMIN") && (
                             <>
                               <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">

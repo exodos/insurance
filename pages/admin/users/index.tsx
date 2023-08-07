@@ -12,6 +12,7 @@ import { useRouter } from "next/router";
 import SiteHeader from "@/layout/header";
 import Link from "next/link";
 import Report from "@/report/fly-out";
+import { USERROLE } from "@/lib/config";
 
 const FeedUser = gql`
   query FeedUser(
@@ -93,7 +94,7 @@ const AdminUserPage = ({
             </div>
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
-                {session.user?.memberships?.role === "SUPERADMIN" && (
+                {session?.user?.memberships?.role === USERROLE.SUPERADMIN && (
                   <>
                     <button
                       type="button"
@@ -155,7 +156,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         destination: "/auth/signin",
       },
     };
-  } else if (session?.user?.memberships?.role !== "SUPERADMIN") {
+  } else if (session?.user?.memberships?.role !== USERROLE.SUPERADMIN) {
     return {
       redirect: {
         destination: "/",

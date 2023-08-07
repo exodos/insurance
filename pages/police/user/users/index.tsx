@@ -85,7 +85,7 @@ const POliceBranchUserPage = ({
             </div>
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
-                {session.user?.memberships?.role === "MEMBER" && (
+                {session?.user?.memberships?.role === "MEMBER" && (
                   <button
                     type="button"
                     className="inline-flex items-center"
@@ -97,7 +97,7 @@ const POliceBranchUserPage = ({
                     />
                   </button>
                 )}
-                {session.user?.memberships?.role === "INSURER" && (
+                {session?.user?.memberships?.role === "INSURER" && (
                   <button type="button" className="inline-flex items-center">
                     <BsFillArrowUpCircleFill
                       className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"

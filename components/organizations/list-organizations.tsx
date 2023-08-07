@@ -88,7 +88,7 @@ const ListOrganizations = ({ orgData }) => {
                       >
                         Updated At
                       </th>
-                      {session.user?.memberships?.role === "SUPERADMIN" && (
+                      {session?.user?.memberships?.role === "SUPERADMIN" && (
                         <th
                           scope="col"
                           className="relative py-3.5 pl-1 pr-1 sm:pr-3"
@@ -96,7 +96,7 @@ const ListOrganizations = ({ orgData }) => {
                           <span className="sr-only">Edit</span>
                         </th>
                       )}
-                      {session.user?.memberships?.role === "SUPERADMIN" && (
+                      {session?.user?.memberships?.role === "SUPERADMIN" && (
                         <th
                           scope="col"
                           className="relative py-3.5 pl-1 pr-1 sm:pr-3"
@@ -131,7 +131,8 @@ const ListOrganizations = ({ orgData }) => {
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {format(new Date(item.updatedAt), "MMM-dd-yyyy")}
                           </td>
-                          {session.user?.memberships?.role === "SUPERADMIN" && (
+                          {session?.user?.memberships?.role ===
+                            "SUPERADMIN" && (
                             <td className="relative whitespace-nowrap py-4 pl-1 text-right text-sm font-medium sm:pr-6">
                               <>
                                 <button
@@ -156,7 +157,8 @@ const ListOrganizations = ({ orgData }) => {
                               </>
                             </td>
                           )}
-                          {session.user?.memberships?.role === "SUPERADMIN" && (
+                          {session?.user?.memberships?.role ===
+                            "SUPERADMIN" && (
                             <td className="relative whitespace-nowrap py-4 pl-1 text-right text-sm font-medium sm:pr-6">
                               <>
                                 <button

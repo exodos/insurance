@@ -178,9 +178,9 @@ const ListHitAndRun = ({ hitAndRunData, href }) => {
                       >
                         Report Date
                       </th>
-                      {(session.user?.memberships?.role ===
+                      {(session?.user?.memberships?.role ===
                         "TRAFFICPOLICEADMIN" ||
-                        session.user?.memberships?.role ===
+                        session?.user?.memberships?.role ===
                           "TRAFFICPOLICEMEMBER") && (
                         <>
                           <th
@@ -248,9 +248,9 @@ const ListHitAndRun = ({ hitAndRunData, href }) => {
                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                               {format(new Date(item.reportDate), "MMM-dd-yyyy")}
                             </td>
-                            {(session.user?.memberships?.role ===
+                            {(session?.user?.memberships?.role ===
                               "TRAFFICPOLICEADMIN" ||
-                              session.user?.memberships?.role ===
+                              session?.user?.memberships?.role ===
                                 "TRAFFICPOLICEMEMBER") && (
                               <>
                                 <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
