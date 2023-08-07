@@ -1240,24 +1240,24 @@ export interface NexusGenFieldTypes {
   Branch: { // field return type
     branchCode: string | null; // String
     branchName: string | null; // String
-    certificates: NexusGenRootTypes['Certificate'][]; // [Certificate!]!
+    certificates: Array<NexusGenRootTypes['Certificate'] | null> | null; // [Certificate]
     city: string | null; // String
-    claimHitAndRuns: NexusGenRootTypes['ClaimHitAndRun'][]; // [ClaimHitAndRun!]!
-    claimUnInsureds: NexusGenRootTypes['ClaimUnInsured'][]; // [ClaimUnInsured!]!
-    claims: NexusGenRootTypes['Claim'][]; // [Claim!]!
+    claimHitAndRuns: Array<NexusGenRootTypes['ClaimHitAndRun'] | null> | null; // [ClaimHitAndRun]
+    claimUnInsureds: Array<NexusGenRootTypes['ClaimUnInsured'] | null> | null; // [ClaimUnInsured]
+    claims: Array<NexusGenRootTypes['Claim'] | null> | null; // [Claim]
     createdAt: NexusGenScalars['DateTime'] | null; // DateTime
-    hitAndRunPolicBranchs: NexusGenRootTypes['HitAndRunPoliceReport'][]; // [HitAndRunPoliceReport!]!
-    hitAndRunPoliceReports: NexusGenRootTypes['HitAndRunPoliceReport'][]; // [HitAndRunPoliceReport!]!
+    hitAndRunPolicBranchs: Array<NexusGenRootTypes['HitAndRunPoliceReport'] | null> | null; // [HitAndRunPoliceReport]
+    hitAndRunPoliceReports: Array<NexusGenRootTypes['HitAndRunPoliceReport'] | null> | null; // [HitAndRunPoliceReport]
     id: string | null; // String
-    insuredPoliceReports: NexusGenRootTypes['InsuredPoliceReport'][]; // [InsuredPoliceReport!]!
-    insureds: NexusGenRootTypes['Insured'][]; // [Insured!]!
+    insuredPoliceReports: Array<NexusGenRootTypes['InsuredPoliceReport'] | null> | null; // [InsuredPoliceReport]
+    insureds: Array<NexusGenRootTypes['Insured'] | null> | null; // [Insured]
     memberships: Array<NexusGenRootTypes['Membership'] | null> | null; // [Membership]
     mobileNumber: string | null; // String
     organizations: NexusGenRootTypes['Organization'] | null; // Organization
     payments: Array<NexusGenRootTypes['Payment'] | null> | null; // [Payment]
-    policeBranchs: NexusGenRootTypes['InsuredPoliceReport'][]; // [InsuredPoliceReport!]!
+    policeBranchs: Array<NexusGenRootTypes['InsuredPoliceReport'] | null> | null; // [InsuredPoliceReport]
     region: string | null; // String
-    unInsuredPoliceReports: NexusGenRootTypes['UnInsuredPoliceReport'][]; // [UnInsuredPoliceReport!]!
+    unInsuredPoliceReports: Array<NexusGenRootTypes['UnInsuredPoliceReport'] | null> | null; // [UnInsuredPoliceReport]
     updatedAt: NexusGenScalars['DateTime'] | null; // DateTime
     vehicles: Array<NexusGenRootTypes['Vehicle'] | null> | null; // [Vehicle]
   }
@@ -1826,11 +1826,11 @@ export interface NexusGenFieldTypes {
     exportVehicle: NexusGenRootTypes['Vehicle'][]; // [Vehicle!]!
     exportVehicleByBranch: NexusGenRootTypes['Vehicle'][]; // [Vehicle!]!
     exportVehicleByInsurer: NexusGenRootTypes['Vehicle'][]; // [Vehicle!]!
-    feedAccidentRecord: NexusGenRootTypes['FeedAccidentRecord']; // FeedAccidentRecord!
-    feedBranch: NexusGenRootTypes['FeedBranch']; // FeedBranch!
+    feedAccidentRecord: NexusGenRootTypes['FeedAccidentRecord'] | null; // FeedAccidentRecord
+    feedBranch: NexusGenRootTypes['FeedBranch'] | null; // FeedBranch
     feedBranchByOrg: NexusGenRootTypes['FeedBranchByOrg'] | null; // FeedBranchByOrg
     feedBranchByOrgDesc: NexusGenRootTypes['FeedBranchByOrgDesc'] | null; // FeedBranchByOrgDesc
-    feedBranchInsurer: NexusGenRootTypes['FeedBranchInsurer']; // FeedBranchInsurer!
+    feedBranchInsurer: NexusGenRootTypes['FeedBranchInsurer'] | null; // FeedBranchInsurer
     feedCertificate: NexusGenRootTypes['FeedCertificate']; // FeedCertificate!
     feedCertificateBranch: NexusGenRootTypes['FeedCertificateBranch']; // FeedCertificateBranch!
     feedCertificateInsurer: NexusGenRootTypes['FeedCertificateInsurer']; // FeedCertificateInsurer!

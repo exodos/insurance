@@ -177,7 +177,7 @@ export const BranchPagination = extendType({
         filter: stringArg(),
         skip: intArg(),
         take: intArg(),
-        orderBy: arg({ type: list(nonNull(BranchOrderByInput)) }), // 1
+        orderBy: arg({ type: list(nonNull(BranchOrderByInput)) }),
       },
       resolve: async (parent, args, ctx) => {
         const where = args.filter
@@ -206,7 +206,7 @@ export const BranchPagination = extendType({
 
         const totalBranch = await ctx.prisma.branch.count({
           where,
-        }); // 2
+        });
         const maxPage = Math.ceil(totalBranch / args?.take);
 
         return {
@@ -229,7 +229,7 @@ export const BranchInsurerPagination = extendType({
         filter: stringArg(),
         skip: intArg(),
         take: intArg(),
-        orderBy: arg({ type: list(nonNull(BranchOrderByInput)) }), // 1
+        orderBy: arg({ type: list(nonNull(BranchOrderByInput)) }),
       },
       resolve: async (parent, args, ctx) => {
         const where = args.filter
@@ -265,7 +265,7 @@ export const BranchInsurerPagination = extendType({
 
         const totalBranch = await ctx.prisma.branch.count({
           where,
-        }); // 2
+        });
         const maxPage = Math.ceil(totalBranch / args?.take);
 
         return {

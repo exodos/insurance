@@ -162,8 +162,8 @@ const NavBar = ({ navigation, children }) => {
                                 <>
                                   <Disclosure.Button
                                     className={classNames(
-                                      item.current
-                                        ? "bg-gray-200 text-gray-500"
+                                      pathname.includes(item.href)
+                                        ? "bg-lightGreen text-white"
                                         : "text-gray-800 hover:text-white hover:bg-gray-300",
                                       "group w-full flex items-center pl-2 pr-1 py-2 text-left text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                     )}
@@ -197,9 +197,15 @@ const NavBar = ({ navigation, children }) => {
                                         <a>
                                           <Disclosure.Button
                                             key={subItem.name}
-                                            // as="a"
-                                            // href={subItem.href}
-                                            className="group w-full flex items-center pl-11 pr-2 py-2 text-sm font-medium text-gray-600 rounded-md hover:text-white hover:bg-gray-300"
+                                            className={classNames(
+                                              subItem.href == pathname
+                                                ? "bg-lightGreen text-white"
+                                                : "text-gray-600 hover:text-white hover:bg-gray-300",
+                                              // "block rounded-md py-2 pl-9 pr-2 text-sm leading-6"
+                                              "group w-full flex items-center pl-11 pr-2 py-2 text-sm font-medium"
+                                            )}
+
+                                            // className="group w-full flex items-center pl-11 pr-2 py-2 text-sm font-medium text-gray-600 rounded-md hover:text-white hover:bg-gray-300"
                                           >
                                             {subItem.name}
                                           </Disclosure.Button>

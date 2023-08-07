@@ -26,24 +26,24 @@ input AccidentRecordOrderByInput {
 type Branch {
   branchCode: String
   branchName: String
-  certificates: [Certificate!]!
+  certificates: [Certificate]
   city: String
-  claimHitAndRuns: [ClaimHitAndRun!]!
-  claimUnInsureds: [ClaimUnInsured!]!
-  claims: [Claim!]!
+  claimHitAndRuns: [ClaimHitAndRun]
+  claimUnInsureds: [ClaimUnInsured]
+  claims: [Claim]
   createdAt: DateTime
-  hitAndRunPolicBranchs: [HitAndRunPoliceReport!]!
-  hitAndRunPoliceReports: [HitAndRunPoliceReport!]!
+  hitAndRunPolicBranchs: [HitAndRunPoliceReport]
+  hitAndRunPoliceReports: [HitAndRunPoliceReport]
   id: String
-  insuredPoliceReports: [InsuredPoliceReport!]!
-  insureds: [Insured!]!
+  insuredPoliceReports: [InsuredPoliceReport]
+  insureds: [Insured]
   memberships: [Membership]
   mobileNumber: String
   organizations: Organization
   payments: [Payment]
-  policeBranchs: [InsuredPoliceReport!]!
+  policeBranchs: [InsuredPoliceReport]
   region: String
-  unInsuredPoliceReports: [UnInsuredPoliceReport!]!
+  unInsuredPoliceReports: [UnInsuredPoliceReport]
   updatedAt: DateTime
   vehicles: [Vehicle]
 }
@@ -976,11 +976,11 @@ type Query {
   exportVehicle(dateFrom: String!, dateTo: String!): [Vehicle!]!
   exportVehicleByBranch(branchId: String!, dateFrom: String!, dateTo: String!): [Vehicle!]!
   exportVehicleByInsurer(dateFrom: String!, dateTo: String!, orgId: String!): [Vehicle!]!
-  feedAccidentRecord(filter: String, orderBy: [AccidentRecordOrderByInput!], skip: Int, take: Int): FeedAccidentRecord!
-  feedBranch(filter: String, orderBy: [BranchOrderByInput!], skip: Int, take: Int): FeedBranch!
+  feedAccidentRecord(filter: String, orderBy: [AccidentRecordOrderByInput!], skip: Int, take: Int): FeedAccidentRecord
+  feedBranch(filter: String, orderBy: [BranchOrderByInput!], skip: Int, take: Int): FeedBranch
   feedBranchByOrg(orgId: String!): FeedBranchByOrg
   feedBranchByOrgDesc(input: orgDescInput!): FeedBranchByOrgDesc
-  feedBranchInsurer(filter: String, orderBy: [BranchOrderByInput!], orgId: String!, skip: Int, take: Int): FeedBranchInsurer!
+  feedBranchInsurer(filter: String, orderBy: [BranchOrderByInput!], orgId: String!, skip: Int, take: Int): FeedBranchInsurer
   feedCertificate(filter: String, orderBy: [CertificateOrderByInput!], skip: Int, take: Int): FeedCertificate!
   feedCertificateBranch(branchId: String!, filter: String, orderBy: [CertificateOrderByInput!], skip: Int, take: Int): FeedCertificateBranch!
   feedCertificateInsurer(filter: String, orderBy: [CertificateOrderByInput!], orgId: String!, skip: Int, take: Int): FeedCertificateInsurer!

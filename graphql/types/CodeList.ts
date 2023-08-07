@@ -50,8 +50,8 @@ export const PlateCodePagination = extendType({
 export const FeedCodeList = objectType({
   name: "FeedCodeList",
   definition(t) {
-    t.nonNull.list.nonNull.field("codeList", { type: CodeList }); // 1
-    t.nonNull.int("totalCodeList"); // 2
+    t.nonNull.list.nonNull.field("codeList", { type: CodeList });
+    t.nonNull.int("totalCodeList");
     t.int("maxPage");
   },
 });

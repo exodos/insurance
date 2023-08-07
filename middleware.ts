@@ -17,33 +17,35 @@ export default withAuth(
       req?.nextUrl?.pathname?.startsWith("/admin") &&
       req?.nextauth?.token?.memberships?.role !== MembershipRole.SUPERADMIN
     ) {
-      return NextResponse.redirect(new URL("/", req.url));
+      // return NextResponse.redirect(new URL("/", req.url));
+      // return NextResponse.rewrite(new URL("/denied", req.url));
+      return NextResponse.redirect(new URL("/denied", req.url));
     }
     if (
       req.nextUrl.pathname.startsWith("/insurer") &&
       req.nextauth.token?.memberships.role !== MembershipRole.INSURER
     ) {
-      return NextResponse.redirect(new URL("/", req.url));
+      return NextResponse.redirect(new URL("/denied", req.url));
     }
     if (
       req.nextUrl.pathname.startsWith("/branch") &&
       req.nextauth.token?.memberships.role !==
         (MembershipRole.BRANCHADMIN && MembershipRole.MEMBER)
     ) {
-      return NextResponse.redirect(new URL("/", req.url));
+      return NextResponse.redirect(new URL("/denied", req.url));
     }
     if (
       req.nextUrl.pathname.startsWith("/police/admin") &&
       req.nextauth.token?.memberships.role !== MembershipRole.TRAFFICPOLICEADMIN
     ) {
-      return NextResponse.redirect(new URL("/", req.url));
+      return NextResponse.redirect(new URL("/denied", req.url));
     }
     if (
       req.nextUrl.pathname.startsWith("/police/user") &&
       req.nextauth.token?.memberships.role !==
         MembershipRole.TRAFFICPOLICEMEMBER
     ) {
-      return NextResponse.redirect(new URL("/", req.url));
+      return NextResponse.redirect(new URL("/denied", req.url));
     }
   },
   {

@@ -128,7 +128,7 @@ export const InsuredPoliceReportPagination = extendType({
         filter: stringArg(),
         skip: intArg(),
         take: intArg(),
-        orderBy: arg({ type: list(nonNull(InsuredPoliceReportOrderByInput)) }), // 1
+        orderBy: arg({ type: list(nonNull(InsuredPoliceReportOrderByInput)) }),
       },
       async resolve(parent, args, ctx) {
         const where = args.filter
@@ -173,7 +173,7 @@ export const InsuredBranchPoliceReportPagination = extendType({
         filter: stringArg(),
         skip: intArg(),
         take: intArg(),
-        orderBy: arg({ type: list(nonNull(InsuredPoliceReportOrderByInput)) }), // 1
+        orderBy: arg({ type: list(nonNull(InsuredPoliceReportOrderByInput)) }),
       },
       async resolve(parent, args, ctx) {
         const where = args.filter
@@ -221,7 +221,7 @@ export const PoliceReportPaginationByPolice = extendType({
         filter: stringArg(),
         skip: intArg(),
         take: intArg(),
-        orderBy: arg({ type: list(nonNull(InsuredPoliceReportOrderByInput)) }), // 1
+        orderBy: arg({ type: list(nonNull(InsuredPoliceReportOrderByInput)) }),
       },
       async resolve(parent, args, ctx) {
         const where = args.filter
@@ -273,7 +273,7 @@ export const InsuredInsurerPoliceReportPagination = extendType({
         filter: stringArg(),
         skip: intArg(),
         take: intArg(),
-        orderBy: arg({ type: list(nonNull(InsuredPoliceReportOrderByInput)) }), // 1
+        orderBy: arg({ type: list(nonNull(InsuredPoliceReportOrderByInput)) }),
       },
       async resolve(parent, args, ctx) {
         const where = args.filter
@@ -325,7 +325,7 @@ export const InsuredPolicePoliceReportPagination = extendType({
         filter: stringArg(),
         skip: intArg(),
         take: intArg(),
-        orderBy: arg({ type: list(nonNull(InsuredPoliceReportOrderByInput)) }), // 1
+        orderBy: arg({ type: list(nonNull(InsuredPoliceReportOrderByInput)) }),
       },
       async resolve(parent, args, ctx) {
         const where = args.filter

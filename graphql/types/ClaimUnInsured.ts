@@ -54,7 +54,7 @@ export const claimUnInsuredPagination = extendType({
         filter: stringArg(),
         skip: intArg(),
         take: intArg(),
-        orderBy: arg({ type: list(nonNull(ClaimOrderByInput)) }), // 1
+        orderBy: arg({ type: list(nonNull(ClaimOrderByInput)) }),
       },
       async resolve(parent, args, ctx) {
         const where = args.filter
@@ -97,7 +97,7 @@ export const claimUnInsuredByPolicePagination = extendType({
         filter: stringArg(),
         skip: intArg(),
         take: intArg(),
-        orderBy: arg({ type: list(nonNull(ClaimOrderByInput)) }), // 1
+        orderBy: arg({ type: list(nonNull(ClaimOrderByInput)) }),
       },
       async resolve(parent, args, ctx) {
         const where = args.filter

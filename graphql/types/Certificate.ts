@@ -3431,8 +3431,8 @@ export const deleteCertificateMutation = extendType({
 export const FeedCertificate = objectType({
   name: "FeedCertificate",
   definition(t) {
-    t.nonNull.list.nonNull.field("certificate", { type: Certificate }); // 1
-    t.nonNull.int("totalCertificate"); // 2
+    t.nonNull.list.nonNull.field("certificate", { type: Certificate });
+    t.nonNull.int("totalCertificate");
     t.int("maxPage");
   },
 });
@@ -3460,8 +3460,8 @@ export const WeeklyReport = objectType({
 export const FeedCertificateBranch = objectType({
   name: "FeedCertificateBranch",
   definition(t) {
-    t.nonNull.list.nonNull.field("certificate", { type: Certificate }); // 1
-    t.nonNull.int("totalCertificate"); // 2
+    t.nonNull.list.nonNull.field("certificate", { type: Certificate });
+    t.nonNull.int("totalCertificate");
     t.int("maxPage");
   },
 });

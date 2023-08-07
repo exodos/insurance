@@ -60,7 +60,7 @@ export const ClaimHitAndRunPagination = extendType({
         filter: stringArg(),
         skip: intArg(),
         take: intArg(),
-        orderBy: arg({ type: list(nonNull(ClaimOrderByInput)) }), // 1
+        orderBy: arg({ type: list(nonNull(ClaimOrderByInput)) }),
       },
       async resolve(parent, args, ctx) {
         const where = args.filter
@@ -103,7 +103,7 @@ export const ClaimHitAndRunByPolicePagination = extendType({
         filter: stringArg(),
         skip: intArg(),
         take: intArg(),
-        orderBy: arg({ type: list(nonNull(ClaimOrderByInput)) }), // 1
+        orderBy: arg({ type: list(nonNull(ClaimOrderByInput)) }),
       },
       async resolve(parent, args, ctx) {
         const where = args.filter
@@ -438,8 +438,8 @@ export const exportHitAndRunBranchQuery = extendType({
 export const FeedClaimHitAndRun = objectType({
   name: "FeedClaimHitAndRun",
   definition(t) {
-    t.nonNull.list.nonNull.field("claimHitAndRuns", { type: ClaimHitAndRun }); // 1
-    t.nonNull.int("totalClaimHitAndRun"); // 2
+    t.nonNull.list.nonNull.field("claimHitAndRuns", { type: ClaimHitAndRun });
+    t.nonNull.int("totalClaimHitAndRun");
     t.int("maxPage");
   },
 });

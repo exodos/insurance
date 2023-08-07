@@ -53,7 +53,7 @@ export const MembershipPagination = extendType({
         filter: stringArg(),
         skip: intArg(),
         take: intArg(),
-        orderBy: arg({ type: list(nonNull(UserOrderByInput)) }), // 1
+        orderBy: arg({ type: list(nonNull(UserOrderByInput)) }),
       },
       resolve: async (parent, args, ctx) => {
         const where = args.filter ? {} : {};
@@ -69,7 +69,7 @@ export const MembershipPagination = extendType({
 
         const totalMembership = await ctx.prisma.membership.count({
           where,
-        }); // 2
+        });
         const maxPage = Math.ceil(totalMembership / args?.take);
 
         return {
@@ -173,7 +173,7 @@ export const FeedMembership = objectType({
   name: "FeedMembership",
   definition(t) {
     t.nonNull.list.nonNull.field("membership", { type: Membership });
-    t.nonNull.int("totalMembership"); // 2
+    t.nonNull.int("totalMembership");
     t.int("maxPage");
   },
 });

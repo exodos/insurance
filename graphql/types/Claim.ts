@@ -100,7 +100,7 @@ export const ClaimPagination = extendType({
         filter: stringArg(),
         skip: intArg(),
         take: intArg(),
-        orderBy: arg({ type: list(nonNull(ClaimOrderByInput)) }), // 1
+        orderBy: arg({ type: list(nonNull(ClaimOrderByInput)) }),
       },
       async resolve(parent, args, ctx) {
         const where = args.filter
@@ -146,7 +146,7 @@ export const ClaimBranchPagination = extendType({
         filter: stringArg(),
         skip: intArg(),
         take: intArg(),
-        orderBy: arg({ type: list(nonNull(ClaimOrderByInput)) }), // 1
+        orderBy: arg({ type: list(nonNull(ClaimOrderByInput)) }),
       },
       async resolve(parent, args, ctx) {
         const where = args.filter
@@ -194,7 +194,7 @@ export const ClaimInsurerPagination = extendType({
         filter: stringArg(),
         skip: intArg(),
         take: intArg(),
-        orderBy: arg({ type: list(nonNull(ClaimOrderByInput)) }), // 1
+        orderBy: arg({ type: list(nonNull(ClaimOrderByInput)) }),
       },
       async resolve(parent, args, ctx) {
         const where = args.filter
@@ -650,7 +650,7 @@ export const FeedClaim = objectType({
   name: "FeedClaim",
   definition(t) {
     t.nonNull.list.nonNull.field("claim", { type: Claim });
-    t.nonNull.int("totalClaim"); // 2
+    t.nonNull.int("totalClaim");
     t.int("maxPage");
   },
 });
