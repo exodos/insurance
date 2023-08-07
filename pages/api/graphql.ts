@@ -6,14 +6,15 @@ import Cors from "micro-cors";
 
 const cors = Cors();
 
-const IS_DEV = process.env.NODE_ENV === "development";
-const localOrigins = [/^http:\/\/localhost:\d{4}$/];
-const prodOrigins = [/^https:\/\/.*\.insurancefund.gov\.et$/];
+// const IS_DEV = process.env.NODE_ENV === "development";
+// const localOrigins = [/^http:\/\/localhost:\d{4}$/];
+// const prodOrigins = [/^https:\/\/.*\.insurancefund.gov\.et$/];
 
 const apolloServer = new ApolloServer({
   schema,
   context: createContext,
   persistedQueries: false,
+  introspection: process.env.NODE_ENV !== "production",
 });
 
 const startServer = apolloServer.start();

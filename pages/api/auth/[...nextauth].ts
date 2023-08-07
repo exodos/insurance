@@ -11,7 +11,7 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials, _) {
-        if (!credentials?.mobileNumber || !credentials?.password) {
+        if (!credentials) {
           throw new Error("Wrong credentials!!");
         }
         const response = await fetch(baseUrl + `/api/user`, {
