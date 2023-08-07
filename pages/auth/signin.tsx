@@ -11,9 +11,9 @@ import SiteHeader from "@/components/layout/header";
 import { phoneRegExp } from "@/lib/config";
 import { FaMobileAlt } from "react-icons/fa";
 
-const SignIn = ({
-  csrfToken,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+export default function SignIn({
+      csrfToken,
+    }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const [error, setError] = useState(null);
 
@@ -184,14 +184,9 @@ const SignIn = ({
       </div>
     </>
   );
-};
+}
 
 export const getServerSideProps = async (context) => {
-  return {
-    props: {
-      csrfToken: await getCsrfToken(context),
-    },
-  };
+  const csrfToken = await getCsrfToken(context);
+  return { props: { csrfToken } };
 };
-
-export default SignIn;

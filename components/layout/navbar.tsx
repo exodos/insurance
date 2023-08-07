@@ -45,7 +45,7 @@ const NavBar = ({ navigation, children }) => {
       setDayTime("Good Morning");
     } else if (now.getHours() > 12 && now.getHours() <= 18) {
       setDayTime("Good Afternoon");
-    } else if (now.getHours() > 18 && now.getHours() <= 22) {
+    } else if (now.getHours() > 18 && now.getHours() <= 24) {
       setDayTime("Good Evening");
     }
   };
@@ -240,8 +240,6 @@ const NavBar = ({ navigation, children }) => {
                     </div>
                   </Dialog.Panel>
                 </Transition.Child>
-                {/* <div className="w-14 flex-shrink-0" aria-hidden="true">
-              </div> */}
               </div>
             </Dialog>
           </Transition.Root>
