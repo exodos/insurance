@@ -53,8 +53,8 @@ export const AdminFormContext = createContext(null!);
 export const AdminVehicleInfoContext = createContext(null!);
 
 const AdminCreateProposal = ({
-      data,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  data,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [formData, setFormData] = useState({});
 
@@ -117,7 +117,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         destination: "/auth/signin",
       },
     };
-  } else if (session.user.memberships.role !== "SUPERADMIN") {
+  } else if (session.user?.memberships?.role !== "SUPERADMIN") {
     return {
       redirect: {
         destination: "/",

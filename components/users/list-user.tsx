@@ -123,11 +123,11 @@ const ListUser = ({ userData, roleList }) => {
                       >
                         Updated At
                       </th>
-                      {(session.user.memberships.role === "SUPERADMIN" ||
-                        session.user.memberships.role === "INSURER" ||
-                        session.user.memberships.role ===
+                      {(session?.user?.memberships?.role === "SUPERADMIN" ||
+                        session?.user?.memberships?.role === "INSURER" ||
+                        session?.user?.memberships?.role ===
                           "TRAFFICPOLICEADMIN" ||
-                        session.user.memberships.role === "MEMBER") && (
+                        session?.user?.memberships?.role === "MEMBER") && (
                         <>
                           <th
                             scope="col"
@@ -188,11 +188,11 @@ const ListUser = ({ userData, roleList }) => {
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {format(new Date(item.updatedAt), "MMM-dd-yyyy")}
                           </td>
-                          {(session.user.memberships.role === "SUPERADMIN" ||
-                            session.user.memberships.role === "INSURER" ||
-                            session.user.memberships.role ===
+                          {(session?.user?.memberships?.role === "SUPERADMIN" ||
+                            session?.user?.memberships?.role === "INSURER" ||
+                            session?.user?.memberships?.role ===
                               "TRAFFICPOLICEADMIN" ||
-                            session.user.memberships.role === "MEMBER") && (
+                            session?.user?.memberships?.role === "MEMBER") && (
                             <>
                               <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                 <>

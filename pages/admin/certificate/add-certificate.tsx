@@ -24,9 +24,9 @@ const FeedPlate = gql`
 `;
 
 const AddCertificate = ({
-      data,
-      branchId,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  data,
+  branchId,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [showMobileForm, setShowMobileForm] = useState(false);
   const [showRegForm, setShowRegForm] = useState(false);
   const [showPlateForm, setShowPlateForm] = useState(false);
@@ -123,7 +123,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         destination: "/auth/signin",
       },
     };
-  } else if (session.user.memberships.role !== "SUPERADMIN") {
+  } else if (session.user?.memberships?.role !== "SUPERADMIN") {
     return {
       redirect: {
         destination: "/",

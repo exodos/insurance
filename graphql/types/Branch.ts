@@ -507,9 +507,9 @@ export const createBranchMutation = extendType({
         });
         if (
           !user ||
-          (user.memberships.role !== "SUPERADMIN" &&
-            user.memberships.role !== "INSURER" &&
-            user.memberships.role !== "TRAFFICPOLICEADMIN")
+          (user?.memberships?.role !== "SUPERADMIN" &&
+            user?.memberships?.role !== "INSURER" &&
+            user?.memberships?.role !== "TRAFFICPOLICEADMIN")
         ) {
           throw new Error(`You do not have permission to perform this action`);
         }
@@ -569,9 +569,9 @@ export const updateBranchMutation = extendType({
         });
         if (
           !user ||
-          (user.memberships.role !== "SUPERADMIN" &&
-            user.memberships.role !== "INSURER" &&
-            user.memberships.role !== "TRAFFICPOLICEADMIN")
+          (user?.memberships?.role !== "SUPERADMIN" &&
+            user?.memberships?.role !== "INSURER" &&
+            user?.memberships?.role !== "TRAFFICPOLICEADMIN")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
@@ -637,9 +637,9 @@ export const deleteBranchMutation = extendType({
         });
         if (
           !user ||
-          (user.memberships.role !== "SUPERADMIN" &&
-            user.memberships.role !== "INSURER" &&
-            user.memberships.role !== "TRAFFICPOLICEADMIN")
+          (user?.memberships?.role !== "SUPERADMIN" &&
+            user?.memberships?.role !== "INSURER" &&
+            user?.memberships?.role !== "TRAFFICPOLICEADMIN")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }

@@ -103,7 +103,7 @@ const ListTariff = ({ tariffData }) => {
                       >
                         Updated At
                       </th>
-                      {session.user.memberships.role === "SUPERADMIN" && (
+                      {session.user?.memberships?.role === "SUPERADMIN" && (
                         <>
                           <th
                             scope="col"
@@ -152,7 +152,7 @@ const ListTariff = ({ tariffData }) => {
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {format(new Date(item.updatedAt), "MMM-dd-yyyy")}
                           </td>
-                          {session.user.memberships.role === "SUPERADMIN" && (
+                          {session.user?.memberships?.role === "SUPERADMIN" && (
                             <>
                               <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                 <>

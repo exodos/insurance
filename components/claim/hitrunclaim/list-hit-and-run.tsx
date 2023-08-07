@@ -158,9 +158,9 @@ const ListHitAndRunClaim = ({ hitAndRunClaimData, href }) => {
                       >
                         Update At
                       </th>
-                      {(session.user.memberships.role ===
+                      {(session.user?.memberships?.role ===
                         "TRAFFICPOLICEADMIN" ||
-                        session.user.memberships.role ===
+                        session.user?.memberships?.role ===
                           "TRAFFICPOLICEMEMBER") && (
                         <>
                           <th
@@ -220,9 +220,9 @@ const ListHitAndRunClaim = ({ hitAndRunClaimData, href }) => {
                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                               {format(new Date(item.updatedAt), "dd-MMM-yyyy")}
                             </td>
-                            {(session.user.memberships.role ===
+                            {(session.user?.memberships?.role ===
                               "TRAFFICPOLICEADMIN" ||
-                              session.user.memberships.role ===
+                              session.user?.memberships?.role ===
                                 "TRAFFICPOLICEMEMBER") && (
                               <>
                                 <td className="relative whitespace-nowrap py-4 pl-2 pr-3 text-right text-sm font-medium sm:pr-6">

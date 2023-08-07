@@ -254,10 +254,10 @@ const ListUnInsuredPoliceReport = ({ policeReportData, href }) => {
                       >
                         <span className="sr-only">Detail</span>
                       </th>
-                      {(session.user.memberships.role ===
+                      {(session.user?.memberships?.role ===
                         "TRAFFICPOLICEADMIN" ||
-                        session.user.memberships.role === "SUPERADMIN" ||
-                        session.user.memberships.role ===
+                        session.user?.memberships?.role === "SUPERADMIN" ||
+                        session.user?.memberships?.role ===
                           "TRAFFICPOLICEMEMBER") && (
                         <>
                           <th
@@ -378,10 +378,11 @@ const ListUnInsuredPoliceReport = ({ policeReportData, href }) => {
                                 </ReactTooltip>
                               </>
                             </td>
-                            {(session.user.memberships.role ===
+                            {(session.user?.memberships?.role ===
                               "TRAFFICPOLICEADMIN" ||
-                              session.user.memberships.role === "SUPERADMIN" ||
-                              session.user.memberships.role ===
+                              session.user?.memberships?.role ===
+                                "SUPERADMIN" ||
+                              session.user?.memberships?.role ===
                                 "TRAFFICPOLICEMEMBER") && (
                               <>
                                 <td className="relative whitespace-nowrap py-4 pl-2 pr-3 text-right text-sm font-medium sm:pr-6">

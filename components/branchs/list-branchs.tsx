@@ -94,10 +94,10 @@ const ListBranch = ({ branchData, href }) => {
                       >
                         Updated At
                       </th>
-                      {(session.user.memberships.role === "SUPERADMIN" ||
-                        session.user.memberships.role === "INSURER" ||
-                        session.user.memberships.role === "BRANCHADMIN" ||
-                        session.user.memberships.role ===
+                      {(session.user?.memberships?.role === "SUPERADMIN" ||
+                        session.user?.memberships?.role === "INSURER" ||
+                        session.user?.memberships?.role === "BRANCHADMIN" ||
+                        session.user?.memberships?.role ===
                           "TRAFFICPOLICEADMIN") && (
                         <>
                           <th scope="col" className="relative py-3.5 sm:pr-1">
@@ -138,10 +138,10 @@ const ListBranch = ({ branchData, href }) => {
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {format(new Date(item.updatedAt), "MMM-dd-yyyy")}
                           </td>
-                          {(session.user.memberships.role === "SUPERADMIN" ||
-                            session.user.memberships.role === "INSURER" ||
-                            session.user.memberships.role === "BRANCHADMIN" ||
-                            session.user.memberships.role ===
+                          {(session.user?.memberships?.role === "SUPERADMIN" ||
+                            session.user?.memberships?.role === "INSURER" ||
+                            session.user?.memberships?.role === "BRANCHADMIN" ||
+                            session.user?.memberships?.role ===
                               "TRAFFICPOLICEADMIN") && (
                             <>
                               <td className="relative whitespace-nowrap py-4 text-right text-sm font-medium sm:pr-1">

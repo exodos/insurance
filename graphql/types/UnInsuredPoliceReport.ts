@@ -231,8 +231,8 @@ export const createUnInsuredPoliceReportMutation = extendType({
         });
         if (
           !user ||
-          (user.memberships.role !== "SUPERADMIN" &&
-            user.memberships.role !== "TRAFFICPOLICEADMIN")
+          (user?.memberships?.role !== "SUPERADMIN" &&
+            user?.memberships?.role !== "TRAFFICPOLICEADMIN")
         ) {
           throw new Error(`You do not have permission to perform the action`);
         }
@@ -373,8 +373,8 @@ export const updateUnInsuredPoliceReportMutation = extendType({
         });
         if (
           !user ||
-          (user.memberships.role !== "SUPERADMIN" &&
-            user.memberships.role !== "TRAFFICPOLICEADMIN")
+          (user?.memberships?.role !== "SUPERADMIN" &&
+            user?.memberships?.role !== "TRAFFICPOLICEADMIN")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
@@ -467,8 +467,8 @@ export const deleteUnInsuredPoliceReportMutation = extendType({
         });
         if (
           !user ||
-          (user.memberships.role !== "SUPERADMIN" &&
-            user.memberships.role !== "TRAFFICPOLICEADMIN")
+          (user?.memberships?.role !== "SUPERADMIN" &&
+            user?.memberships?.role !== "TRAFFICPOLICEADMIN")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }

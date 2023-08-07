@@ -269,7 +269,7 @@ export const updateTariffMutation = extendType({
             memberships: true,
           },
         });
-        if (!user || user.memberships.role !== "SUPERADMIN") {
+        if (!user || user?.memberships?.role !== "SUPERADMIN") {
           throw new Error(`You do not have permission to perform action`);
         }
 
@@ -398,7 +398,7 @@ export const deleteTariffMutation = extendType({
             memberships: true,
           },
         });
-        if (!user || user.memberships.role !== "SUPERADMIN") {
+        if (!user || user?.memberships?.role !== "SUPERADMIN") {
           throw new Error(`You do not have permission to perform action`);
         }
 

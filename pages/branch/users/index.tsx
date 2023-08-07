@@ -59,9 +59,9 @@ const FeedUserBranch = gql`
 `;
 
 const BranchUserPage = ({
-      data,
-      branchId,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  data,
+  branchId,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
   const { asPath } = useRouter();
@@ -86,7 +86,7 @@ const BranchUserPage = ({
             </div>
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
-                {session.user.memberships.role === "BRANCHADMIN" && (
+                {session.user?.memberships?.role === "BRANCHADMIN" && (
                   <button
                     type="button"
                     className="inline-flex items-center"
@@ -98,7 +98,7 @@ const BranchUserPage = ({
                     />
                   </button>
                 )}
-                {session.user.memberships.role === "BRANCHADMIN" && (
+                {session.user?.memberships?.role === "BRANCHADMIN" && (
                   <Link
                     href={{
                       pathname: "/branch/users/export-branch-user",
@@ -147,9 +147,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       },
     };
   } else if (
-    session.user.memberships.role !== "BRANCHADMIN" &&
-    session.user.memberships.role !== "MEMBER" &&
-    session.user.memberships.role !== "USER"
+    session.user?.memberships?.role !== "BRANCHADMIN" &&
+    session.user?.memberships?.role !== "MEMBER" &&
+    session.user?.memberships?.role !== "USER"
   ) {
     return {
       redirect: {

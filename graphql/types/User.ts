@@ -95,7 +95,7 @@ export const UserPagination = extendType({
         filter: stringArg(),
         skip: intArg(),
         take: intArg(),
-        orderBy: arg({ type: list(nonNull(UserOrderByInput)) }), // 1
+        orderBy: arg({ type: list(nonNull(UserOrderByInput)) }),
       },
       resolve: async (parent, args, ctx) => {
         const where = args.filter
@@ -120,7 +120,7 @@ export const UserPagination = extendType({
 
         const totalUser = await ctx.prisma.user.count({
           where,
-        }); // 2
+        });
         const maxPage = Math.ceil(totalUser / args?.take);
 
         return {
@@ -416,10 +416,10 @@ export const createUserMutation = extendType({
         });
         if (
           !user ||
-          (user.memberships.role !== "SUPERADMIN" &&
-            user.memberships.role !== "INSURER" &&
-            user.memberships.role !== "BRANCHADMIN" &&
-            user.memberships.role !== "TRAFFICPOLICEADMIN")
+          (user?.memberships?.role !== "SUPERADMIN" &&
+            user?.memberships?.role !== "INSURER" &&
+            user?.memberships?.role !== "BRANCHADMIN" &&
+            user?.memberships?.role !== "TRAFFICPOLICEADMIN")
         ) {
           throw new Error(`You do not have permission to perform this action`);
         }
@@ -500,9 +500,9 @@ export const updateUserMutation = extendType({
         });
         if (
           !user ||
-          (user.memberships.role !== "SUPERADMIN" &&
-            user.memberships.role !== "INSURER" &&
-            user.memberships.role !== "TRAFFICPOLICEADMIN")
+          (user?.memberships?.role !== "SUPERADMIN" &&
+            user?.memberships?.role !== "INSURER" &&
+            user?.memberships?.role !== "TRAFFICPOLICEADMIN")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
@@ -583,10 +583,10 @@ export const deleteUserMutation = extendType({
         });
         if (
           !user ||
-          (user.memberships.role !== "SUPERADMIN" &&
-            user.memberships.role !== "INSURER" &&
-            user.memberships.role !== "BRANCHADMIN" &&
-            user.memberships.role !== "TRAFFICPOLICEADMIN")
+          (user?.memberships?.role !== "SUPERADMIN" &&
+            user?.memberships?.role !== "INSURER" &&
+            user?.memberships?.role !== "BRANCHADMIN" &&
+            user?.memberships?.role !== "TRAFFICPOLICEADMIN")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
@@ -692,9 +692,9 @@ export const adminChangeUserPasswordMutation = extendType({
         });
         if (
           !user ||
-          (user.memberships.role !== "SUPERADMIN" &&
-            user.memberships.role !== "INSURER" &&
-            user.memberships.role !== "TRAFFICPOLICEADMIN")
+          (user?.memberships?.role !== "SUPERADMIN" &&
+            user?.memberships?.role !== "INSURER" &&
+            user?.memberships?.role !== "TRAFFICPOLICEADMIN")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }

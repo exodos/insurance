@@ -25,8 +25,8 @@ const ExportOrganization = gql`
 `;
 
 const ExportOrganizationPage = ({
-      props,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  props,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [formValues, setFormValues] = useState(null);
 
   let slicedValue = null;
@@ -285,7 +285,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         destination: "/auth/signin",
       },
     };
-  } else if (session.user.memberships.role !== "SUPERADMIN") {
+  } else if (session.user?.memberships?.role !== "SUPERADMIN") {
     return {
       redirect: {
         destination: "/",

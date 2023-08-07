@@ -16,10 +16,10 @@ router
 
       res.status(401).end("Unauthenticated Request");
     } else if (
-      session.user.memberships.role !== "SUPERADMIN" &&
-      session.user.memberships.role !== "INSURER" &&
-      session.user.memberships.role !== "MEMBER" &&
-      session.user.memberships.role !== "BRANCHADMIN"
+      session.user?.memberships?.role !== "SUPERADMIN" &&
+      session.user?.memberships?.role !== "INSURER" &&
+      session.user?.memberships?.role !== "MEMBER" &&
+      session.user?.memberships?.role !== "BRANCHADMIN"
     ) {
       // res
       //   .status(401)

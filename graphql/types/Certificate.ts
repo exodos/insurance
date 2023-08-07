@@ -717,10 +717,10 @@ export const createCertificateMutation = extendType({
         });
         if (
           !user ||
-          (user.memberships.role !== "SUPERADMIN" &&
-            user.memberships.role !== "INSURER" &&
-            user.memberships.role !== "MEMBER" &&
-            user.memberships.role !== "BRANCHADMIN")
+          (user?.memberships?.role !== "SUPERADMIN" &&
+            user?.memberships?.role !== "INSURER" &&
+            user?.memberships?.role !== "MEMBER" &&
+            user?.memberships?.role !== "BRANCHADMIN")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
@@ -1109,10 +1109,10 @@ export const createInsuranceByBranchMutation = extendType({
         });
         if (
           !user ||
-          (user.memberships.role !== "SUPERADMIN" &&
-            user.memberships.role !== "INSURER" &&
-            user.memberships.role !== "MEMBER" &&
-            user.memberships.role !== "BRANCHADMIN")
+          (user?.memberships?.role !== "SUPERADMIN" &&
+            user?.memberships?.role !== "INSURER" &&
+            user?.memberships?.role !== "MEMBER" &&
+            user?.memberships?.role !== "BRANCHADMIN")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
@@ -1540,9 +1540,9 @@ export const createCertificateBranchMutation = extendType({
         });
         if (
           !user ||
-          (user.memberships.role !== "SUPERADMIN" &&
-            user.memberships.role !== "INSURER" &&
-            user.memberships.role !== "MEMBER")
+          (user?.memberships?.role !== "SUPERADMIN" &&
+            user?.memberships?.role !== "INSURER" &&
+            user?.memberships?.role !== "MEMBER")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
@@ -1922,10 +1922,10 @@ export const createOrUpdateCertificateMutation = extendType({
         });
         if (
           !user ||
-          (user.memberships.role !== "SUPERADMIN" &&
-            user.memberships.role !== "INSURER" &&
-            user.memberships.role !== "MEMBER" &&
-            user.memberships.role !== "BRANCHADMIN")
+          (user?.memberships?.role !== "SUPERADMIN" &&
+            user?.memberships?.role !== "INSURER" &&
+            user?.memberships?.role !== "MEMBER" &&
+            user?.memberships?.role !== "BRANCHADMIN")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
@@ -2469,10 +2469,10 @@ export const transferCertificateMutation = extendType({
         });
         if (
           !user ||
-          (user.memberships.role !== "SUPERADMIN" &&
-            user.memberships.role !== "INSURER" &&
-            user.memberships.role !== "MEMBER" &&
-            user.memberships.role !== "BRANCHADMIN")
+          (user?.memberships?.role !== "SUPERADMIN" &&
+            user?.memberships?.role !== "INSURER" &&
+            user?.memberships?.role !== "MEMBER" &&
+            user?.memberships?.role !== "BRANCHADMIN")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
@@ -3011,10 +3011,10 @@ export const updateCertificateMutation = extendType({
         });
         if (
           !user ||
-          (user.memberships.role !== "SUPERADMIN" &&
-            user.memberships.role !== "INSURER" &&
-            user.memberships.role !== "MEMBER" &&
-            user.memberships.role !== "BRANCHADMIN")
+          (user?.memberships?.role !== "SUPERADMIN" &&
+            user?.memberships?.role !== "INSURER" &&
+            user?.memberships?.role !== "MEMBER" &&
+            user?.memberships?.role !== "BRANCHADMIN")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
@@ -3335,9 +3335,9 @@ export const deleteCertificateMutation = extendType({
         });
         if (
           !user ||
-          (user.memberships.role !== "SUPERADMIN" &&
-            user.memberships.role !== "BRANCHADMIN" &&
-            user.memberships.role !== "INSURER")
+          (user?.memberships?.role !== "SUPERADMIN" &&
+            user?.memberships?.role !== "BRANCHADMIN" &&
+            user?.memberships?.role !== "INSURER")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }

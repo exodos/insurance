@@ -62,8 +62,8 @@ const FeedClaimBranch = gql`
 `;
 
 const BranchClaimPage = ({
-      data,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  data,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
 
   const { asPath } = useRouter();
@@ -85,7 +85,7 @@ const BranchClaimPage = ({
             </div>
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
-                {session.user.memberships.role === "MEMBER" && (
+                {session.user?.memberships?.role === "MEMBER" && (
                   <Link
                     href={{
                       pathname: "/branch/claim/export-branch-claim",

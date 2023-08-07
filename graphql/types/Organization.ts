@@ -183,7 +183,7 @@ export const createOrganizationMutation = extendType({
             memberships: true,
           },
         });
-        if (!user || user.memberships.role !== "SUPERADMIN") {
+        if (!user || user?.memberships?.role !== "SUPERADMIN") {
           throw new Error(`You do not have permission to perform this action`);
         }
 

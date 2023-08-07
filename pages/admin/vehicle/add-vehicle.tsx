@@ -68,8 +68,8 @@ const InsuredByMobileNumber = gql`
 `;
 
 const AddVehicle = ({
-      props,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  props,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [formValues, setFormValues] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createList, setCreateList] = useState([]);
@@ -393,7 +393,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         destination: "/auth/signin",
       },
     };
-  } else if (session.user.memberships.role !== "SUPERADMIN") {
+  } else if (session.user?.memberships?.role !== "SUPERADMIN") {
     return {
       redirect: {
         destination: "/",

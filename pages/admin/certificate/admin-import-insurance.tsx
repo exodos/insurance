@@ -27,10 +27,10 @@ const FeedBranchByOrgDesc = gql`
 `;
 
 const AdminImportInsurance = ({
-      insuredId,
-      path,
-      data,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  insuredId,
+  path,
+  data,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [parsedData, setParsedData] = useState([]);
   const [tableRows, setTableRows] = useState([]);
   const [values, setValues] = useState([]);
@@ -399,7 +399,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         destination: "/auth/signin",
       },
     };
-  } else if (session.user.memberships.role !== "SUPERADMIN") {
+  } else if (session.user?.memberships?.role !== "SUPERADMIN") {
     return {
       redirect: {
         destination: "/",

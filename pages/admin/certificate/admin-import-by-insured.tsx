@@ -8,8 +8,8 @@ import ImportVehicleByMobile from "@/components/common/import-vehicle-mobile";
 import ImportVehicleByReg from "@/components/common/import-vehicle-reg";
 
 const AdminImportCertificateByInsureds = ({
-      branchId,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  branchId,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [showMobileForm, setShowMobileForm] = useState(false);
   const [showRegForm, setShowRegForm] = useState(false);
 
@@ -95,7 +95,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         destination: "/auth/signin",
       },
     };
-  } else if (session.user.memberships.role !== "SUPERADMIN") {
+  } else if (session.user?.memberships?.role !== "SUPERADMIN") {
     return {
       redirect: {
         destination: "/",

@@ -201,8 +201,8 @@ export const updateClaimHitAndRunMutation = extendType({
         });
         if (
           !user ||
-          (user.memberships.role !== "SUPERADMIN" &&
-            user.memberships.role !== "TRAFFICPOLICEADMIN")
+          (user?.memberships?.role !== "SUPERADMIN" &&
+            user?.memberships?.role !== "TRAFFICPOLICEADMIN")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
@@ -276,9 +276,9 @@ export const updateClaimHitAndRunDamageEstimateMutation = extendType({
         });
         if (
           !user ||
-          (user.memberships.role !== "SUPERADMIN" &&
-            user.memberships.role !== "TRAFFICPOLICEADMIN" &&
-            user.memberships.role !== "TRAFFICPOLICEMEMBER")
+          (user?.memberships?.role !== "SUPERADMIN" &&
+            user?.memberships?.role !== "TRAFFICPOLICEADMIN" &&
+            user?.memberships?.role !== "TRAFFICPOLICEMEMBER")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
@@ -338,7 +338,7 @@ export const deleteClaimHitAndRunMutation = extendType({
             memberships: true,
           },
         });
-        if (!user || user.memberships.role !== "SUPERADMIN") {
+        if (!user || user?.memberships?.role !== "SUPERADMIN") {
           throw new Error(`You do not have permission to perform action`);
         }
         return await ctx.prisma.claimHitAndRun.delete({

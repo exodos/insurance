@@ -87,8 +87,8 @@ const FeedInsuredPoliceReport = gql`
 `;
 
 const BranchPoliceReportPage = ({
-      data,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  data,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
 
   return (
@@ -110,8 +110,8 @@ const BranchPoliceReportPage = ({
             </div>
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
-                {(session.user.memberships.role === "SUPERADMIN" ||
-                  session.user.memberships.role === "TRAFFICPOLICE") && (
+                {(session.user?.memberships?.role === "SUPERADMIN" ||
+                  session.user?.memberships?.role === "TRAFFICPOLICE") && (
                   <Link
                     href={"/admin/policereport/add-insured-report"}
                     passHref
@@ -124,7 +124,7 @@ const BranchPoliceReportPage = ({
                     </button>
                   </Link>
                 )}
-                {session.user.memberships.role === "SUPERADMIN" && (
+                {session.user?.memberships?.role === "SUPERADMIN" && (
                   <button type="button" className="inline-flex items-center">
                     <BsFillArrowUpCircleFill
                       className="flex-shrink-0 h-8 w-8 text-sm font-medium text-gray-50 hover:text-gray-300"

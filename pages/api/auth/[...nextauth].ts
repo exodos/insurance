@@ -23,7 +23,6 @@ export const authOptions: NextAuthOptions = {
         });
 
         const user = await response.json();
-        console.log("🚀 ~ file: [...nextauth].ts:23 ~ authorize ~ user:", user);
 
         if (response.ok && user) {
           return user;

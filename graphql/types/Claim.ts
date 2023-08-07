@@ -345,9 +345,9 @@ export const updateClaimMutation = extendType({
         });
         if (
           !user ||
-          (user.memberships.role !== "SUPERADMIN" &&
-            user.memberships.role !== "TRAFFICPOLICEADMIN" &&
-            user.memberships.role !== "TRAFFICPOLICEMEMBER")
+          (user?.memberships?.role !== "SUPERADMIN" &&
+            user?.memberships?.role !== "TRAFFICPOLICEADMIN" &&
+            user?.memberships?.role !== "TRAFFICPOLICEMEMBER")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
@@ -407,8 +407,8 @@ export const updateDamageEstimateMutation = extendType({
         });
         if (
           !user ||
-          (user.memberships.role !== "SUPERADMIN" &&
-            user.memberships.role !== "TRAFFICPOLICEADMIN")
+          (user?.memberships?.role !== "SUPERADMIN" &&
+            user?.memberships?.role !== "TRAFFICPOLICEADMIN")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
@@ -473,8 +473,8 @@ export const deleteClaimMutation = extendType({
         });
         if (
           !user ||
-          (user.memberships.role !== "SUPERADMIN" &&
-            user.memberships.role !== "TRAFFICPOLICEADMIN")
+          (user?.memberships?.role !== "SUPERADMIN" &&
+            user?.memberships?.role !== "TRAFFICPOLICEADMIN")
         ) {
           throw new Error(`You do not have permission to perform action`);
         }
@@ -508,12 +508,12 @@ export const updateClaimStatusMutation = extendType({
         });
         if (
           !user ||
-          (user.memberships.role !== "SUPERADMIN" &&
-            user.memberships.role !== "INSURER" &&
-            user.memberships.role !== "BRANCHADMIN" &&
-            user.memberships.role !== "MEMBER" &&
-            user.memberships.role !== "TRAFFICPOLICEADMIN" &&
-            user.memberships.role !== "TRAFFICPOLICEMEMBER")
+          (user?.memberships?.role !== "SUPERADMIN" &&
+            user?.memberships?.role !== "INSURER" &&
+            user?.memberships?.role !== "BRANCHADMIN" &&
+            user?.memberships?.role !== "MEMBER" &&
+            user?.memberships?.role !== "TRAFFICPOLICEADMIN" &&
+            user?.memberships?.role !== "TRAFFICPOLICEMEMBER")
         ) {
           throw new Error(`You do not have permission to perform the action`);
         }

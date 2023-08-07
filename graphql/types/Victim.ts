@@ -124,7 +124,7 @@ export const createVictimMutation = extendType({
             memberships: true,
           },
         });
-        if (!user || user.memberships.role !== "SUPERADMIN") {
+        if (!user || user?.memberships?.role !== "SUPERADMIN") {
           throw new Error(`You do not have permission to perform action`);
         }
         return await ctx.prisma.victim.create({
@@ -161,7 +161,7 @@ export const updateVictimMutation = extendType({
             memberships: true,
           },
         });
-        if (!user || user.memberships.role !== "SUPERADMIN") {
+        if (!user || user?.memberships?.role !== "SUPERADMIN") {
           throw new Error(`You do not have permission to perform action`);
         }
         return await ctx.prisma.victim.update({
@@ -192,7 +192,7 @@ export const deleteVictimMutation = extendType({
             memberships: true,
           },
         });
-        if (!user || user.memberships.role !== "SUPERADMIN") {
+        if (!user || user?.memberships?.role !== "SUPERADMIN") {
           throw new Error(`You do not have permission to perform action`);
         }
         return await ctx.prisma.victim.delete({

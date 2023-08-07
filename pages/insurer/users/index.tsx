@@ -70,9 +70,9 @@ const FeedUserInsurer = gql`
 `;
 
 const InsurerUserPage = ({
-      data,
-      orgId,
-    }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  data,
+  orgId,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session, status } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -98,7 +98,7 @@ const InsurerUserPage = ({
             </div>
             {session?.user && (
               <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
-                {session.user.memberships.role === "INSURER" && (
+                {session.user?.memberships?.role === "INSURER" && (
                   <button
                     type="button"
                     className="inline-flex items-center"
@@ -110,7 +110,7 @@ const InsurerUserPage = ({
                     />
                   </button>
                 )}
-                {session.user.memberships.role === "INSURER" && (
+                {session.user?.memberships?.role === "INSURER" && (
                   <Link
                     href={{
                       pathname: "/insurer/users/export-insurer-user",

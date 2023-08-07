@@ -50,7 +50,7 @@ const EditUserModal = ({ user, roleList, href }) => {
     city: user.city,
     email: user.email,
     mobileNumber: user.mobileNumber,
-    role: user.memberships.role,
+    role: user?.memberships?.role,
   };
   const validate = Yup.object().shape({
     firstName: Yup.string().required("First Name Is Required"),
