@@ -6,6 +6,10 @@ import Cors from "micro-cors";
 
 const cors = Cors();
 
+const IS_DEV = process.env.NODE_ENV === "development";
+const localOrigins = [/^http:\/\/localhost:\d{4}$/];
+const prodOrigins = [/^https:\/\/.*\.insurancefund.gov\.et$/];
+
 const apolloServer = new ApolloServer({
   schema,
   context: createContext,
@@ -57,10 +61,10 @@ export default cors(async function handler(
 //   })(req, res);
 // };
 
+// export default handler;
+
 export const config: PageConfig = {
   api: {
     bodyParser: false,
   },
 };
-
-// export default handler;

@@ -1,31 +1,12 @@
-// import { connectionPlugin, makeSchema } from "nexus";
-// import { join } from "path";
-// import * as types from "./types";
-// import { nexusShield, allow } from "nexus-shield";
-// import { ForbiddenError } from "apollo-server-micro";
-
-// export const schema = makeSchema({
-//   plugins: [
-//     connectionPlugin(),
-//     nexusShield({
-//       defaultError: new ForbiddenError("Not allowed"),
-//       defaultRule: allow,
-//     }),
-//   ],
-//   types,
-//   outputs: {
-//     typegen: join(process.cwd(), "generated/nexus-typegen.ts"),
-//     schema: join(process.cwd(), "generated/schema.graphql"),
-//   },
-// });
-
-import { fieldAuthorizePlugin, makeSchema } from "nexus";
-import { join, resolve } from "path";
+import { makeSchema } from "nexus";
+import { join } from "path";
 import * as types from "./types";
-import { ForbiddenError } from "apollo-server-micro";
+import { applyMiddleware } from "graphql-middleware";
+import { permissions } from "./permissions";
 
-export const schema = makeSchema({
+export const baseSchema = makeSchema({
   types,
+  plugins: [],
   outputs: {
     typegen: join(process.cwd(), "generated/nexus-typegen.ts"),
     schema: join(process.cwd(), "generated/schema.graphql"),
@@ -35,3 +16,5 @@ export const schema = makeSchema({
     module: join(process.cwd(), "graphql", "context.ts"),
   },
 });
+
+export const schema = applyMiddleware(baseSchema, permissions);
