@@ -10,12 +10,18 @@ import SignInError from "./signin-error";
 import SiteHeader from "@/components/layout/header";
 import { phoneRegExp } from "@/lib/config";
 import { FaMobileAlt } from "react-icons/fa";
+import { BsEye } from "react-icons/bs";
 
 export default function SignIn({
       csrfToken,
     }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  const [passwordShown, setPasswordShown] = useState(false);
   const router = useRouter();
   const [error, setError] = useState(null);
+
+  const togglePasswordVisiblity = () => {
+    setPasswordShown(passwordShown ? false : true);
+  };
 
   const validate = Yup.object().shape({
     mobileNumber: Yup.string()
@@ -130,29 +136,37 @@ export default function SignIn({
                           </div>
                         </div>
                       </div>
-                      <div>
-                        <label
-                          htmlFor="password"
-                          className="hidden text-sm font-medium text-gray-700"
-                        >
-                          Password
-                        </label>
-                        <div className="relative">
-                          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                            <RiLockPasswordFill
-                              className="h-6 w-6 text-lightGreen"
-                              aria-hidden="true"
+
+                      <div className="relative">
+                        <div>
+                          <label
+                            htmlFor="password"
+                            className="hidden text-sm font-medium text-gray-700"
+                          >
+                            Password
+                          </label>
+                          <div className="relative">
+                            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                              <RiLockPasswordFill
+                                className="h-6 w-6 text-lightGreen"
+                                aria-hidden="true"
+                              />
+                            </div>
+                            <Field
+                              name="password"
+                              type={passwordShown ? "text" : "password"}
+                              autoComplete="off"
+                              className="block w-full rounded-md  border-gray-50 p-4 pl-10 focus:shadow-xl focus:border-darkGrayHv ring-1 ring-gray-400 sm:text-sm"
+                              placeholder="Password"
                             />
-                          </div>
-                          <Field
-                            name="password"
-                            type="password"
-                            autoComplete="off"
-                            className="block w-full rounded-md  border-gray-50 p-4 pl-10 focus:shadow-xl focus:border-darkGrayHv ring-1 ring-gray-400 sm:text-sm"
-                            placeholder="Password"
-                          />
-                          <div className="text-red-600  text-sm italic mt-1">
-                            <ErrorMessage name="password" />
+                            <div className="absolute inset-y-0 right-0 flex items-center pr-3 text-sm leading-5">
+                              <i onClick={togglePasswordVisiblity}>
+                                <BsEye className="h-5 w-5" />
+                              </i>
+                            </div>
+                            <div className="text-red-600  text-sm italic mt-1">
+                              <ErrorMessage name="password" />
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -187,6 +201,9 @@ export default function SignIn({
 }
 
 export const getServerSideProps = async (context) => {
-  const csrfToken = await getCsrfToken(context);
-  return { props: { csrfToken } };
+  return {
+    props: {
+      csrfToken: await getCsrfToken(context),
+    },
+  };
 };

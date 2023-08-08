@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { verifyPassword } from "@/lib/auth";
 import { applyMiddleware, getRateLimitMiddlewares } from "@/login-middleware";
 import { changePhone } from "@/lib/config";
-import prisma from "@/lib/prisma";
+import {prisma} from "@/lib/prisma";
 
 const middlewares = getRateLimitMiddlewares({ limit: 10 }).map(applyMiddleware);
 
@@ -13,7 +13,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     await Promise.all(middlewares.map((middleware) => middleware(req, res)));
     const checkUser = await prisma.user.findFirst({
       where: {
-        mobileNumber: changePhone(mobileNumber),
+        // mobileNumber: changePhone(mobileNumber),
+        mobileNumber: (mobileNumber),
       },
       include: {
         memberships: {

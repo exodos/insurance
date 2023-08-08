@@ -63,7 +63,6 @@ CREATE TABLE "User" (
     "adminRestPassword" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "orgId" TEXT NOT NULL,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -90,7 +89,6 @@ CREATE TABLE "Organization" (
     "orgCode" TEXT NOT NULL,
     "region" TEXT NOT NULL,
     "city" TEXT NOT NULL,
-    "mobileNumber" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "description" "OrgDesc" NOT NULL,
@@ -103,9 +101,9 @@ CREATE TABLE "Membership" (
     "id" TEXT NOT NULL,
     "role" "MembershipRole" NOT NULL DEFAULT 'USER',
     "userId" TEXT NOT NULL,
+    "branchId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "branchId" TEXT NOT NULL,
 
     CONSTRAINT "Membership_pkey" PRIMARY KEY ("id")
 );
@@ -562,9 +560,6 @@ CREATE UNIQUE INDEX "Organization_orgName_key" ON "Organization"("orgName");
 CREATE UNIQUE INDEX "Organization_orgCode_key" ON "Organization"("orgCode");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Organization_mobileNumber_key" ON "Organization"("mobileNumber");
-
--- CreateIndex
 CREATE UNIQUE INDEX "Membership_userId_key" ON "Membership"("userId");
 
 -- CreateIndex
@@ -728,9 +723,6 @@ CREATE UNIQUE INDEX "_ThirdPartyLogToVehicle_AB_unique" ON "_ThirdPartyLogToVehi
 
 -- CreateIndex
 CREATE INDEX "_ThirdPartyLogToVehicle_B_index" ON "_ThirdPartyLogToVehicle"("B");
-
--- AddForeignKey
-ALTER TABLE "User" ADD CONSTRAINT "User_orgId_fkey" FOREIGN KEY ("orgId") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Branch" ADD CONSTRAINT "Branch_orgId_fkey" FOREIGN KEY ("orgId") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

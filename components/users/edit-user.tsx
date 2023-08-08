@@ -68,6 +68,16 @@ const EditUserModal = ({ user, roleList, href }) => {
 
   const router = useRouter();
 
+  const adminRole = [
+    { value: "SUPERADMIN", label: "SUPERADMIN" },
+    { value: "INSURER", label: "INSURER" },
+    { value: "BRANCHADMIN", label: "BRANCHADMIN" },
+    { value: "MEMBER", label: "MEMBER" },
+    { value: "TRAFFICPOLICEADMIN", label: "TRAFFICPOLICEADMIN" },
+    { value: "TRAFFICPOLICEMEMBER", label: "TRAFFICPOLICEMEMBER" },
+    { value: "USER", label: "USER" },
+  ];
+
   const onSubmit = async (values: any) => {
     const input = {
       firstName: values.firstName,

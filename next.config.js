@@ -52,6 +52,10 @@ const nextConfig = {
             key: "Access-Control-Allow-Origin",
             value: "https://studio.apollographql.com",
           },
+          {
+            key: "Access-Control-Allow-Origin",
+            value: "https://insurancefund.gov.et",
+          },
           { key: "Access-Control-Allow-Headers", value: "Content-Type" },
         ],
       },

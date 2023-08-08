@@ -9,18 +9,9 @@ import {
 let apolloClient: ApolloClient<NormalizedCacheObject>;
 
 const link = new HttpLink({
-  uri: "http://localhost:3000/api/graphql",
+  uri: "https://insurancefund.gov.et/api/graphql",
   credentials: "same-origin",
 });
-
-// const link = createPersistedQueryLink({
-//   sha256,
-//   useGETForHashedQueries: true,
-// }).concat(
-//   new HttpLink({
-//     uri: "http://localhost:3000/api/graphql",
-//   })
-// );
 
 function createApolloClient() {
   return new ApolloClient({

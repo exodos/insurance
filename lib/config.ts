@@ -1,7 +1,7 @@
 import axios from "axios";
 const dev = process.env.NODE_ENV != "production";
 
-export const baseUrl = `http://localhost:3000`;
+export const baseUrl = `https://insurancefund.gov.et`;
 
 // export const baseUrl = dev ? "http://localhost:3000" : "http://192.168.43.30";
 

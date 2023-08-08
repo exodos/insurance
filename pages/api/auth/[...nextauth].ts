@@ -10,7 +10,7 @@ export const authOptions: NextAuthOptions = {
         mobileNumber: { label: "mobileNumber", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials, _) {
+      async authorize(credentials) {
         if (!credentials) {
           throw new Error("Wrong credentials!!");
         }
